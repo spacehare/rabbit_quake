@@ -1,0 +1,13 @@
+[paths]
+trenchbroom = 'I:\Quake\TrenchBroom-Win64-v2024.1-Release'
+trenchbroom_preferences = 'C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json'
+# ericw: can be a path to a folder, or a list of folders
+ericw = 'I:\Quake\ericw'
+engine_exes = [
+	'I:\Quake\Game\quakespasm-0.95.0_win64\quakespasm.exe',
+	'I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe',
+]
+configs = 'I:\Quake\cfg'
+
+[cfg_whitelist]
+'remobilize.cfg' = ['remobilize_test15']

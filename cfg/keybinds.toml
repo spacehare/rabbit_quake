@@ -1,0 +1,8 @@
+# use AHK notation
+# https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
+# https://www.autohotkey.com/docs/v2/KeyList.htm
+
+compile = '!c'
+launch = '!`'
+pc_iterate = '!v'
+pc_close_loop = '!+v'
