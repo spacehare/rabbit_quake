@@ -1,4 +1,11 @@
 # # # # #
+# GODOT
+# # # # #
+# Godot 4+ specific ignores
+.godot/
+
+
+# # # # #
 # RUST
 # # # # #
 /target

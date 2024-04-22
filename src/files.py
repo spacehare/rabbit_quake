@@ -29,8 +29,17 @@ def _get_bind(dictionary: dict, key: str):
     return dictionary.get(key) or DEFAULTS[key]
 
 
+def make_listpath(what) -> list[Path]:
+    if type(what) is list:
+        return [Path(d) for d in what]
+    elif type(what) is str:
+        return [*Path(what).iterdir()]
+    else:
+        raise TypeError(f'{what} of type {type(what)} is not list or str')
+
+
 class Engine:
-    def __init__(self, exe: Path) -> None:
+    def __init__(self, exe: Path):
         self.exe = exe
         self.folder = exe.parent
         self.name = self.folder.name
@@ -48,14 +57,15 @@ class Keybinds:
 
 
 class Settings:
-    trenchbroom = settings_contents['paths'].get('trenchbroom')
+    trenchbroom = Path(settings_contents['paths'].get('trenchbroom'))
     trenchbroom_exe = trenchbroom / 'trenchbroom.exe'
-    trenchbroom_prefs = settings_contents['paths'].get(
-        'trenchbroom_preferences')
-    ericw = settings_contents['paths'].get('ericw')
-    _engine_exes: list[Path] = settings_contents['paths'].get('engines')
-    engines = set([Engine(exe) for exe in _engine_exes])
-    configs = settings_contents['paths'].get('configs')
+    trenchbroom_prefs = Path(settings_contents['paths'].get(
+        'trenchbroom_preferences'))
+    _ericw = settings_contents['paths'].get('ericw')
+    _engine_exes: list[Path] = make_listpath(
+        settings_contents['paths'].get('engine_exes'))
+    engines = set([Engine(Path(exe)) for exe in _engine_exes])
+    configs = Path(settings_contents['paths'].get('configs'))
     cfg_whitelist = settings_contents.get('cfg_whitelist')
 
 
@@ -63,8 +73,4 @@ class Ericw:
     light = Path('bin/light.exe')
     qbsp = Path('bin/qbsp.exe')
     vis = Path('bin/vis.exe')
-    compilers: list[Path]
-    if Settings.ericw is list:
-        compilers = [Path(dir) for dir in Settings.ericw]
-    elif Settings.ericw is str:
-        compilers = [Path(Settings.ericw)]
+    compilers: list[Path] = make_listpath(Settings._ericw)
