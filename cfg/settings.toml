@@ -4,6 +4,10 @@
 # ...or just a string of a folder path containing those folders...
 # ericw = 'I:\Quake\ericw'
 
+# used for map names and {name}
+# ex: if your name is rabbit, maps will be zipped as ej3_rabbit
+name = 'rabbit'
+
 [paths]
 trenchbroom = 'I:\Quake\TrenchBroom-Win64-v2024.1-Release'
 trenchbroom_preferences = 'C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json'
@@ -17,6 +21,38 @@ engine_exes = [
 	'I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe',
 ]
 configs = 'I:\Quake\cfg'
+maps = 'I:\Quake\Dev\map'
 
 [cfg_whitelist]
 'remobilize.cfg' = ['remobilize_test15']
+
+[submit]
+allowed = [
+	'mapsrc/*.map',
+	'*.wav',
+	'*.mp3',
+	'maps/*.bsp',
+	'maps/*.lit',
+	'*.tga',
+	'*.txt',
+	'*.md',
+]
+denied = [
+	'*.texinfo',
+	'*.json',
+	'*.log',
+	'*.prt',
+	'*.zip',
+	'*.7z',
+	'autosave/*',
+]
+
+[template]
+folders = [
+	'maps',
+	'mapsrc',
+	'music',
+	'gfx/env/{name}',
+	'sound/{name}',
+	'progs/{name}',
+]

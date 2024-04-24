@@ -1,6 +1,6 @@
 from pathlib import Path
 from tomllib import load
-import files
+import appsettings
 
 settings: dict
 with open('settings.toml', 'rb') as f:
@@ -20,14 +20,14 @@ def create_autoexec_and_copy_cfgs(where: Path):
                 if key not in cfg_file.name or where.name in val:
                     filtered_cfg_files.append(cfg_file)
                     new_file = where / cfg_file.name
-                    new_file.symlink_to(cfg_file.absolute())
+                    new_file.symlink_to(cfg_file.resolve())
 
         lines = [f'exec {cfg_file.name}\n' for cfg_file in filtered_cfg_files]
         autoexec.writelines(lines)
 
 
 def main():
-    for mod_location in files.Settings.engines:
+    for mod_location in appsettings.Settings.engines:
         for mod_dir in mod_location.mods:
             print('MOD_DIR', mod_dir)
             for existing_cfg in [child for child in mod_dir.rglob('*') if (child.is_file() or child.is_symlink()) and child.suffix == '.cfg']:

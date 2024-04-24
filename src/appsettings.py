@@ -4,6 +4,7 @@ import app_paths
 from pathlib import Path
 import tomllib
 from enum import StrEnum
+import re
 
 
 def get_contents(file_path: Path):
@@ -13,11 +14,12 @@ def get_contents(file_path: Path):
 settings_contents: dict = get_contents(app_paths.SETTINGS)
 keybinds_contents: dict = get_contents(app_paths.KEYBINDS)
 
+banned_chars = re.compile(r'[<>:"\\\/|?*]')
 
 # https://github.com/spyoungtech/ahk/blob/main/ahk/keys.py
 # https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
 # https://www.autohotkey.com/docs/v2/KeyList.htm
-DEFAULTS = {
+AHK_KEY_DEFAULTS = {
     'compile': '!c',
     'launch': '!`',
     'pc_iterate': '!v',
@@ -26,7 +28,7 @@ DEFAULTS = {
 
 
 def _get_bind(dictionary: dict, key: str):
-    return dictionary.get(key) or DEFAULTS[key]
+    return dictionary.get(key) or AHK_KEY_DEFAULTS[key]
 
 
 def make_listpath(what) -> list[Path]:
@@ -47,9 +49,6 @@ class Engine:
 
 
 class Keybinds:
-    def _get(self, what):
-        return keybinds_contents.get(what)
-
     compile = _get_bind(settings_contents, 'compile')
     launch = _get_bind(settings_contents, 'launch')
     pc_iterate = _get_bind(settings_contents, 'pc_iterate')
@@ -66,6 +65,7 @@ class Settings:
         settings_contents['paths'].get('engine_exes'))
     engines = set([Engine(Path(exe)) for exe in _engine_exes])
     configs = Path(settings_contents['paths'].get('configs'))
+    maps = Path(settings_contents['paths'].get('maps'))
     cfg_whitelist = settings_contents.get('cfg_whitelist')
 
 
@@ -74,3 +74,12 @@ class Ericw:
     qbsp = Path('bin/qbsp.exe')
     vis = Path('bin/vis.exe')
     compilers: list[Path] = make_listpath(Settings._ericw)
+
+
+class Submit:
+    allowed = settings_contents['submit']['allowed']
+    denied = settings_contents['submit']['denied']
+
+
+class Template:
+    folders = settings_contents['template']['folders']

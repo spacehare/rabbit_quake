@@ -1,6 +1,6 @@
 from subprocess import call, run
 from ahk import directives, keys, AHK
-import files
+import appsettings
 
 a = AHK(version='v2')
 TB_AHK_TITLE = 'ahk_exe TrenchBroom.exe'
@@ -17,11 +17,11 @@ def if_tb_open(func):
 
 
 def open_trenchbroom(map: str | None):
-    run([files.Settings.trenchbroom_exe])
+    run([appsettings.Settings.trenchbroom_exe])
 
 
 def open_preferences():
-    run(['open', files.Settings.trenchbroom_prefs])
+    run(['open', appsettings.Settings.trenchbroom_prefs])
 
 
 @if_tb_open
