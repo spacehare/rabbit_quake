@@ -1,20 +1,20 @@
 from pathlib import Path
+import bcolors
 
 CFG = Path('./cfg')
+TEMP = Path('./.temp').resolve()
 SETTINGS = Path(CFG / 'settings.toml')
 KEYBINDS = Path(CFG / 'keybinds.toml')
 
-all_paths = [CFG, SETTINGS, KEYBINDS]
+all_paths = [CFG, TEMP, SETTINGS, KEYBINDS]
 
 for path in [p.absolute() for p in all_paths]:
-    if path.exists():
+    print(bcolors.colorize(path, bcolors.bcolors.OKCYAN))
+    if path.exists() or path.is_symlink():
         continue
-    if path.is_symlink():
-        continue
-    elif path.is_dir():
+    else:
         path.mkdir(parents=True)
-    elif path.is_file():
-        pass
+        # path.touch()
     if not path.exists():
         print('\n', path)
         raise FileNotFoundError()

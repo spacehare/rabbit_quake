@@ -1,14 +1,8 @@
 from pathlib import Path
-from tomllib import load
-import appsettings
+from settings import Settings
 
-settings: dict
-with open('settings.toml', 'rb') as f:
-    settings = load(f)
-
-path_configs = Path(settings['folders']['configs'])
-cfg_files = [f for f in path_configs.glob('*')]
-allowlist: dict = settings['limit']
+cfg_files = [f for f in Settings.configs.glob('*')]
+allowlist: dict = Settings.cfg_whitelist
 
 
 def create_autoexec_and_copy_cfgs(where: Path):
@@ -26,8 +20,8 @@ def create_autoexec_and_copy_cfgs(where: Path):
         autoexec.writelines(lines)
 
 
-def main():
-    for mod_location in appsettings.Settings.engines:
+def link_all_cfgs():
+    for mod_location in Settings.engines:
         for mod_dir in mod_location.mods:
             print('MOD_DIR', mod_dir)
             for existing_cfg in [child for child in mod_dir.rglob('*') if (child.is_file() or child.is_symlink()) and child.suffix == '.cfg']:
@@ -38,4 +32,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    link_all_cfgs()

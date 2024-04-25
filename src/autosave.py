@@ -1,17 +1,12 @@
 from pathlib import Path
-import appsettings
+import settings
 from bcolors import *
 import argparse
 import shared
 
 autosave_path: Path = Path('autosave')
 autosave_str = 'autosave'
-where = appsettings.Settings.maps
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--delete', '-d', action='store_true', help='delete all autosaves')
-parser.add_argument('--list', '-l', action='store_true', help='print all autosaves')
-args = parser.parse_args()
+where = settings.Settings.maps_path
 
 
 def get_all_autosaves():
@@ -38,6 +33,11 @@ def delete_autosaves():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--delete', '-d', action='store_true', help='delete all autosaves')
+    parser.add_argument('--list', '-l', action='store_true', help='print all autosaves')
+    args = parser.parse_args()
+
     if args.delete:
         delete_autosaves()
     if args.list:

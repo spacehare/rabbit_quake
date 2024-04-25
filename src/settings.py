@@ -1,6 +1,5 @@
-# import tomllib
 from typing import Any
-import app_paths
+import paths
 from pathlib import Path
 import tomllib
 from enum import StrEnum
@@ -11,8 +10,8 @@ def get_contents(file_path: Path):
     return tomllib.loads(file_path.read_text())
 
 
-settings_contents: dict = get_contents(app_paths.SETTINGS)
-keybinds_contents: dict = get_contents(app_paths.KEYBINDS)
+settings_contents: dict = get_contents(paths.SETTINGS)
+keybinds_contents: dict = get_contents(paths.KEYBINDS)
 
 banned_chars = re.compile(r'[<>:"\\\/|?*]')
 
@@ -66,8 +65,9 @@ class Settings:
         settings_contents['paths'].get('engine_exes'))
     engines = set([Engine(Path(exe)) for exe in _engine_exes])
     configs = Path(settings_contents['paths'].get('configs'))
-    maps = Path(settings_contents['paths'].get('maps'))
-    cfg_whitelist = settings_contents.get('cfg_whitelist')
+    maps_path = Path(settings_contents['paths'].get('maps'))
+    maps: list[Path] = [p for p in maps_path.iterdir()]
+    cfg_whitelist = settings_contents.get('cfg_whitelist') or {}
 
 
 class Ericw:
