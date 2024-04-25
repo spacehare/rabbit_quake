@@ -7,7 +7,6 @@ KEYBINDS = Path(CFG / 'keybinds.toml')
 all_paths = [CFG, SETTINGS, KEYBINDS]
 
 for path in [p.absolute() for p in all_paths]:
-    print('_PATH_', path)
     if path.exists():
         continue
     if path.is_symlink():

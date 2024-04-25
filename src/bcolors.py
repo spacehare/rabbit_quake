@@ -22,5 +22,5 @@ class Ind:
     COL_FAIL = colorize(IND_FAIL, bcolors.FAIL)
 
     @staticmethod
-    def mark(boolean):
+    def mark(boolean=True):
         return Ind.COL_SUCCESS if boolean else Ind.COL_FAIL

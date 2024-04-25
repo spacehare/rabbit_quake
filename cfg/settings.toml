@@ -6,6 +6,7 @@
 
 # used for map names and {name}
 # ex: if your name is rabbit, maps will be zipped as ej3_rabbit
+# and templates will be generated like gfx/env/rabbit/
 name = 'rabbit'
 
 [paths]

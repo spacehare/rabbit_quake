@@ -56,6 +56,7 @@ class Keybinds:
 
 
 class Settings:
+    name = settings_contents['name']
     trenchbroom = Path(settings_contents['paths'].get('trenchbroom'))
     trenchbroom_exe = trenchbroom / 'trenchbroom.exe'
     trenchbroom_prefs = Path(settings_contents['paths'].get(
@@ -81,5 +82,17 @@ class Submit:
     denied = settings_contents['submit']['denied']
 
 
+SVARS = {
+    '{name}': Settings.name
+}
+
+
+def replace_var(what: str):
+    output: str = ''
+    for k, v in SVARS.items():
+        output = what.replace(k, v)
+    return output
+
+
 class Template:
-    folders = settings_contents['template']['folders']
+    folders: list[Path] = [Path(replace_var(p)) for p in settings_contents['template']['folders']]
