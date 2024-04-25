@@ -45,6 +45,7 @@ def zip():
             ok = is_path_ok(item)
             if ok:
                 zip_file.write(output_file, arcname=item.relative_to(args.submission))
+    print(f'ok, zipped {output_file}')
 
 
 if __name__ == '__main__':
