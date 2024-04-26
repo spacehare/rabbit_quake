@@ -3,23 +3,15 @@ from typing import Any
 
 '''parse Valve220 quake .map files'''
 
-_ex_brush_str = '''
-{
-( -1024 696 16 ) ( -1024 696 17 ) ( -1024 695 16 ) clip [ -1.8369701987210297e-16 1 0 8 ] [ 0 0 -1 8 ] 180 1 1
-( -1024 772 16 ) ( -1025 772 16 ) ( -1024 772 17 ) clip [ -1 -1.8369701987210297e-16 0 -32 ] [ 0 0 -1 8 ] 0 1 1
-( -1016 840 8 ) ( -1017 840 8 ) ( -1016 839 8 ) clip [ -1.8369701987210297e-16 1 0 8 ] [ 1 1.8369701987210297e-16 0 32 ] 270 1 1
-( -1024 696 124 ) ( -1024 695 124 ) ( -1025 696 124 ) clip [ 1.8369701987210297e-16 -1 0 -8 ] [ 1 1.8369701987210297e-16 0 32 ] 90 1 1
-( -1016 828 8 ) ( -1016 828 9 ) ( -1017 828 8 ) clip [ 1 1.8369701987210297e-16 0 32 ] [ 0 0 -1 8 ] 0 1 1
-( -1020 840 8 ) ( -1020 839 8 ) ( -1020 840 9 ) clip [ 1.8369701987210297e-16 -1 0 -8 ] [ 0 0 -1 8 ] 180 1 1
-}
-'''
 
 # https://github.com/joshuaskelly/vgio/blob/master/vgio/quake/map.py
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
 r_num = re.compile(r'\b(-?\d+\.?\d*(?:e-\d+)?)\b')
-r_tex = re.compile(r'(?!\()(?<=\) )(.+?)(?= \[) \[ (.+?) \] \[ (.+?) \] (.+)')
-r_plane_in_brush = re.compile(r'^[^{}\n]+$', re.MULTILINE)
+r_tex_name = re.compile(r'(?!\()(?<=\) )(.+?)(?= \[)')
+r_plane_in_brush = re.compile(r'\([^{}\n]+[^\n]$', re.MULTILINE)
 r_plane = re.compile(r'# (?P<digit>\b-?\d+\d*\b)|(?P<texname>(?<=\) )\b.+?(?= \[))')
+r_keyval = re.compile(r'\"(.+)\" \"(.+)\"$', re.MULTILINE)
+r_brushes_in_ent = re.compile(r'(?<=\{\n)[^\{]+(?=\n\})')
 
 
 class QProp:
@@ -30,18 +22,8 @@ class QProp:
     def loads(string: str) -> Any:
         return QProp()
 
-
-class QFloat:
-    def __init__(self, value: float):
-        self._value = round(value, 6)
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, new_value):
-        self._value = round(new_value, 6)
+    def __repr__(self):
+        return self.dumps()
 
 
 class Point(QProp):
@@ -70,95 +52,58 @@ class Point(QProp):
             return (Point(*points))
 
 
-class UV(QProp):
-    def __init__(self, point: Point, offset: float):
+class UvPoint():
+    def __init__(self, point: Point, offset: float, scale: float):
         self.point = point
         self.offset = offset
-
-    def dumps(self):
-        return f'[ {self.point.dumps()} {self.offset} ]'
-
-    @staticmethod
-    def loads(string: str):
-        values = r_num.findall(string)
-        if len(values) == 4:
-            return UV(Point(*values[0:3]), values[3])
+        self.scale = scale
 
 
-class Face(QProp):
-    '''x1, y1, z1, x2, etc'''
+class UV():
+    def __init__(self, u: UvPoint, v: UvPoint):
+        self.u = u
+        self.v = v
 
+    def __iter__(self):
+        yield self.u
+        yield self.v
+
+
+class Points():
     def __init__(self, a: Point, b: Point, c: Point):
         self.a = a
         self.b = b
         self.c = c
-
-    def __repr__(self):
-        return f"Face({self.a}, {self.b}, {self.c})"
 
     def __iter__(self):
         yield self.a
         yield self.b
         yield self.c
 
-    def dumps(self):
-        return f'( {self.a.dumps()} ) ( {self.b.dumps()} ) ( {self.c.dumps()} )'
-
-    @staticmethod
-    def loads(string: str):
-        values = r_num.findall(string)
-        a = values[:3]
-        b = values[3:6]
-        c = values[6:9]
-        return Face(Point(*a), Point(*b), Point(*c))
-
-
-class Scale():
-    def __init__(self, u: float, v: float):
-        pass
-
-
-class Texture(QProp):
-    def __init__(self, name: str, u: UV, v: UV, rot_scale: Point):
-        self.name = name
-        self.u = u
-        self.v = v
-        self.rotation = rot_scale.x
-        self.scale = [rot_scale.y, rot_scale.z]
-
-    def dumps(self):
-        return f'{self.name} [ {self.u} ] [ {self.v} ] {self.rotation} {self.scale[0]} {self.scale[1]}'
-
-    @staticmethod
-    def loads(string: str):
-        m = r_tex.search(string)
-        if m:
-            groups = m.groups()
-            name = groups[0]
-            u = UV.loads(groups[1])
-            v = UV.loads(groups[2])
-            rot_scale = Point.loads(groups[3])
-            if name and u and v and rot_scale:
-                return Texture(name, u, v, rot_scale)
+    def __repr__(self):
+        return f'{self.a} {self.b} {self.c}'
 
 
 class Plane(QProp):
-    def __init__(self, face: Face, texture: Texture):
-        self.face = face
-        self.texture = texture
+    def __init__(self, points: Points, texture_name: str, uv: UV, rotation: float):
+        self.points = points
+        self.texture_name = texture_name
+        self.uv = uv
+        self.rotation = rotation
 
     def __repr__(self):
-        return f'Plane({self.face}, {self.texture})'
+        return f'Plane(Points({self.points}), {self.texture_name}, {self.uv}, {self.rotation})'
 
     def dumps(self):
-        return f'{self.face.dumps()} {self.texture.dumps()}'
+        return f'( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}'
 
     @staticmethod
     def loads(string: str):
-        face = Face.loads(string)
-        texture = Texture.loads(string)
-        if face and texture:
-            return Plane(face=face, texture=texture)
+        numbers = r_num.findall(string)
+        p_points = Points(Point(*numbers[0:3]), Point(*numbers[3:6]), Point(*numbers[6:9]))
+        p_tex = r_tex_name.findall(string)[0]
+        p_uv = UV(UvPoint(Point(*numbers[9:12]), numbers[12], numbers[18]), UvPoint(Point(*numbers[13:16]), numbers[16], numbers[19]))
+        return Plane(p_points, p_tex, p_uv, numbers[17])
 
 
 class Brush(QProp):
@@ -166,28 +111,52 @@ class Brush(QProp):
         self.planes = planes
 
     def dumps(self):
-        out: str = '{\n'
-        for plane in self.planes:
-            out += str(plane)
-        out += '\n}'
-        return out
-
-    def __repr__(self):
-        return f'Brush([{self.planes}])'
+        return '{\n' + '\n'.join(str(plane.dumps()) for plane in self.planes) + '\n}'
 
     @staticmethod
     def loads(string: str):
         plane_strings: list[str] = r_plane_in_brush.findall(string)
-        planes: list[Plane] = [o for p in plane_strings if (o := Plane.loads(p))]
+        planes: list[Plane] = [possible_plane for ps in plane_strings if (possible_plane := Plane.loads(ps))]
         if planes:
             return Brush(planes)
 
 
+class KV(QProp):
+    def __init__(self, kvdict: dict):
+        self.kvdict = kvdict
+
+    def dumps(self):
+        return '\n'.join([f'"{k}" "{v}"' for k, v in self.kvdict.items()])
+
+    def __repr__(self):
+        return str(self.kvdict)
+
+    @staticmethod
+    def loads(string: str):
+        found = r_keyval.finditer(string)
+        kvdict = {}
+        for m in found:
+            groups = m.groups()
+            kvdict |= {groups[0]: groups[1]}
+        return KV(kvdict)
+
+
 class Entity(QProp):
-    pass
+    def __init__(self, kv: KV, brushes: list[Brush] | None = None):
+        self.kv = kv
+        self.brushes = brushes
 
+    def dumps(self):
+        out = '{\n'
+        out += self.kv.dumps()
+        if self.brushes:
+            out += '\n'.join(brush.dumps() for brush in self.brushes)
+        out += '\n}'
+        return out
 
-if __name__ == '__main__':
-    a = Brush.loads(_ex_brush_str)
-    if a:
-        print(a, '\n', a.dumps())
+    @staticmethod
+    def loads(string: str):
+        kv: KV = KV.loads(string)
+        brushes_in_ent = r_brushes_in_ent.findall(string)
+        brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
+        return Entity(kv, brushes)
