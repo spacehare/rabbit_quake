@@ -13,25 +13,35 @@ import tb
 import templates
 import parse
 
+# https://docs.python.org/3/library/unittest.html
 
-class Tests(unittest.TestCase):
-    def setUp(self) -> None:
+
+class TestZip(unittest.TestCase):
+    def setUp(self):
         self.ex_map = Settings.maps[0]
-        self.ex_zip = ex_zip = submit.zip(self.ex_map, paths.TEMP)
-        self.ex_jam = jamgen.gen(paths.TEMP, 'test')
+        self.ex_zip = submit.zip(self.ex_map, paths.TEMP)
 
     def tearDown(self) -> None:
         self.ex_zip.unlink()
-        shutil.rmtree(self.ex_jam)
-
-    def test_autosave_get(self):
-        self.assertIsNotNone(autosave.get_all_autosaves())
 
     def test_submit(self):
         self.assertTrue(self.ex_zip.exists())
 
+
+class testGen(unittest.TestCase):
+    def setUp(self) -> None:
+        self.ex_jam = jamgen.gen(paths.TEMP, 'test')
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.ex_jam)
+
     def test_jamgen(self):
         self.assertTrue(self.ex_jam.exists())
+
+
+class Tests(unittest.TestCase):
+    def test_autosave_get(self):
+        self.assertIsNotNone(autosave.get_all_autosaves())
 
     def test_parser(self):
         ex_ent_str = '''
