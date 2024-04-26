@@ -125,11 +125,11 @@ class KV(QProp):
     def __init__(self, kvdict: dict):
         self.kvdict = kvdict
 
-    def dumps(self):
-        return '\n'.join([f'"{k}" "{v}"' for k, v in self.kvdict.items()])
-
     def __repr__(self):
         return str(self.kvdict)
+
+    def dumps(self):
+        return '\n'.join([f'"{k}" "{v}"' for k, v in self.kvdict.items()]) + '\n'
 
     @staticmethod
     def loads(string: str):
