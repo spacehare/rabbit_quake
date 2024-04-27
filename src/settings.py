@@ -62,11 +62,22 @@ class Settings:
     _ericw = settings_contents['paths'].get('ericw')
     _engine_exes: list[Path] = make_listpath(
         settings_contents['paths'].get('engine_exes'))
-    engines = set([Engine(Path(exe)) for exe in _engine_exes])
+    engines: list[Engine] = list([Engine(Path(exe)) for exe in _engine_exes])
     configs = Path(settings_contents['paths'].get('configs'))
     maps_path = Path(settings_contents['paths'].get('maps'))
     maps: list[Path] = [p for p in maps_path.iterdir()]
     cfg_whitelist = settings_contents.get('cfg_whitelist') or {}
+
+
+class EricwProfile:
+    def __init__(self, qbsp, vis, light):
+        self.qbsp = qbsp
+        self.vis = vis
+        self.light = light
+
+    @staticmethod
+    def from_dict(d: dict):
+        return EricwProfile(d['qbsp'], d['vis'], d['light'])
 
 
 class Ericw:
@@ -74,6 +85,7 @@ class Ericw:
     qbsp = Path('bin/qbsp.exe')
     vis = Path('bin/vis.exe')
     compilers: list[Path] = make_listpath(Settings._ericw)
+    profiles: list[EricwProfile] = [EricwProfile.from_dict(prof) for prof in settings_contents['ericw']]
 
 
 class Submit:

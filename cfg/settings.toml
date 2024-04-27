@@ -66,3 +66,14 @@ folders = [
 	'sound/{name}',
 	'progs/{name}',
 ]
+
+[ericw]
+[profiles.dev]
+qbsp = ['-bsp2', '-vv']
+vis = ['-fast', '-vv']
+light = ['-dirtdebug', '-vv']
+
+[profiles.dist]
+qbsp = ['-bsp2', '-splitturb']
+vis = ['-noambient']
+light = ['extra']

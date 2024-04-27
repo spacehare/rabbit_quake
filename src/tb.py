@@ -11,6 +11,7 @@ from pathlib import Path
 from parse import Entity, Brush, QuakeMap
 from bcolors import *
 import platform
+import ericw
 
 if platform.system() != 'Windows':
     print(colorize('this script is Windows only', bcolors.FAIL))
@@ -21,8 +22,9 @@ if platform.system() != 'Windows':
 # PRIVATE https://github.com/spacehare/trenchbroom_pyahk
 a = AHK(version='v2')
 TB_AHK_TITLE = 'ahk_exe TrenchBroom.exe'
-current_map: str = ''
-currend_mod: str = ''
+
+current_map: Path | None = None
+current_mod: str = ''
 
 
 def copy() -> str:
@@ -65,39 +67,41 @@ def open_preferences():
     os.startfile(Settings.trenchbroom_prefs)
 
 
-def compile():
-    pass
-
-
-def launch():
-    pass
-
-
 @if_tb_open
 def ex():
     print('aaa')
 
 
-def find_map_from_tb_title() -> str | None:
+class MapData:
+    def __init__(self, filepath: Path, data: str):
+        self.filepath = filepath
+        self.data = data
+
+
+def find_map_from_tb_title():
+    print(colorize('searching for map based on window title', bcolors.HEADER))
     tb = a.find_window_by_title(TB_AHK_TITLE)
     qmap_matches: list[Path] = []
+    tb_qmap_path: Path | None = None
 
     if tb:
         tb_qmap_name_search = re.search(r'.+\.map', tb.title)
         if tb_qmap_name_search:
             tb_qmap_name = tb_qmap_name_search.group()
-            print('name from TrenchBroom window title:', colorize(tb_qmap_name, bcolors.HEADER))
+            print('name from TrenchBroom window title:', colorize(tb_qmap_name, bcolors.OKCYAN))
             for qmap_dir in Settings.maps:
                 rglob = qmap_dir.rglob('*')
                 for item in rglob:
                     if tb_qmap_name == item.name:
+                        tb_qmap_path = item
                         print('found', colorize(item, bcolors.OKBLUE))
                         qmap_matches.append(item)
 
-        if qmap_matches:
-            print('using', colorize(qmap_matches[0], bcolors.BOLD))
-            with open(qmap_matches[0], encoding='utf-8') as f:
-                return f.read()
+            if qmap_matches and tb_qmap_path:
+                print('using', colorize(qmap_matches[0], bcolors.OKGREEN))
+                with open(qmap_matches[0], encoding='utf-8') as f:
+                    return MapData(tb_qmap_path, f.read())
+    print(colorize('could not find map from title', bcolors.FAIL))
     return
 
 
@@ -110,18 +114,36 @@ def iterate(close_loop=False):
     paste(ent.dumps())
 
 
-def define_hotkeys():
-    a.add_hotkey(Keybinds.iterate, lambda: iterate())
-    a.add_hotkey(Keybinds.pc_close_loop, lambda: iterate(True))
+def compile():
+    pass
+
+
+def launch(*, engine=Settings.engines[0], mod='', map_name=''):
+    params: list = [engine.exe]
+    if mod:
+        params += ['-game', mod]
+    if map_name:
+        params += ['+map', map_name]
+    print('launching...', colorize(' '.join([str(p) for p in params]), bcolors.OKBLUE))
+    subprocess.run(params, cwd=engine.folder)
 
 
 if __name__ == '__main__':
-    qmap_data = find_map_from_tb_title()
-    if qmap_data:
-        qmap = QuakeMap.loads(qmap_data)
-        print(colorize(f'found map!', bcolors.OKBLUE))
-    else:
-        print(colorize('could not find map from title', bcolors.FAIL))
-    define_hotkeys()
+    print('🐇 program start')
+    qmap_full = find_map_from_tb_title()
+    if qmap_full:
+        qmap = QuakeMap.loads(qmap_full.data)
+        current_map = qmap_full.filepath
+        current_mod = qmap.mod
+        print('current mod:', colorize(current_mod, bcolors.OKCYAN))
+
+    a.add_hotkey(Keybinds.iterate, lambda: iterate())
+    a.add_hotkey(Keybinds.pc_close_loop, lambda: iterate(True))
+    a.add_hotkey(Keybinds.compile, compile)
+
+    if current_map and current_mod:
+        a.add_hotkey(Keybinds.launch, lambda: launch(mod=current_mod, map_name=current_map.stem))
+
     a.start_hotkeys()
+    print(Ind.mark())
     a.block_forever()
