@@ -160,3 +160,31 @@ class Entity(QProp):
         brushes_in_ent = r_brushes_in_ent.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
         return Entity(kv, brushes)
+
+
+class QuakeMap(QProp):
+    def __init__(self, kv: KV, brushes: list[Brush] | None, entities: list[Entity] | None):
+        self.kv = kv
+        self.brushes = brushes
+        self.entities = entities
+
+    @property
+    def wad(self):
+        return self.kv.kvdict['wad']
+
+    @property
+    def mod(self):
+        return self.kv.kvdict['_tb_mod']
+
+    @property
+    def message(self):
+        return self.kv.kvdict['message']
+
+    @property
+    def mapversion(self):
+        return self.kv.kvdict['mapversion']
+
+    @staticmethod
+    def loads(string: str):
+        kv: KV = KV.loads(string)
+        return QuakeMap(kv, [], [])
