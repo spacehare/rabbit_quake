@@ -9,6 +9,15 @@
 # and templates will be generated like gfx/env/rabbit/
 name = 'rabbit'
 
+[keybinds]
+# use AHK notation
+# https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
+# https://www.autohotkey.com/docs/v2/KeyList.htm
+compile = '!c'
+launch = '!`'
+iterate = '!v'
+pc_close_loop = '!+v'
+
 [paths]
 trenchbroom = 'I:\Quake\TrenchBroom-Win64-v2024.1-Release'
 trenchbroom_preferences = 'C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json'

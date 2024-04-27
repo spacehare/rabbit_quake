@@ -8,5 +8,5 @@
   - submit a quake mapping jam map as a `.zip`
 - `symlink_cfg.py`
   - create symbolic links for your `.cfg` files
-- `tb.py`
+- `tb.py` Windows only
   - an AHK script to interface with TrenchBroom

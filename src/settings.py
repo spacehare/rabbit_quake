@@ -11,7 +11,6 @@ def get_contents(file_path: Path):
 
 
 settings_contents: dict = get_contents(paths.SETTINGS)
-keybinds_contents: dict = get_contents(paths.KEYBINDS)
 
 banned_chars = re.compile(r'[<>:"\\\/|?*]')
 
@@ -21,12 +20,12 @@ banned_chars = re.compile(r'[<>:"\\\/|?*]')
 AHK_KEY_DEFAULTS = {
     'compile': '!c',
     'launch': '!`',
-    'pc_iterate': '!v',
+    'iterate': '!v',
     'pc_close_loop': '!+v'
 }
 
 
-def _get_bind(dictionary: dict, key: str):
+def _get_bind(dictionary: dict, key: str) -> str:
     return dictionary.get(key) or AHK_KEY_DEFAULTS[key]
 
 
@@ -48,10 +47,10 @@ class Engine:
 
 
 class Keybinds:
-    compile = _get_bind(settings_contents, 'compile')
-    launch = _get_bind(settings_contents, 'launch')
-    pc_iterate = _get_bind(settings_contents, 'pc_iterate')
-    pc_close_loop = _get_bind(settings_contents, 'pc_close_loop')
+    compile = _get_bind(settings_contents['keybinds'], 'compile')
+    launch = _get_bind(settings_contents['keybinds'], 'launch')
+    iterate = _get_bind(settings_contents['keybinds'], 'iterate')
+    pc_close_loop = _get_bind(settings_contents['keybinds'], 'pc_close_loop')
 
 
 class Settings:

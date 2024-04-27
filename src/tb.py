@@ -3,42 +3,55 @@
 import ahk
 from ahk import directives, keys, AHK
 from ahk.keys import KEYS
-import settings
-from settings import Settings
+from settings import Settings, Keybinds
 import subprocess
 import os
 import re
 from pathlib import Path
-import parse
+from parse import Entity, Brush, QuakeMap
 from bcolors import *
+import platform
+
+if platform.system() != 'Windows':
+    print(colorize('this script is Windows only', bcolors.FAIL))
+    exit()
 
 # TODO add features from these:
 # PUBLIC  https://github.com/spacehare/AHK_public
 # PRIVATE https://github.com/spacehare/trenchbroom_pyahk
 a = AHK(version='v2')
 TB_AHK_TITLE = 'ahk_exe TrenchBroom.exe'
-current_map = ''
+current_map: str = ''
+currend_mod: str = ''
 
 
 def copy() -> str:
-    a.send('^{c}')
-    a.clip_wait()
+    a.set_clipboard('')
+    a.send('^c')
+    a.clip_wait(1)
+    # print('CLIPBOARD', a.get_clipboard())
     return a.get_clipboard()
 
 
 def paste(text: str = ''):
     if text:
         a.set_clipboard(text)
-        a.clip_wait()
-    a.send('^{v}')
+        a.clip_wait(1)
+    a.send('^v')
+
+
+def delete():
+    pass
 
 
 def if_tb_open(func):
-    if a.win_is_active(TB_AHK_TITLE):
-        if callable(func):
-            func()
-    else:
-        print(f'attempted to run {func.__name__}, but trenchbroom was not the active window')
+    def wrapper(*args):
+        if a.win_is_active(TB_AHK_TITLE):
+            if callable(func):
+                func(*args)
+        else:
+            print(f'attempted to run {func.__name__}, but trenchbroom was not the active window')
+    return wrapper
 
 
 def open_trenchbroom(map: str = ''):
@@ -62,7 +75,7 @@ def launch():
 
 @if_tb_open
 def ex():
-    pass
+    print('aaa')
 
 
 def find_map_from_tb_title() -> str | None:
@@ -88,12 +101,27 @@ def find_map_from_tb_title() -> str | None:
     return
 
 
+@if_tb_open
+def iterate(close_loop=False):
+    print(colorize('iterating', bcolors.HEADER))
+    ent = Entity.loads(copy())
+    ent.iterate('targetname')
+    ent.iterate('target', set_to_val=close_loop)
+    paste(ent.dumps())
+
+
+def define_hotkeys():
+    a.add_hotkey(Keybinds.iterate, lambda: iterate())
+    a.add_hotkey(Keybinds.pc_close_loop, lambda: iterate(True))
+
+
 if __name__ == '__main__':
-    x = find_map_from_tb_title()
-    if x:
-        m = parse.QuakeMap.loads(x)
+    qmap_data = find_map_from_tb_title()
+    if qmap_data:
+        qmap = QuakeMap.loads(qmap_data)
         print(colorize(f'found map!', bcolors.OKBLUE))
     else:
         print(colorize('could not find map from title', bcolors.FAIL))
+    define_hotkeys()
     a.start_hotkeys()
     a.block_forever()

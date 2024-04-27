@@ -4,9 +4,7 @@ import bcolors
 CFG = Path('./cfg')
 TEMP = Path('./.temp').resolve()
 SETTINGS = Path(CFG / 'settings.toml')
-KEYBINDS = Path(CFG / 'keybinds.toml')
-
-all_paths = [CFG, TEMP, SETTINGS, KEYBINDS]
+all_paths = [CFG, TEMP, SETTINGS]
 
 for path in [p.absolute() for p in all_paths]:
     print(bcolors.colorize(path, bcolors.bcolors.OKCYAN))

@@ -7,11 +7,19 @@ from typing import Any
 # https://github.com/joshuaskelly/vgio/blob/master/vgio/quake/map.py
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
 r_num = re.compile(r'\b(-?\d+\.?\d*(?:e-\d+)?)\b')
+r_num_in_key = re.compile(r'(-?\d+\.?\d*(?:e-\d+)?)')
 r_tex_name = re.compile(r'(?!\()(?<=\) )(.+?)(?= \[)')
 r_plane_in_brush = re.compile(r'\([^{}\n]+[^\n]$', re.MULTILINE)
 r_plane = re.compile(r'# (?P<digit>\b-?\d+\d*\b)|(?P<texname>(?<=\) )\b.+?(?= \[))')
-r_keyval = re.compile(r'\"(.+)\" \"(.+)\"$', re.MULTILINE)
+r_keyval = re.compile(r'\"(.+)\" \"(.+)\"', re.MULTILINE)
 r_brushes_in_ent = re.compile(r'(?<=\{\n)[^\{]+(?=\n\})')
+
+
+def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | None:
+    m = r_num_in_key.findall(string)
+    if m:
+        out = m[place]
+        return int(out) if force_int else float(out)
 
 
 class QProp:
@@ -151,15 +159,42 @@ class Entity(QProp):
         out += self.kv.dumps()
         if self.brushes:
             out += '\n'.join(brush.dumps() for brush in self.brushes)
-        out += '\n}'
+        out += '\n}' if self.brushes else '}'
         return out
 
     @staticmethod
     def loads(string: str):
         kv: KV = KV.loads(string)
+        print('loads', kv.kvdict)
         brushes_in_ent = r_brushes_in_ent.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
         return Entity(kv, brushes)
+
+    @property
+    def classname(self):
+        return self.kv.kvdict['classname']
+
+    @property
+    def targetname(self):
+        return self.kv.kvdict.get('targetname')
+
+    @property
+    def target(self):
+        return self.kv.kvdict.get('target')
+
+    def iterate(self, key: str, *, val: int = 1, set_to_val: bool = False) -> None:
+        PLACEHOLDER = '@🐇@'
+        possible_val = self.kv.kvdict.get(key)
+        if possible_val:
+            num = get_num_in_key(possible_val)
+            txt = str(possible_val).replace(str(num), PLACEHOLDER)
+            if num:
+                print(f'found {num} in {self.kv.kvdict[key]}')
+                if set_to_val:
+                    num = val
+                else:
+                    num += val
+                self.kv.kvdict[key] = txt.replace(PLACEHOLDER, str(num))
 
 
 class QuakeMap(QProp):
