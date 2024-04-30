@@ -11,6 +11,7 @@ from pathlib import Path
 from parse import Entity, Brush, QuakeMap
 from bcolors import *
 import platform
+import ericw
 
 if platform.system() != 'Windows':
     print(colorize('this script is Windows only', bcolors.FAIL))
@@ -114,7 +115,8 @@ def iterate(close_loop=False):
 
 
 def compile():
-    Ericw.profiles[0].compile(Ericw.compilers[0], Path(r"I:\Quake\Dev\map\rm - Copy\rm_rabbit.map"))
+    if current_map:
+        ericw.compile(Ericw.profiles[0], Ericw.compilers[0], current_map)
 
 
 def launch(*, engine=Settings.engines[0], mod='', map_name=''):
