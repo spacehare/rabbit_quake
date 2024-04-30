@@ -3,7 +3,7 @@
 import ahk
 from ahk import directives, keys, AHK
 from ahk.keys import KEYS
-from settings import Settings, Keybinds
+from settings import Settings, Keybinds, Ericw
 import subprocess
 import os
 import re
@@ -11,7 +11,6 @@ from pathlib import Path
 from parse import Entity, Brush, QuakeMap
 from bcolors import *
 import platform
-import ericw
 
 if platform.system() != 'Windows':
     print(colorize('this script is Windows only', bcolors.FAIL))
@@ -115,7 +114,7 @@ def iterate(close_loop=False):
 
 
 def compile():
-    pass
+    Ericw.profiles[0].compile(Ericw.compilers[0], Path(r"I:\Quake\Dev\map\rm - Copy\rm_rabbit.map"))
 
 
 def launch(*, engine=Settings.engines[0], mod='', map_name=''):
@@ -125,7 +124,7 @@ def launch(*, engine=Settings.engines[0], mod='', map_name=''):
     if map_name:
         params += ['+map', map_name]
     print('launching...', colorize(' '.join([str(p) for p in params]), bcolors.OKBLUE))
-    subprocess.run(params, cwd=engine.folder)
+    return subprocess.run(params, cwd=engine.folder)
 
 
 if __name__ == '__main__':

@@ -68,12 +68,17 @@ folders = [
 ]
 
 [ericw]
-[profiles.dev]
-qbsp = ['-bsp2', '-vv']
-vis = ['-fast', '-vv']
-light = ['-dirtdebug', '-vv']
+bsp = 'maps'
+src = 'mapsrc'
 
-[profiles.dist]
+[[ericw.profiles]]
+name = 'dev'
+qbsp = ['-bsp2', '-verbose']
+vis = ['-fast', '-vv']
+light = ['-dirtdebug']
+
+[[ericw.profiles]]
+name = 'submit'
 qbsp = ['-bsp2', '-splitturb']
 vis = ['-noambient']
 light = ['extra']
