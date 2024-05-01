@@ -3,7 +3,7 @@
 import ahk
 from ahk import directives, keys, AHK
 from ahk.keys import KEYS
-from settings import Settings, Keybinds, Ericw
+from settings import Settings, Keybinds
 import subprocess
 import os
 import re
@@ -12,6 +12,7 @@ from parse import Entity, Brush, QuakeMap
 from bcolors import *
 import platform
 import ericw
+
 
 if platform.system() != 'Windows':
     print(colorize('this script is Windows only', bcolors.FAIL))
@@ -116,7 +117,7 @@ def iterate(close_loop=False):
 
 def compile():
     if current_map:
-        ericw.compile(Ericw.profiles[0], Ericw.compilers[0], current_map)
+        ericw.compile(ericw.profiles[0], ericw.compilers[0], current_map)
 
 
 def launch(*, engine=Settings.engines[0], mod='', map_name=''):

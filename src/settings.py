@@ -1,9 +1,7 @@
-from ericw import Compiler
 import paths
 from pathlib import Path
 import tomllib
 import re
-import subprocess
 from bcolors import *
 
 
@@ -78,30 +76,6 @@ class Settings:
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
 # https://ericwa.github.io/ericw-tools/doc/vis.html
 # https://ericwa.github.io/ericw-tools/doc/light.html
-
-
-
-
-class EricwProfile:
-    def __init__(self, name: str, qbsp_params: list[str] | None, vis_params: list[str] | None, light_params: list[str] | None):
-        self.name = name
-        self.qbsp_params = qbsp_params or []
-        self.vis_params = vis_params or []
-        self.light_params = light_params or []
-        print(f'({__name__}), creating profile {self.name}')
-
-    @staticmethod
-    def from_dict(d: dict):
-        return EricwProfile(d['name'], d.get('qbsp'), d.get('vis'), d.get('light'))
-
-
-
-
-class Ericw:
-    bsp_dir: Path = Path(settings_contents['ericw']['bsp'])
-    src_dir: Path = Path(settings_contents['ericw']['src'])
-    compilers: list[Compiler] = [Compiler(path=comp_path) for comp_path in make_listpath(Settings._ericw)]
-    profiles: list[EricwProfile] = [EricwProfile.from_dict(prof) for prof in settings_contents['ericw']['profiles']]
 
 
 class Submit:
