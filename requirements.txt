@@ -1,3 +1,9 @@
+# tb
 ahk==1.7.0
 ahk-binary==2023.9.0
+
+# conv
 pillow==10.3.0
+
+# submit
+markdown2==2.4.13
