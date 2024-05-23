@@ -208,7 +208,7 @@ class QuakeMap(QProp):
         return self.kv.kvdict['wad']
 
     @property
-    def mod(self):
+    def mod(self) -> str:
         return self.kv.kvdict['_tb_mod']
 
     @property

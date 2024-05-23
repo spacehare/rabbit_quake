@@ -2,6 +2,8 @@ import subprocess
 from pathlib import Path
 from bcolors import Ind
 from settings import settings_contents, make_listpath, Settings
+import shutil
+
 
 class Profile:
     def __init__(self, name: str, qbsp_params: list[str] | None, vis_params: list[str] | None, light_params: list[str] | None):
@@ -9,11 +11,12 @@ class Profile:
         self.qbsp_params = qbsp_params or []
         self.vis_params = vis_params or []
         self.light_params = light_params or []
-        print(f'({__name__}), creating profile {self.name}')
+        print(f'({__name__}) creating profile {self.name}')
 
     @staticmethod
     def from_dict(d: dict):
         return Profile(d['name'], d.get('qbsp'), d.get('vis'), d.get('light'))
+
 
 class Compiler:
     def __init__(self, path: Path):
@@ -34,7 +37,9 @@ class Compiler:
 
 def compile(profile: Profile, compiler: Compiler, map_path: Path, bsp_path: Path | None = None, *, qbsp=True, vis=True, light=True):
     print(f'running profile {profile.name}')
+    print('with map', map_path)
     out_bsp: Path = bsp_path or (map_path.parent / bsp_dir / map_path.with_suffix('.bsp').name)
+    print('to bsp', out_bsp)
     out_mapsrc: Path = src_dir / map_path
 
     for idx, tool_bool in enumerate([qbsp, vis, light]):
@@ -61,9 +66,17 @@ def get_output(process: subprocess.CompletedProcess[bytes]):
     print(Ind.mark(code == 0), code)
     return code
 
+
 bsp_dir: Path = Path(settings_contents['ericw']['bsp'])
 src_dir: Path = Path(settings_contents['ericw']['src'])
 compilers: list[Compiler] = [Compiler(path=comp_path) for comp_path in make_listpath(Settings._ericw)]
 profiles: list[Profile] = [Profile.from_dict(prof) for prof in settings_contents['ericw']['profiles']]
 
 
+def transfer_or_link(file: Path, location_folder: Path, copy=True):
+    out = (location_folder / file.name)
+    if copy:
+        shutil.copyfile(file, out)
+    else:
+        out.symlink_to(file)
+    return out

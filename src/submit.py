@@ -5,6 +5,7 @@ import argparse
 import settings
 from bcolors import *
 from settings import Settings
+import markdown2
 
 
 def create_unique_suffix() -> str:
@@ -44,6 +45,8 @@ if __name__ == '__main__':
                         help='the folder containing the files you want to zip for jam submission')
     parser.add_argument('--output_dir', '-o', type=Path,
                         help='where the zipped folder will be created. if one is not supplied, it will be set to the submission folder')
+    parser.add_argument('--md', action='store_true',
+                        help='convert markdown files to html')
     args = parser.parse_args()
 
     output_parent = args.output_dir or args.submission

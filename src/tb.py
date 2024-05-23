@@ -26,6 +26,14 @@ TB_AHK_TITLE = 'ahk_exe TrenchBroom.exe'
 
 current_map: Path | None = None
 current_mod: str = ''
+current_mod_folder: Path | None = None
+current_engine = Settings.engines[0]
+current_profile: ericw.Profile = ericw.profiles[0]
+current_compiler: ericw.Compiler = ericw.compilers[0]
+
+enable_qbsp = True
+enable_vis = True
+enable_light = True
 
 
 def copy() -> str:
@@ -82,7 +90,7 @@ class MapData:
 def find_map_from_tb_title():
     print(colorize('searching for map based on window title', bcolors.HEADER))
     tb = a.find_window_by_title(TB_AHK_TITLE)
-    qmap_matches: list[Path] = []
+    qmap_path_matches: list[Path] = []
     tb_qmap_path: Path | None = None
 
     if tb:
@@ -96,14 +104,15 @@ def find_map_from_tb_title():
                     if tb_qmap_name == item.name:
                         tb_qmap_path = item
                         print('found', colorize(item, bcolors.OKBLUE))
-                        qmap_matches.append(item)
+                        qmap_path_matches.append(item)
 
-            if qmap_matches and tb_qmap_path:
-                print('using', colorize(qmap_matches[0], bcolors.OKGREEN))
-                with open(qmap_matches[0], encoding='utf-8') as f:
-                    return MapData(tb_qmap_path, f.read())
+            if qmap_path_matches and tb_qmap_path:
+                print('using', colorize(qmap_path_matches[0], bcolors.OKGREEN))
+                with open(qmap_path_matches[0]) as f:
+                    return MapData(qmap_path_matches[0], f.read())
+
     print(colorize('could not find map from title', bcolors.FAIL))
-    return
+    exit()
 
 
 @if_tb_open
@@ -115,9 +124,27 @@ def iterate(close_loop=False):
     paste(ent.dumps())
 
 
-def compile():
+def compile_and_transfer(profile, compiler, qbsp, vis, light):
     if current_map:
-        ericw.compile(ericw.profiles[0], ericw.compilers[0], current_map)
+        print(qbsp, vis, light)
+        ret = ericw.compile(profile, compiler, current_map, qbsp=qbsp, vis=vis, light=light)
+        transfer()
+        return ret
+
+
+def transfer():
+    if current_map and current_mod_folder:
+        print(current_map.parent / 'maps')
+        print(current_mod_folder / 'maps')
+        for f in [f for f in (current_map.parent / 'maps').iterdir()]:
+            if f.suffix == '.bsp' or f.suffix == '.lit':
+                ericw.transfer_or_link(f, current_mod_folder / 'maps')
+
+
+def compile_then_launch(qbsp, vis, light):
+    if current_map and current_mod:
+        if compile_and_transfer(current_profile, current_compiler, qbsp, vis, light):
+            launch(mod=current_mod, map_name=current_map.stem)
 
 
 def launch(*, engine=Settings.engines[0], mod='', map_name=''):
@@ -130,6 +157,10 @@ def launch(*, engine=Settings.engines[0], mod='', map_name=''):
     return subprocess.run(params, cwd=engine.folder)
 
 
+def yes_or_no(text: str) -> bool:
+    return 'y' in text
+
+
 if __name__ == '__main__':
     print('🐇 program start')
     qmap_full = find_map_from_tb_title()
@@ -137,11 +168,26 @@ if __name__ == '__main__':
         qmap = QuakeMap.loads(qmap_full.data)
         current_map = qmap_full.filepath
         current_mod = qmap.mod
+        current_mod_folder = current_engine.folder / current_mod
         print('current mod:', colorize(current_mod, bcolors.OKCYAN))
+
+    what_profile = input('what profile?')
+    what_compiler = input('what compiler?')
+    what_qbsp = input('enable qbsp?')
+    what_vis = input('enable vis?')
+    what_light = input('enable light?')
+
+    current_profile = ericw.profiles[int(what_profile)]
+    current_compiler = ericw.compilers[int(what_compiler)]
+    enable_qbsp = yes_or_no(what_qbsp)
+    enable_vis = yes_or_no(what_vis)
+    enable_light = yes_or_no(what_light)
+    print(current_profile, current_compiler, enable_qbsp, enable_vis, enable_light)
 
     a.add_hotkey(Keybinds.iterate, lambda: iterate())
     a.add_hotkey(Keybinds.pc_close_loop, lambda: iterate(True))
-    a.add_hotkey(Keybinds.compile, compile)
+    a.add_hotkey(Keybinds.compile, lambda: compile_and_transfer(current_profile, current_compiler, enable_qbsp, enable_vis, enable_light))
+    a.add_hotkey('!b', lambda: compile_then_launch(enable_qbsp, enable_vis, enable_light))
 
     if current_map and current_mod:
         a.add_hotkey(Keybinds.launch, lambda: launch(mod=current_mod, map_name=current_map.stem))

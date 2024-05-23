@@ -5,8 +5,12 @@ from PIL.Image import Dither
 from bcolors import *
 import re
 
+# TODO give warning when image is not div by 16
+# TODO see wadcleaver
+# TODO add max-string name check
 
-def img_from_list(p: list):
+
+def palette_from_tuples(p: list):
     w = len(p)
     h = 1
     img = Image.new('P', (w, h))
@@ -281,20 +285,18 @@ QUAKE_PALETTE_LIST = [
 NO_BRIGHTS = QUAKE_PALETTE_LIST[:224]
 NO_BRIGHTS_WITH_TRANS = NO_BRIGHTS + [TRANS_RGB]
 
-QUAKE_PALETTE_LIST = img_from_list(QUAKE_PALETTE_LIST)
-NO_BRIGHTS = img_from_list(NO_BRIGHTS)
-NO_BRIGHTS_WITH_TRANS = img_from_list(NO_BRIGHTS_WITH_TRANS)
+QUAKE_PALETTE_LIST = palette_from_tuples(QUAKE_PALETTE_LIST)
+NO_BRIGHTS = palette_from_tuples(NO_BRIGHTS)
+NO_BRIGHTS_WITH_TRANS = palette_from_tuples(NO_BRIGHTS_WITH_TRANS)
 
-MAX_TEX_CHARS = 16
+TEX_MAX_CHARS = 16
+TEX_SIZE_MOD = 16
 PRE_TRANS = '{'
 PRE_WATER = '*'
 PRE_ANIMATED = '+'
 PRE_TOGGLE = '+A'
 PRE_SKY = 'sky'
 R_NUM_STEM_SUFFIX = re.compile(r'(.*?)(\d+$)')
-
-
-# TODO see wadcleaver
 
 
 def get_files(path: Path):

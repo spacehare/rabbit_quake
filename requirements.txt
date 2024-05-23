@@ -2,8 +2,11 @@
 ahk==1.7.0
 ahk-binary==2023.9.0
 
-# conv
+# image conversion
 pillow==10.3.0
+
+# wav conversion
+# pydub==0.25.1
 
 # submit
 markdown2==2.4.13

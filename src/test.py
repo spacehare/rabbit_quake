@@ -14,6 +14,8 @@ import templates
 import parse
 
 # https://docs.python.org/3/library/unittest.html
+# python -m unittest
+# python -m unittest -h
 
 
 class TestZip(unittest.TestCase):
