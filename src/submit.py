@@ -8,33 +8,33 @@ from settings import Settings
 
 
 def create_unique_suffix() -> str:
-    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    vers = f'{now}'
-    return vers
+    return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 
 def is_path_ok(path: Path) -> bool:
     allow = False
-    for pattern in settings.Submit.allowed + settings.Submit.denied:
+    for pattern in settings.Submit.allowed:
         matched = path.match(pattern)
         if matched:
             if pattern in settings.Submit.allowed:
                 allow = True
-            elif pattern in settings.Submit.denied:
-                allow = False
-    print(Ind.mark(allow), path)
+
+    print(Ind.mark(allow), colorize(path, bcolors.OKBLUE if allow else bcolors.FAIL))
     return allow
 
 
-def zip(submission: Path, output_path: Path):
+def zip(submission: Path, output_parent: Path):
     possible_name = f'_{Settings.name}' if Settings.name not in submission.stem else ''
-    versioned_output: Path = Path(f'{output_path}/{submission.stem}{possible_name}_{create_unique_suffix()}.zip')
+    versioned_output: Path = output_parent / Path(f'{submission.stem}{possible_name}_{create_unique_suffix()}.zip')
+    print('output file:', versioned_output)
+    ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p)]
+
     with zf.ZipFile(versioned_output, 'w', zf.ZIP_DEFLATED) as zip_file:
-        for item in [Path(p) for p in submission.rglob('*')]:
-            ok = is_path_ok(item)
-            if ok:
-                zip_file.write(versioned_output, arcname=item.relative_to(submission))
-    print(f'{Ind.mark()}, zipped {versioned_output}')
+        for file in ok_files:
+            zip_file.write(file, arcname=file.relative_to(submission))
+            print('->', file.relative_to(submission))
+
+    print(f'{Ind.mark()}, zipped {len(ok_files)} files into {versioned_output}')
     return versioned_output
 
 
@@ -46,7 +46,6 @@ if __name__ == '__main__':
                         help='where the zipped folder will be created. if one is not supplied, it will be set to the submission folder')
     args = parser.parse_args()
 
-    true_output = args.output_dir or args.submission
-    output_file = true_output / Path(rf'{args.submission.stem}.zip')
+    output_parent = args.output_dir or args.submission
 
-    zip(args.submission, output_file)
+    zip(args.submission, output_parent)

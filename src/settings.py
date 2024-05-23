@@ -80,7 +80,6 @@ class Settings:
 
 class Submit:
     allowed = settings_contents['submit']['allowed']
-    denied = settings_contents['submit']['denied']
 
 
 SVARS = {

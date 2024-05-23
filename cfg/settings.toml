@@ -39,22 +39,12 @@ maps = 'I:\Quake\Dev\map'
 [submit]
 allowed = [
 	'mapsrc/*.map',
-	'*.wav',
-	'*.mp3',
+	'sound/**/*.wav',
+	'music/*',
 	'maps/*.bsp',
 	'maps/*.lit',
-	'*.tga',
-	'*.txt',
-	'*.md',
-]
-denied = [
-	'*.texinfo',
-	'*.json',
-	'*.log',
-	'*.prt',
-	'*.zip',
-	'*.7z',
-	'autosave/*',
+	'gfx/env/**/*.tga',
+	'readme/*',
 ]
 
 [template]
@@ -81,4 +71,4 @@ light = ['-dirtdebug']
 name = 'submit'
 qbsp = ['-bsp2', '-splitturb']
 vis = ['-noambient']
-light = ['extra']
+light = ['-extra']
