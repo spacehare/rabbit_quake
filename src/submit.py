@@ -24,7 +24,7 @@ def is_path_ok(path: Path) -> bool:
     return allow
 
 
-def zip(submission: Path, output_parent: Path):
+def zip(submission: Path, output_parent: Path, *, convert_markdown=False):
     possible_name = f'_{Settings.name}' if Settings.name not in submission.stem else ''
     versioned_output: Path = output_parent / Path(f'{submission.stem}{possible_name}_{create_unique_suffix()}.zip')
     print('output file:', versioned_output)
@@ -32,7 +32,11 @@ def zip(submission: Path, output_parent: Path):
 
     with zf.ZipFile(versioned_output, 'w', zf.ZIP_DEFLATED) as zip_file:
         for file in ok_files:
-            zip_file.write(file, arcname=file.relative_to(submission))
+            if file.suffix == '.md':
+                html = markdown2.markdown_path(file)
+                zip_file.writestr(str(file.relative_to(submission).with_suffix('.html')), html)
+
+            zip_file.write(file, file.relative_to(submission))
             print('->', file.relative_to(submission))
 
     print(f'{Ind.mark()}, zipped {len(ok_files)} files into {versioned_output}')
@@ -43,7 +47,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('submission', type=Path,
                         help='the folder containing the files you want to zip for jam submission')
-    parser.add_argument('--output_dir', '-o', type=Path,
+    parser.add_argument('output_dir', nargs='?', type=Path,
                         help='where the zipped folder will be created. if one is not supplied, it will be set to the submission folder')
     parser.add_argument('--md', action='store_true',
                         help='convert markdown files to html')
@@ -51,4 +55,4 @@ if __name__ == '__main__':
 
     output_parent = args.output_dir or args.submission
 
-    zip(args.submission, output_parent)
+    zip(args.submission, output_parent, convert_markdown=args.md)
