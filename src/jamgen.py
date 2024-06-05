@@ -1,7 +1,7 @@
-import settings
+import app.settings as settings
 import argparse
 from pathlib import Path
-import bcolors
+import app.bcolors as bcolors
 
 
 def gen(where: Path, prefix: str):

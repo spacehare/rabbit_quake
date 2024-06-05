@@ -2,9 +2,9 @@ import zipfile as zf
 from pathlib import Path
 from datetime import datetime
 import argparse
-import settings
-from bcolors import *
-from settings import Settings
+import app.settings as settings
+from app.bcolors import *
+from app.settings import Settings
 import markdown2
 
 
@@ -12,23 +12,34 @@ def create_unique_suffix() -> str:
     return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 
-def is_path_ok(path: Path) -> bool:
+def is_path_ok(path: Path, whitelist) -> bool:
     allow = False
-    for pattern in settings.Submit.allowed:
-        matched = path.match(pattern)
-        if matched:
-            if pattern in settings.Submit.allowed:
-                allow = True
+    for pattern in whitelist:
+        allow = path.match(pattern) and pattern in whitelist
+        if allow:
+            break
 
-    print(Ind.mark(allow), colorize(path, bcolors.OKBLUE if allow else bcolors.FAIL))
+    print(Ind.mark(allow),
+          colorize(path, bcolors.OKBLUE if allow else bcolors.FAIL))
     return allow
+
+# def is_path_ok(path: Path) -> bool:
+#     allow = False
+#     for pattern in Settings.submit_allowed:
+#         matched = path.match(pattern)
+#         if matched:
+#             if pattern in Settings.submit_allowed:
+#                 allow = True
+
+#     print(Ind.mark(allow), colorize(path, bcolors.OKBLUE if allow else bcolors.FAIL))
+#     return allow
 
 
 def zip(submission: Path, output_parent: Path, *, convert_markdown=False):
     possible_name = f'_{Settings.name}' if Settings.name not in submission.stem else ''
     versioned_output: Path = output_parent / Path(f'{submission.stem}{possible_name}_{create_unique_suffix()}.zip')
     print('output file:', versioned_output)
-    ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p)]
+    ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p, Settings.submit_whitelist)]
 
     with zf.ZipFile(versioned_output, 'w', zf.ZIP_DEFLATED) as zip_file:
         for file in ok_files:

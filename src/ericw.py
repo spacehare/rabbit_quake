@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
-from bcolors import Ind
-from settings import settings_contents, make_listpath, Settings
+from app.bcolors import Ind
+from app.settings import _contents, make_listpath, Settings
 import shutil
 
 
@@ -67,10 +67,10 @@ def get_output(process: subprocess.CompletedProcess[bytes]):
     return code
 
 
-bsp_dir: Path = Path(settings_contents['ericw']['bsp'])
-src_dir: Path = Path(settings_contents['ericw']['src'])
+bsp_dir: Path = Path(_contents['ericw']['bsp'])
+src_dir: Path = Path(_contents['ericw']['src'])
 compilers: list[Compiler] = [Compiler(path=comp_path) for comp_path in make_listpath(Settings._ericw)]
-profiles: list[Profile] = [Profile.from_dict(prof) for prof in settings_contents['ericw']['profiles']]
+profiles: list[Profile] = [Profile.from_dict(prof) for prof in _contents['ericw']['profiles']]
 
 
 def transfer_or_link(file: Path, location_folder: Path, copy=True):

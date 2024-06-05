@@ -1,15 +1,15 @@
-import paths
+import app.paths as paths
 from pathlib import Path
 import tomllib
 import re
-from bcolors import *
+from app.bcolors import *
 
 
 def get_contents(file_path: Path):
     return tomllib.loads(file_path.read_text())
 
 
-settings_contents: dict = get_contents(paths.SETTINGS)
+_contents: dict = get_contents(paths.SETTINGS)
 
 banned_chars = re.compile(r'[<>:"\\\/|?*]')
 
@@ -46,42 +46,40 @@ class Engine:
 
 
 class Keybinds:
-    compile = _get_bind(settings_contents['keybinds'], 'compile')
-    launch = _get_bind(settings_contents['keybinds'], 'launch')
-    iterate = _get_bind(settings_contents['keybinds'], 'iterate')
-    pc_close_loop = _get_bind(settings_contents['keybinds'], 'pc_close_loop')
+    compile = _get_bind(_contents['keybinds'], 'compile')
+    launch = _get_bind(_contents['keybinds'], 'launch')
+    iterate = _get_bind(_contents['keybinds'], 'iterate')
+    pc_close_loop = _get_bind(_contents['keybinds'], 'pc_close_loop')
+
+
+class JampackRelationship:
+    def __init__(self, dest: Path, patterns: list[str]):
+        self.dest = dest
+        self.patterns = patterns
 
 
 class Settings:
-    name = settings_contents['name']
-    trenchbroom = Path(settings_contents['paths'].get('trenchbroom'))
+    name = _contents['name']
+    trenchbroom = Path(_contents['paths'].get('trenchbroom'))
     trenchbroom_exe = trenchbroom / 'trenchbroom.exe'
-    trenchbroom_prefs = Path(settings_contents['paths'].get(
+    trenchbroom_prefs = Path(_contents['paths'].get(
         'trenchbroom_preferences'))
-    _ericw = settings_contents['paths'].get('ericw')
+    _ericw = _contents['paths'].get('ericw')
     _engine_exes: list[Path] = make_listpath(
-        settings_contents['paths'].get('engine_exes'))
+        _contents['paths'].get('engine_exes'))
     engines: list[Engine] = list([Engine(Path(exe)) for exe in _engine_exes])
-    configs = Path(settings_contents['paths'].get('configs'))
-    maps_path = Path(settings_contents['paths'].get('maps'))
+    configs = Path(_contents['paths'].get('configs'))
+    maps_path = Path(_contents['paths'].get('maps'))
     maps: list[Path] = [p for p in maps_path.iterdir()]
-    cfg_whitelist = settings_contents.get('cfg_whitelist') or {}
-
-
-# class Tool:
-#     def __init__(self, exe: Path):
-#         self.exe = exe
+    cfg_whitelist = _contents.get('cfg_whitelist') or {}
+    submit_whitelist = _contents['submit']['allowed']
+    _raw_jampack_whitelist: dict = _contents['jampack']['allowed']
+    jampack_whitelist = [JampackRelationship(k, v) for k, v in _raw_jampack_whitelist.items()]
 
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
 # https://ericwa.github.io/ericw-tools/doc/vis.html
 # https://ericwa.github.io/ericw-tools/doc/light.html
-
-
-class Submit:
-    allowed = settings_contents['submit']['allowed']
-
-
 SVARS = {
     '{name}': Settings.name
 }
@@ -95,4 +93,4 @@ def replace_var(what: str):
 
 
 class Template:
-    folders: list[Path] = [Path(replace_var(p)) for p in settings_contents['template']['folders']]
+    folders: list[Path] = [Path(replace_var(p)) for p in _contents['template']['folders']]

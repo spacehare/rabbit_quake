@@ -1,5 +1,5 @@
 from pathlib import Path
-from settings import Settings
+from app.settings import Settings
 
 cfg_files = [f for f in Settings.configs.glob('*')]
 allowlist: dict = Settings.cfg_whitelist

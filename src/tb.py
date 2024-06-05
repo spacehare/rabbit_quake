@@ -3,13 +3,13 @@
 import ahk
 from ahk import directives, keys, AHK
 from ahk.keys import KEYS
-from settings import Settings, Keybinds
 import subprocess
 import os
 import re
 from pathlib import Path
-from parse import Entity, Brush, QuakeMap
-from bcolors import *
+from app.parse import Entity, Brush, QuakeMap
+from app.settings import Settings, Keybinds
+from app.bcolors import *
 import platform
 import ericw
 
@@ -154,11 +154,13 @@ def launch(*, engine=Settings.engines[0], mod='', map_name=''):
     if map_name:
         params += ['+map', map_name]
     print('launching...', colorize(' '.join([str(p) for p in params]), bcolors.OKBLUE))
-    return subprocess.run(params, cwd=engine.folder)
+    process = subprocess.run(params, cwd=engine.folder)
+    a.win_activate(f'ahk_exe {engine.exe}')
+    return process
 
 
 def yes_or_no(text: str) -> bool:
-    return 'y' in text
+    return 'y' in text.lower()
 
 
 if __name__ == '__main__':
@@ -171,18 +173,18 @@ if __name__ == '__main__':
         current_mod_folder = current_engine.folder / current_mod
         print('current mod:', colorize(current_mod, bcolors.OKCYAN))
 
-    what_profile = input('what profile?')
-    what_compiler = input('what compiler?')
-    what_qbsp = input('enable qbsp?')
-    what_vis = input('enable vis?')
-    what_light = input('enable light?')
+    # what_profile = input('what profile?')
+    # what_compiler = input('what compiler?')
+    # what_qbsp = input('enable qbsp?')
+    # what_vis = input('enable vis?')
+    # what_light = input('enable light?')
 
-    current_profile = ericw.profiles[int(what_profile)]
-    current_compiler = ericw.compilers[int(what_compiler)]
-    enable_qbsp = yes_or_no(what_qbsp)
-    enable_vis = yes_or_no(what_vis)
-    enable_light = yes_or_no(what_light)
-    print(current_profile, current_compiler, enable_qbsp, enable_vis, enable_light)
+    # current_profile = ericw.profiles[int(what_profile)]
+    # current_compiler = ericw.compilers[int(what_compiler)]
+    # enable_qbsp = yes_or_no(what_qbsp)
+    # enable_vis = yes_or_no(what_vis)
+    # enable_light = yes_or_no(what_light)
+    # print(current_profile, current_compiler, enable_qbsp, enable_vis, enable_light)
 
     a.add_hotkey(Keybinds.iterate, lambda: iterate())
     a.add_hotkey(Keybinds.pc_close_loop, lambda: iterate(True))

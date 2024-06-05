@@ -2,7 +2,7 @@ from pathlib import Path
 import argparse
 from PIL import Image, ImageColor, ImagePalette, ImageFilter
 from PIL.Image import Dither
-from bcolors import *
+from app.bcolors import *
 import re
 
 # TODO give warning when image is not div by 16

@@ -1,4 +1,4 @@
-# some values can be lists [] or strings ''
+# some values can be lists [] or strings '', ""
 # in the case of ericw, it can be a folder containing different versions...
 # ericw = ['I:\Quake\ericw\ericw-tools-2.0.0-alpha7-win64', 'I:\Quake\ericw\ericw-tools-v0.18.1-32-g6660c5f-win64']
 # ...or just a string of a folder path containing those folders...
@@ -35,6 +35,33 @@ maps = 'I:\Quake\Dev\map'
 
 [cfg_whitelist]
 'remobilize.cfg' = ['remobilize_test15']
+
+[jampack]
+parents = [
+	'readme',
+	'sound',
+	'gfx/env',
+	'music',
+	'maps',
+	'map',
+	'mapsrc',
+	'progs',
+	'models',
+]
+
+[jampack.allowed]
+# ex: 'destination folder' = [ 'file1', 'file2', '*.txt ]
+# organize these in order, so...
+# if you want "readme.txt" to be put inside of the root (/)
+# you should have that at the top
+'.' = ['descript.ion', 'quake.rc', '*.txt', '*.pak', '*.dat']
+'gfx/env' = ['*.tga']
+readme = ['*.txt', '*.html', '*.md', 'readme/*']
+progs = ['*.mdl']
+sound = ['*.wav']
+music = ['track*.*']
+mapsrc = ['*.map']
+maps = ['*.bsp', '*.lit']
 
 [submit]
 allowed = [

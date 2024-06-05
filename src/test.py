@@ -2,16 +2,16 @@ import unittest
 import shutil
 
 import autosave
-import bcolors
+import app.bcolors as bcolors
 import jamgen
-import paths
+import app.paths as paths
 import submit
-from settings import Settings
-import shared
+from app.settings import Settings
+import app.shared as shared
 import symlink_cfg
 import tb
-import templates
-import parse
+import app.templates as templates
+import app.parse as parse
 
 # https://docs.python.org/3/library/unittest.html
 # python -m unittest
