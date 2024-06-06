@@ -18,12 +18,16 @@ import app.parse as parse
 # https://quakewiki.org/wiki/Quake_BSP_Format
 # https://quakewiki.org/wiki/BSP2
 
+# https://github.com/joshuaskelly/vgio/blob/master/vgio/quake/map.py
+# https://developer.valvesoftware.com/wiki/MAP_(file_format)
+# https://github.com/matthewearl/pyquake/blob/master/pyquake/mapsource.py
+
 whitelist_map = Settings.jampack_whitelist
 
 
 def ex(bsp_path: Path):
     with open(bsp_path, 'rb') as f:
-        f.read(4)
+        f.read(4)  # idk why i need to do this, but i do
         header = f.read(48)
         lumps = struct.unpack('12I', header)
         # print(lumps)
@@ -36,8 +40,12 @@ def ex(bsp_path: Path):
 
         text: str = data.decode('utf-8')
 
-        for line in text.split('\n'):
-            if 'sounds' in line:
+        obj = parse.parse(text)
+
+        for line in text.splitlines():
+            if 'sky' in line:
+                print(line)
+            if 'noise' in line:
                 print(line)
         exit()
     # bsp = bsp_tool.load_bsp(str(bsp_path))
