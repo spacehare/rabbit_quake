@@ -4,6 +4,12 @@ from app.bcolors import Ind
 from app.settings import _contents, make_listpath, Settings
 import shutil
 
+# https://ericwa.github.io/ericw-tools/doc/qbsp.html
+# https://ericwa.github.io/ericw-tools/doc/vis.html
+# https://ericwa.github.io/ericw-tools/doc/light.html
+
+# https://ericw-tools.readthedocs.io/en/latest/
+
 
 class Profile:
     def __init__(self, name: str, qbsp_params: list[str] | None, vis_params: list[str] | None, light_params: list[str] | None):

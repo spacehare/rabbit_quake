@@ -6,7 +6,7 @@ import subprocess
 # ffmpeg -i input.mp3 -ac 1 -ar 44100 -sample_fmt s16 output.wav
 
 
-def is_audio_file_ffmpeg(file: Path) -> bool:
+def ffmpeg_is_audio_file(file: Path) -> bool:
     result = subprocess.run(
         ['ffprobe',
          '-v', 'error',
@@ -23,7 +23,7 @@ def is_audio_file_ffmpeg(file: Path) -> bool:
     return False
 
 
-def convert_with_ffmpeg(file: Path, output_parent: Path):
+def ffmpeg_convert(file: Path, output_parent: Path):
     subprocess.run([
         'ffmpeg',
         '-i', file,
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     for file in (input_path,) if input_path.is_file() else input_path.rglob('*'):
         ok = True
         if check:
-            ok = is_audio_file_ffmpeg(file)
+            ok = ffmpeg_is_audio_file(file)
         if ok and file.is_file():
-            convert_with_ffmpeg(file, output_path)
+            ffmpeg_convert(file, output_path)

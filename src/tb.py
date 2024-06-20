@@ -1,18 +1,16 @@
 '''WINDOWS ONLY'''
 
-import ahk
-from ahk import directives, keys, AHK
-from ahk.keys import KEYS
 import subprocess
 import os
 import re
+import platform
+import app.ericw as ericw
+from ahk import directives, keys, AHK
+from ahk.keys import KEYS
 from pathlib import Path
 from app.parse import Entity, Brush, QuakeMap
 from app.settings import Settings, Keybinds
 from app.bcolors import *
-import platform
-import ericw
-
 
 if platform.system() != 'Windows':
     print(colorize('this script is Windows only', bcolors.FAIL))
@@ -192,7 +190,8 @@ if __name__ == '__main__':
     a.add_hotkey('!b', lambda: compile_then_launch(enable_qbsp, enable_vis, enable_light))
 
     if current_map and current_mod:
-        a.add_hotkey(Keybinds.launch, lambda: launch(mod=current_mod, map_name=current_map.stem))
+        x = current_map
+        a.add_hotkey(Keybinds.launch, lambda: launch(mod=current_mod, map_name=x.stem))
 
     a.start_hotkeys()
     print(Ind.mark())

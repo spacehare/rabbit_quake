@@ -265,6 +265,10 @@ class TBObject:
         self.planes = planes or []
         # self.comment = comment or ''
 
+    @property
+    def classname(self):
+        return self.kv.get('classname')
+
     def __repr__(self):
         return f'{self.kv.get('classname')} ~ children: {len(self.children)}'
 

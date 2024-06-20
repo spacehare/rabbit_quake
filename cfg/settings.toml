@@ -4,9 +4,7 @@
 # ...or just a string of a folder path containing those folders...
 # ericw = 'I:\Quake\ericw'
 
-# used for map names and {name}
-# ex: if your name is rabbit, maps will be zipped as ej3_rabbit
-# and templates will be generated like gfx/env/rabbit/
+# templates will be generated like: gfx/env/{name} = gfx/env/rabbit
 name = 'rabbit'
 
 [keybinds]
@@ -37,31 +35,68 @@ maps = 'I:\Quake\Dev\map'
 'remobilize.cfg' = ['remobilize_test15']
 
 [jampack]
-parents = [
-	'readme',
-	'sound',
-	'gfx/env',
-	'music',
-	'maps',
-	'map',
-	'mapsrc',
-	'progs',
-	'models',
-]
+folder_to_pak = 'pakme'
+# i think below is obsolete ?
+# parents = [
+# 	'readme',
+# 	'sound',
+# 	'gfx/env',
+# 	'music',
+# 	'maps',
+# 	'map',
+# 	'mapsrc',
+# 	'progs',
+# 	'models',
+# ]
 
-[jampack.allowed]
-# ex: 'destination folder' = [ 'file1', 'file2', '*.txt ]
-# organize these in order, so...
-# if you want "readme.txt" to be put inside of the root (/)
-# you should have that at the top
-'.' = ['descript.ion', 'quake.rc', '*.txt', '*.pak', '*.dat']
-'gfx/env' = ['*.tga']
-readme = ['*.txt', '*.html', '*.md', 'readme/*']
-progs = ['*.mdl']
-sound = ['*.wav']
-music = ['track*.*']
-mapsrc = ['*.map']
-maps = ['*.bsp', '*.lit']
+# for dependencies read from the bsp
+[[jampack.dependencies]]
+value_patterns = ['*.wav']
+destination = 'sound'
+
+[[jampack.dependencies]]
+value_patterns = ['*.mdl']
+
+[[jampack.dependencies]]
+keys = ['sky']
+stem_append = '*.tga'
+destination = 'gfx/env'
+
+[[jampack.dependencies]]
+classnames = ['misc_changemusic', 'worldspawn']
+keys = ['sounds']
+stem_prepend = 'track'
+destination = 'music'
+# stem_append = '.*'
+# value_regexs = ['track\d+\..+']
+
+# for grabbing non-dependant files, like readme files or .map files
+[[jampack.allow]]
+patterns = [
+	'descript.ion',
+	'*.def',
+	'*.fgd',
+	'*.json',
+	'*.pak',
+	'*.dat',
+	'*.rc',
+]
+destination = '.'
+
+[[jampack.allow]]
+patterns = ['*.map']
+except_patterns = ['autosave/*.map']
+except_regexs = ['autosave..+\.\d+\.map']
+destination = 'mapsrc'
+
+[[jampack.allow]]
+patterns = ['*.bsp', '*.lit']
+destination = 'maps'
+
+[[jampack.allow]]
+patterns = ['*.txt', '*.html', '*.md', 'readme/*']
+destination = 'readme'
+
 
 [submit]
 allowed = [
@@ -82,7 +117,12 @@ folders = [
 	'gfx/env/{name}',
 	'sound/{name}',
 	'progs/{name}',
+	'readme',
 ]
+
+[[template.copy]]
+files = ['assets\template.map', 'assets/todo.txt']
+destination = '.'
 
 [ericw]
 bsp = 'maps'
@@ -96,6 +136,6 @@ light = ['-dirtdebug']
 
 [[ericw.profiles]]
 name = 'submit'
-qbsp = ['-bsp2', '-splitturb']
+qbsp = ['-leaktest', '-bsp2', '-splitturb']
 vis = ['-noambient']
-light = ['-extra']
+light = ['-extra4']

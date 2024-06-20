@@ -18,7 +18,7 @@ def processImage(path: Path, iwidth=4, iheight=3):
     tilesize: int = width
     print('width', width, 'height', height)
 
-    splitAndSave(img, 2, 0, tilesize, append_direction_str(path, "_up"))
+    splitAndSave(img, 2, 1, tilesize, append_direction_str(path, "_up"))
     splitAndSave(img, 2, 3, tilesize, append_direction_str(path, "_dn"))
     splitAndSave(img, 3, 2, tilesize, append_direction_str(path, "_ft"))
     splitAndSave(img, 1, 2, tilesize, append_direction_str(path, "_bk"))
@@ -31,10 +31,9 @@ def append_direction_str(path: Path, direction):
 
 
 def splitAndSave(img: Image.Image, x, y, tilesize: int, name):
-    if x != 0:
-        x -= 1
-    if y != 0:
-        y -= 1
+    x -= 1
+    y -= 1
+
     area = (tilesize * x,
             tilesize * y,
             tilesize * x + tilesize,
@@ -49,5 +48,11 @@ def saveImage(img: Image.Image, path, name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('image', type=Path)
+    parser.add_argument('--ft', type=tuple)
+    parser.add_argument('--bk', type=tuple)
+    parser.add_argument('--lf', type=tuple)
+    parser.add_argument('--rt', type=tuple)
+    parser.add_argument('--up', type=tuple)
+    parser.add_argument('--dn', type=tuple)
     args = parser.parse_args()
     processImage(args.image)

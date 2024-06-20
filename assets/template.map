@@ -1,0 +1,9 @@
+// Game: Quake
+// Format: Valve
+// entity 0
+{
+"mapversion" "220"
+"wad" ""
+"classname" "worldspawn"
+"message" "TITLE GOES HERE"
+}

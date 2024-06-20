@@ -1,4 +1,5 @@
 import math
+import argparse
 
 # makkon textures are 512 x 512
 
@@ -47,3 +48,6 @@ if __name__ == '__main__':
     display('czg12s_256u', czg12s_256u, 1024)  # seamless
     display('czg12s_256u', czg12s_256u, 64 * 13)  # closer to 1
     display('czg24s_512u', czg24s_512u, 64 * 24)  # seamless, 1.059713
+
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
