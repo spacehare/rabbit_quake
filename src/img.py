@@ -4,35 +4,25 @@ from PIL import Image, ImageColor, ImagePalette, ImageFilter
 from PIL.Image import Dither
 from app.bcolors import *
 import re
-import app.palette as palette
-
+import app.palette as pal
+from app.palette import palette_image_from_tuples
 
 # TODO give warning when image is not div by 16
 # TODO see wadcleaver
 # TODO add max-string name check
 
 
-def palette_from_tuples(p: list):
-    w = len(p)
-    h = 1
-    img = Image.new('P', (w, h))
-    for x in range(w):
-        for y in range(h):
-            img.putpixel((x, y), p[x])
-    return img
-
-
 PLACEHOLDER_RGB = (0, 255, 0)
 PLACEHOLDER_RGBA_255 = (0, 255, 0, 255)
 PLACEHOLDER_RGBA_0 = (0, 255, 0, 0)
 TRANS_RGB = (159, 91, 83)
-QUAKE_PALETTE_LIST = palette.QUAKE
+QUAKE_PALETTE_LIST = pal.QUAKE_RGB_TUPLES
 NO_BRIGHTS_LIST = QUAKE_PALETTE_LIST[:224]
 NO_BRIGHTS_WITH_TRANS_LIST = NO_BRIGHTS_LIST + [TRANS_RGB]
 
-QUAKE_PALETTE_IMG = palette_from_tuples(QUAKE_PALETTE_LIST)
-NO_BRIGHTS_IMG = palette_from_tuples(NO_BRIGHTS_LIST)
-NO_BRIGHTS_WITH_TRANS_IMG = palette_from_tuples(NO_BRIGHTS_WITH_TRANS_LIST)
+QUAKE_PALETTE_IMG = palette_image_from_tuples(QUAKE_PALETTE_LIST)
+NO_BRIGHTS_IMG = palette_image_from_tuples(NO_BRIGHTS_LIST)
+NO_BRIGHTS_WITH_TRANS_IMG = palette_image_from_tuples(NO_BRIGHTS_WITH_TRANS_LIST)
 
 TEX_MAX_CHARS = 16
 TEX_SIZE_MOD = 16
