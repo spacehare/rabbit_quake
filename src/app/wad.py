@@ -43,10 +43,9 @@ class WAD:
     def from_folder(folder: Path):
         new_wad = WAD()
         image_paths = [f for f in folder.rglob('*') if f.is_file()]
-
-        id = b'WAD2'
-
         dir_offs = WAD.STRUCT_HEADER.size
+
+        current_entry_offset = WAD.STRUCT_HEADER.size
         for path in image_paths:
             print('->', path)
             name = path.stem
@@ -60,14 +59,20 @@ class WAD:
                     indexes = bytes(pal.image_to_palette_indexes(downscaled_img))
                     mipmaps.append(MipMap(w, h, indexes))
 
-                tex: MipTex = MipTex(name.encode(), img.width, img.height, (), mipmaps)
-                dir_offs += tex.size
-                entry: Entry = Entry(-1, -1, -1, 'D', 0, name.encode())
-
+                current_mipmap_offset = MipTex.STRUCT_NO_MIPMAPS.size
+                mip_offs = [current_mipmap_offset]
+                for i in mipmaps:
+                    current_mipmap_offset += len(i.data)
+                    if i != mipmaps[3]:
+                        mip_offs.append(current_mipmap_offset)
+                tex: MipTex = MipTex(name.encode(), img.width, img.height, mip_offs, mipmaps)
+                dir_offs += tex.size_in_wad
+                entry: Entry = Entry(current_entry_offset, current_mipmap_offset, current_mipmap_offset, 'D', 0, name.encode())
+                current_entry_offset += current_mipmap_offset
                 new_wad.entries.append(entry)
                 new_wad.textures.append(tex)
 
-        new_wad.wad_id = id
+        new_wad.wad_id = b'WAD2'
         new_wad.dir_offset = dir_offs
         return new_wad
 
@@ -75,8 +80,7 @@ class WAD:
     def from_wad_file(path: Path | str):
         new_wad = WAD()
         with open(path, 'rb') as f:
-            header = f.read(12)
-            id, numentries, dir_offs = WAD.STRUCT_HEADER.unpack(header)
+            id, numentries, dir_offs = WAD.STRUCT_HEADER.unpack(f.read(WAD.STRUCT_HEADER.size))
             new_wad.wad_id = id
             new_wad.dir_offset = dir_offs
             if id != b'WAD2':
@@ -85,12 +89,12 @@ class WAD:
             f.seek(dir_offs)
             for _ in range(numentries):
                 original_pos = f.tell()
-                lump = f.read(32)
+                lump = f.read(Entry.STRUCT.size)
 
                 # get Entry data
                 entry = Entry.from_lump(lump)
-                print('entry', entry.name)
                 new_wad.entries.append(entry)
+
                 # get texture data
                 f.seek(entry.offset)
                 texture_name = f.read(16)  # '16s'
@@ -108,9 +112,19 @@ class WAD:
 
                 new_tex = MipTex(texture_name, width, height, mip_offsets, mipmaps)
                 new_wad.textures.append(new_tex)
-                f.seek(original_pos + 32)
+                f.seek(original_pos + Entry.STRUCT.size)
 
         return new_wad
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, WAD):
+            checks = [
+                self.wad_id == value.wad_id,
+                self.dir_offset == value.dir_offset,
+                self.textures == value.textures,
+            ]
+            return all(checks)
+        return False
 
 
 class Entry:
@@ -182,11 +196,24 @@ class MipMap:
         return img
 
     def __str__(self) -> str:
-        return f'({self.width}, {self.height})'
+        return f'({self.width}, {self.height}), {len(self.data)}'
+
+    # def __repr__(self) -> str:
+    #     return f'MipMap(width={self.width}, height={self.height}, data={self.data})'
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, MipMap):
+            checks = [
+                self.width == value.width,
+                self.height == value.height,
+                self.data == value.data
+            ]
+            return all(checks)
+        return False
 
 
 class MipTex:
-    # STRUCT = struct.Struct('16sII4I') # needs to include the mipmaps...
+    STRUCT_NO_MIPMAPS = struct.Struct('16sII4I')
 
     def __init__(self, raw_name: bytes, width: int, height: int, mip_offsets: list[int] | tuple, mipmaps: list[MipMap]):
         self.raw_name = raw_name  # max 16 characters
@@ -207,16 +234,28 @@ class MipTex:
         return self.raw_name.split(b'\0', 1)[0].decode()
 
     @property
-    def size(self):
-        return 40 + sum([m.height * m.width for m in self.mipmaps])
+    def size_in_wad(self):
+        return MipTex.STRUCT_NO_MIPMAPS.size + sum([m.height * m.width for m in self.mipmaps])
 
-    @staticmethod
-    def from_lump(lump: bytes):
-        return
+    # @staticmethod
+    # def from_lump(lump: bytes):
+    #     return
 
-    # @property
-    # def as_bytes(self) -> bytes:
-    #     return self.STRUCT.pack(self.name, self.width, self.height, self.mip_offsets)
+    @property
+    def to_bytes(self) -> bytes:
+        return self.STRUCT_NO_MIPMAPS.pack(self.name, self.width, self.height, *self.mip_offsets)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, MipTex):
+            checks = [
+                self.name == value.name,
+                self.width == value.width,
+                self.height == value.height,
+                list(self.mip_offsets) == list(value.mip_offsets),
+                self.mipmaps == value.mipmaps,
+            ]
+            return all(checks)
+        return False
 
 
 if __name__ == '__main__':
@@ -227,21 +266,15 @@ if __name__ == '__main__':
     wadfile = WAD.from_wad_file(r"I:\Quake\Dev\wad\rabbit_june.wad")  # 424 bytes
 
     print('####### wad for loop ##########')
-    for w in [wadfolder, wadfile]:
-        print('-----')
+    for n, w in [('folder', wadfolder), ('wad', wadfile)]:
+        w: WAD = w
+        print('-----', n)
         print(f'dir_offs: {w.dir_offset} - entries: {len(w.entries)} - textures: {len(w.textures)}')
         print('  entries:')
         for e in w.entries:
-            print(f'    - {e.name} -',  'offs:', e.offset)
+            print(f'    - {e.name} -',  'offs:', e.offset, '- sizes:', e.disk_size, e.size)
         print('  textures:')
         for t in w.textures:
-            print(f'    - {t.name} -',  'wh:', t.width, t.height)
+            print(f'    - {t.name} -',  'wh:', t.width, t.height, '- mm_offs:', t.mip_offsets)
 
-    # ##########################################
-
-    # wj = WAD.from_wad_file(r"I:\Quake\Dev\wad\rabbit_june.wad")
-
-    # w = WAD.from_wad_file(r"I:\Quake\Dev\wad\rabbit_june.wad")
-    # w.textures[0].mipmaps[0].to_image()
-    # for x in w.textures:
-    #     print(x)
+    print(wadfile == wadfolder)
