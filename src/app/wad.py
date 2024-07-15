@@ -13,11 +13,12 @@ else:
 class WAD:
     STRUCT_HEADER = struct.Struct('4sll')
     wad_id: bytes  # ex: b'WAD2'
-    dir_offset: int = -1
 
-    def __init__(self):
+    def __init__(self, id=b'WAD2'):
         self.entries: list[Entry] = []
         self.textures: list[MipTex] = []
+        self.wad_id = id
+        self.dir_offset = self.STRUCT_HEADER.size
 
     @property
     def header_bytes(self) -> bytes:
@@ -35,15 +36,31 @@ class WAD:
         # buffer.extend(header)
         pass
 
-    @staticmethod
-    def from_images(images: list[Image.Image]):
+    def add_image(self, image: Image.Image, stem: str):
         pass
+
+    def add_file(self, path: Path):
+        # TODO i have to sleep, so work on this later...
+        # this def will += the dir_offset and stuff
+        # TODO also work on DRY DRY DRY !
+        name = path.stem
+        with Image.open(path) as img:
+            mipmaps: list[MipMap] = []
+            for i in range(4):
+                pass
+
+    @staticmethod
+    def from_images(images: list[Image.Image], names: list[str]):
+        new_wad = WAD()
+        for image, name in zip(images, names):
+            new_wad.add_image(image, name)
+        return new_wad
 
     @staticmethod
     def from_folder(folder: Path):
+        # TODO switch to using the add_file method :)
         new_wad = WAD()
         image_paths = [f for f in folder.rglob('*') if f.is_file()]
-        dir_offs = WAD.STRUCT_HEADER.size
 
         current_entry_offset = WAD.STRUCT_HEADER.size
         for path in image_paths:
@@ -66,14 +83,12 @@ class WAD:
                     if i != mipmaps[3]:
                         mip_offs.append(current_mipmap_offset)
                 tex: MipTex = MipTex(name.encode(), img.width, img.height, mip_offs, mipmaps)
-                dir_offs += tex.size_in_wad
+                new_wad.dir_offset += tex.size_in_wad
                 entry: Entry = Entry(current_entry_offset, current_mipmap_offset, current_mipmap_offset, 'D', 0, name.encode())
                 current_entry_offset += current_mipmap_offset
                 new_wad.entries.append(entry)
                 new_wad.textures.append(tex)
 
-        new_wad.wad_id = b'WAD2'
-        new_wad.dir_offset = dir_offs
         return new_wad
 
     @staticmethod
@@ -278,3 +293,7 @@ if __name__ == '__main__':
             print(f'    - {t.name} -',  'wh:', t.width, t.height, '- mm_offs:', t.mip_offsets)
 
     print(wadfile == wadfolder)
+
+    allfiles = [f for f in Path(r'I:\TEX\june').rglob('*')]
+    x = [Image.open(f) for f in allfiles]
+    wfi = WAD.from_images(x, [f.stem for f in allfiles])

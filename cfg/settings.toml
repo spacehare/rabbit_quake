@@ -29,7 +29,7 @@ engine_exes = [
 	'I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe',
 ]
 configs = 'I:\Quake\cfg'
-maps = 'I:\Quake\Dev\map'
+maps = 'I:\Quake\Dev\maps'
 
 [cfg_whitelist]
 'remobilize.cfg' = ['remobilize_test15']
@@ -121,7 +121,7 @@ folders = [
 ]
 
 [[template.copy]]
-files = ['assets\template.map', 'assets/todo.txt']
+files = ['assets\template.map', 'assets/todo.md']
 destination = '.'
 
 [ericw]

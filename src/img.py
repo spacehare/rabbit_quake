@@ -125,7 +125,7 @@ def wadpack():
 
 def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alpha_cutoff):
     with Image.open(img_path) as img:
-        name = out_img_folder / img_path.name
+        out_path = out_img_folder / img_path.name
 
         # alter image
         img = img.convert('RGBA')
@@ -144,17 +144,17 @@ def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alp
 
         # TODO i dont need to save BEFORE renaming, just do the operations on the stem and then save
         # alter image file path name
-        img.save(name)
+        img.save(out_path)
 
-        new_name = name
+        new_name = out_path
         if prefix:
             new_name = prepend(new_name, prefix)
         if is_img_quake_trans(img):
             print('TRANS!!!!!!!')
-            # TODO prepend_trans isnt working :( :(
+            # FIXME prepend_trans isnt working :( :(
             new_name = prepend_trans(new_name, img)
         new_name = pad_zeroes_in_stem_int(new_name, zeroes)
-        return name.rename(new_name)
+        return out_path.rename(new_name)
 
 
 if __name__ == '__main__':

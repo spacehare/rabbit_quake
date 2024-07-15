@@ -55,9 +55,8 @@ def delete():
 
 def if_tb_open(func):
     def wrapper(*args):
-        if a.win_is_active(TB_AHK_TITLE):
-            if callable(func):
-                func(*args)
+        if a.win_is_active(TB_AHK_TITLE) and callable(func):
+            func(*args)
         else:
             print(f'attempted to run {func.__name__}, but trenchbroom was not the active window')
     return wrapper

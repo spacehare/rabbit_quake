@@ -6,8 +6,10 @@ from datetime import datetime, timezone
 from app.bcolors import *
 from app.settings import Settings
 
+# TODO read bsp and find dependencies
 
-def create_unique_suffix() -> str:
+
+def create_unique_slug() -> str:
     return datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
 
 
@@ -29,7 +31,7 @@ def zip(submission: Path, output_parent: Path, *, convert_markdown=False):
         print('could not find a BSP file, exiting')
         exit()
 
-    versioned_output: Path = output_parent / Path(f'{name}-{create_unique_suffix()}.zip')
+    versioned_output: Path = output_parent / Path(f'{name}-{create_unique_slug()}.zip')
     print('output file:', versioned_output)
     ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p, Settings.submit_whitelist)]
 
