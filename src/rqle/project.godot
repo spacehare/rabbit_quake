@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="rqle"
+run/main_scene="res://view_wad.tscn"
 config/features=PackedStringArray("4.2", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[debug]
+
+gdscript/warnings/integer_division=0
 
 [rendering]
 
