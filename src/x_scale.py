@@ -31,23 +31,54 @@ class Shape:
 
 
 if __name__ == '__main__':
-    czg12s_128u = Shape([*[32] * 4,
-                        *[RightTriangle(16, 32)] * 8])
-    czg12s_256u = Shape([*[64] * 4,
-                        *[RightTriangle(32, 64)] * 8])  # 1.118033988749895, 71.55417527999327
-    czg24s_512u = Shape([*[64] * 4,  # 1
-                        *[RightTriangle(16, 64)] * 8,  # 1.0307764064044151
-                        *[RightTriangle(32, 64)] * 8,  # 1.118033988749895
-                        *[RightTriangle(48, 48)] * 4,  # 1.0606601717798212
-                         ])
+    # czg8s_128u = Shape([*[RightTriangle(16, 48)] * 8])
+    # czg12s_128u = Shape([*[32] * 4,
+    #                     *[RightTriangle(16, 32)] * 8])
+    # czg12s_256u = Shape([*[64] * 4,
+    #                     *[RightTriangle(32, 64)] * 8])  # 1.118033988749895, 71.55417527999327
+    # czg24s_512u = Shape([*[64] * 4,  # 1
+    #                     *[RightTriangle(16, 64)] * 8,  # 1.0307764064044151
+    #                     *[RightTriangle(32, 64)] * 8,  # 1.118033988749895
+    #                     *[RightTriangle(48, 48)] * 4,  # 1.0606601717798212
+    #                      ])
 
     def display(text, shape: Shape, width):
         print(text, len(shape.sides), 'x scale', shape.get_x_scale(width), f'div: {width}', sep='\t')
 
-    display('czg12s_128u', czg12s_128u, 512)  # seamless
-    display('czg12s_256u', czg12s_256u, 1024)  # seamless
-    display('czg12s_256u', czg12s_256u, 64 * 13)  # closer to 1
-    display('czg24s_512u', czg24s_512u, 64 * 24)  # seamless, 1.059713
+    # display('czg8s_128u', czg8s_128u, 512)  # seamless
+    # display('czg12s_128u', czg12s_128u, 512)  # seamless
+    # display('czg12s_256u', czg12s_256u, 1024)  # seamless
+    # display('czg12s_256u', czg12s_256u, 64 * 13)  # closer to 1
+    # display('czg24s_512u', czg24s_512u, 64 * 24)  # seamless, 1.059713
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--texture-res', '-r', type=int)
+    parser.add_argument('--triangles', '-t', help='[a, b, number of sides]', nargs='+')
+    parser.add_argument('--flats', '-f', help='[a, number of sides]', nargs='+')
     args = parser.parse_args()
+    texture_res: int = args.texture_res
+
+    raw_tris = list(zip(*(iter(args.triangles or []),) * 3))
+    raw_flats = list(zip(*(iter(args.flats or []),) * 2))
+
+    triangles = []
+    flats = []
+
+    for tri in raw_tris:
+        a = int(tri[0])
+        b = int(tri[1])
+        num = int(tri[2])
+
+        for i in range(num):
+            triangles.append(RightTriangle(a, b))
+
+    for flat in raw_flats:
+        a = int(flat[0])
+        num = int(flat[1])
+
+        for i in range(num):
+            flats.append(a)
+
+    shape = Shape(triangles + flats)
+
+    display('->', shape, args.texture_res or 512)
