@@ -136,7 +136,7 @@ def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alp
         # img_trans.save(name.parent / (name.stem + '_TRANS' + name.suffix))
         # img_opaque.save(name.parent / (name.stem + '_OPAQUE' + name.suffix))
 
-        img_opaque = palettize(img_opaque, NO_BRIGHTS_IMG)
+        img_opaque = palettize(img_opaque, QUAKE_PALETTE_IMG)
         img_opaque = img_opaque.convert('RGBA')
 
         img = Image.alpha_composite(img_opaque, img_trans)
@@ -152,7 +152,7 @@ def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alp
         if is_img_quake_trans(img):
             print('TRANS!!!!!!!')
             # FIXME prepend_trans isnt working :( :(
-            new_name = prepend_trans(new_name, img)
+            # new_name = prepend_trans(new_name, img)
         new_name = pad_zeroes_in_stem_int(new_name, zeroes)
         return out_path.rename(new_name)
 
@@ -190,6 +190,5 @@ if __name__ == '__main__':
         #     fix(input, output)
         if input.is_dir():
             for file in get_files(input):
-                print(file)
-                finished = fix(file, output, prefix=args.prefix, zeroes=args.zeroes or 3, alpha_cutoff=254)
+                finished = fix(file, output, prefix=args.prefix, zeroes=args.zeroes or 3, alpha_cutoff=args.alpha_cutoff or 254)
                 print(Ind.mark(), finished)

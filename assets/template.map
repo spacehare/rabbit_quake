@@ -30,6 +30,9 @@
 "_wateralpha" "1"
 "_lavaalpha" "1"
 "_telealpha" "1"
+"_surflight_radiosity" "1"
+"fog_color" "255 255 255"
+"fog_density" "0"
 }
 {
 "classname" "func_group"

@@ -107,6 +107,7 @@ allowed = [
 	'maps/*.lit',
 	'gfx/env/**/*.tga',
 	'readme/*',
+	'progs/**/*.mdl',
 ]
 
 [template]
@@ -118,6 +119,7 @@ folders = [
 	'sound/{name}',
 	'progs/{name}',
 	'readme',
+	'build',
 ]
 
 [[template.copy]]
