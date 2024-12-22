@@ -38,7 +38,7 @@ def zip(submission: Path, output_parent: Path, *, convert_markdown=False):
     with zf.ZipFile(versioned_output, 'w', zf.ZIP_DEFLATED) as zip_file:
         for file in ok_files:
             if file.suffix == '.md' and convert_markdown:
-                html = markdown2.markdown_path(file)
+                html = markdown2.markdown_path(file, extras=['tables'])
                 zip_file.writestr(str(file.relative_to(submission).with_suffix('.html')), html)
 
             zip_file.write(file, file.relative_to(submission))
