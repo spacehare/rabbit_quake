@@ -3,8 +3,7 @@ import app.bcolors as bcolors
 
 CFG = Path('./cfg')
 TEMP = Path('./.temp').resolve()
-SETTINGS = Path(CFG / 'settings.toml')
-all_paths = [CFG, TEMP, SETTINGS]
+all_paths = [CFG, TEMP]
 
 for path in [p.absolute() for p in all_paths]:
     print(f'({__name__}) path found', bcolors.colorize(path, bcolors.bcolors.OKCYAN))
