@@ -45,9 +45,18 @@ if __name__ == '__main__':
     output_path: Path = args.output_path
     check: bool = args.check
 
+    # TODO rewrite
     for file in (input_path,) if input_path.is_file() else input_path.rglob('*'):
         ok = True
         if check:
             ok = ffmpeg_is_audio_file(file)
         if ok and file.is_file():
+            # dump everything into one folder
             ffmpeg_convert(file, output_path)
+
+            # preserve folder structure
+            # if input_path.is_dir():
+            #     idx = file.parts.index(input_path.name)
+            #     final = output_path / Path('/'.join(file.parts[idx:]))
+            #     final.parent.mkdir(parents=True, exist_ok=True)
+            #     ffmpeg_convert(file, final.parent)

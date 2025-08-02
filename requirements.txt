@@ -1,4 +1,4 @@
-# PyYAML==6.0.1
+PyYAML==6.0.1
 
 # tb
 ahk==1.7.0

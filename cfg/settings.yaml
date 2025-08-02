@@ -1,0 +1,113 @@
+name: rabbit
+keybinds:
+  compile: "!c"
+  launch: "!`"
+  iterate: "!v"
+  pc_close_loop: "!+v"
+paths:
+  trenchbroom: I:\Quake\TrenchBroom-Win64-v2024.1-Release
+  trenchbroom_preferences: C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json
+  ericw: I:\Quake\ericw
+  engine_exes:
+    - I:\Quake\Game\quakespasm-0.95.0_win64\quakespasm.exe
+    - I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe
+  configs: I:\Quake\cfg
+  maps: I:\Quake\Dev\maps
+cfg_whitelist:
+  remobilize.cfg:
+    - remobilize_test15
+jampack:
+  folder_to_pak: pakme
+  dependencies:
+    - value_patterns:
+        - "*.wav"
+      destination: sound
+    - value_patterns:
+        - "*.mdl"
+    - keys:
+        - sky
+      stem_append: "*.tga"
+      destination: gfx/env
+    - classnames:
+        - misc_changemusic
+        - worldspawn
+      keys:
+        - sounds
+      stem_prepend: track
+      destination: music
+  allow:
+    - patterns:
+        - descript.ion
+        - "*.def"
+        - "*.fgd"
+        - "*.json"
+        - "*.pak"
+        - "*.dat"
+        - "*.rc"
+      destination: .
+    - patterns:
+        - "*.map"
+      except_patterns:
+        - autosave/*.map
+      except_regexs:
+        - autosave..+\.\d+\.map
+      destination: mapsrc
+    - patterns:
+        - "*.bsp"
+        - "*.lit"
+      destination: maps
+    - patterns:
+        - "*.txt"
+        - "*.html"
+        - "*.md"
+        - readme/*
+      destination: readme
+submit:
+  allowed:
+    - mapsrc/*.map
+    - sound/**/*.wav
+    - music/*
+    - track*.*
+    - maps/*.bsp
+    - maps/*.lit
+    - gfx/env/*.tga
+    - gfx/env/**/*.tga
+    - readme/*
+    - progs/**/*.mdl
+template:
+  folders:
+    - maps
+    - mapsrc
+    - music
+    - gfx/env/{name}
+    - sound/{name}
+    - progs/{name}
+    - readme
+    - build
+  copy:
+    - files:
+        - assets\template.map
+        - assets/todo.md
+      destination: .
+ericw:
+  bsp: maps
+  src: mapsrc
+  profiles:
+    - name: dev
+      qbsp:
+        - -bsp2
+        - -verbose
+      vis:
+        - -fast
+        - -vv
+      light:
+        - -dirtdebug
+    - name: submit
+      qbsp:
+        - -leaktest
+        - -bsp2
+        - -splitturb
+      vis:
+        - -noambient
+      light:
+        - -extra4
