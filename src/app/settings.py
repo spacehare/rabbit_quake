@@ -1,16 +1,24 @@
 import tomllib
+import yaml
 import re
-import app.paths as paths
 from pathlib import Path
 from app.bcolors import *
 from app.parse import TBObject
 
 
-def get_contents(file_path: Path):
-    return tomllib.loads(file_path.read_text())
+def get_cfg_file_contents():
+    possible_cfgs = Path('cfg/').glob('settings.*')
+    file_path: Path = (*possible_cfgs,)[0]
+    print('found settings file at %s' % file_path)
+    if file_path.suffix == '.toml':
+        return tomllib.loads(file_path.read_text())
+    elif file_path.suffix == '.yaml':
+        return yaml.safe_load(file_path.open())
+
+    exit()
 
 
-_contents: dict = get_contents(paths.SETTINGS)
+_contents: dict = get_cfg_file_contents()
 
 banned_chars = re.compile(r'[<>:"\\\/|?*]')
 

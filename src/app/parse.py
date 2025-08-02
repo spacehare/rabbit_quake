@@ -136,14 +136,24 @@ class Plane(QProp):
 
     @staticmethod
     def loads(string: str):
-        searched = r_plane.finditer(string)
-        group_list = [re_match.group() for re_match in searched]
-        numbers = [float(item) for idx, item in enumerate(group_list) if idx != 9]
-        p_tex = group_list[9]
-        p_points = Points(Point(*numbers[0:3]), Point(*numbers[3:6]), Point(*numbers[6:9]))
-        p_uv = UV(UvPoint(Point(*numbers[9:12]), numbers[12], numbers[18]), UvPoint(Point(*numbers[13:16]), numbers[16], numbers[19]))
+        return Plane.deconstruct_line(string)
 
-        return Plane(p_points, p_tex, p_uv, numbers[17])
+    @staticmethod
+    def deconstruct_line(line: str):
+        items = line.split()
+        p_points = Points(
+            Point(*items[1:4]),
+            Point(*items[6:9]),
+            Point(*items[11:14]))
+        p_tex = items[15]
+        p_uv = UV(UvPoint(Point(*items[17:20]), items[20], items[29]),
+                  UvPoint(Point(*items[23:26]), items[26], items[30]))
+        p_rotation = items[28]
+        return Plane(
+            points=p_points,
+            texture_name=p_tex,
+            uv=p_uv,
+            rotation=p_rotation)
 
 
 class Brush(QProp):

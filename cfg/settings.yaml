@@ -4,6 +4,11 @@ keybinds:
   launch: "!`"
   iterate: "!v"
   pc_close_loop: "!+v"
+
+pp:
+  prefix_general: "@"
+  prefix_variable: "$"
+
 paths:
   trenchbroom: I:\Quake\TrenchBroom-Win64-v2024.1-Release
   trenchbroom_preferences: C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json
@@ -13,9 +18,11 @@ paths:
     - I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe
   configs: I:\Quake\cfg
   maps: I:\Quake\Dev\maps
+
 cfg_whitelist:
   remobilize.cfg:
     - remobilize_test15
+
 jampack:
   folder_to_pak: pakme
   dependencies:
@@ -62,6 +69,7 @@ jampack:
         - "*.md"
         - readme/*
       destination: readme
+
 submit:
   allowed:
     - mapsrc/*.map
@@ -74,6 +82,7 @@ submit:
     - gfx/env/**/*.tga
     - readme/*
     - progs/**/*.mdl
+
 template:
   folders:
     - maps
@@ -89,6 +98,7 @@ template:
         - assets\template.map
         - assets/todo.md
       destination: .
+
 ericw:
   bsp: maps
   src: mapsrc
