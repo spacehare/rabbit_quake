@@ -1,13 +1,19 @@
 from pathlib import Path
 import re
+import argparse
 
-file_path = Path(r"I:\Quake\Dev\maps\maps\mcj_rabbit\mcj_rabbit.map")
-txt = file_path.read_text(encoding='utf-8')
-r = re.compile(r"[^\W]+(?= \[)")
+PATTERN_TEXTURE = re.compile(r".+\) (.+?) \[")
 
-matches = r.findall(txt)
 
-unique = sorted(set(matches))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('map', type=Path, help='the full path of the target map file')
+    args = parser.parse_args()
+    file: Path = args.map
 
-for item in unique:
-    print(item)
+    matches = PATTERN_TEXTURE.findall(file.read_text(encoding='utf-8'))
+
+    unique = sorted(set(matches))
+
+    for item in unique:
+        print(item)
