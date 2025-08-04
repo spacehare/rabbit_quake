@@ -11,13 +11,16 @@ import argparse
 # autoclip illusionaries with like a "@clip 1" KV or something
 # instanced vars within groups
 
-FILENAME = 'pp.yaml'
+# todo: tutorialize or automate BAT file
+# prefer an absolute path; pass the BAT to TB
+# python "I:\rabbit_quake\src\pp.py" %1 %2
+
 PREFIX_GENERAL_DEFAULT = '@'
 PREFIX_VARIABLE_DEFAULT = '$'
 
 
 @dataclass
-class PP:
+class PPConfig:
     version: int = -1
     variables = {}
     '''key-value pairs to find-and-replace'''
@@ -28,13 +31,13 @@ class PP:
     def loads(yaml_path: Path):
         loaded: dict = yaml.safe_load(yaml_path.open())
         print(loaded)
-        new_pp = PP()
+        new_pp = PPConfig()
         new_pp.version = loaded['version']
         new_pp.variables = loaded.get('variables')
         return new_pp
 
 
-def find_and_replace(map_string: str, pp_cfg: PP):
+def find_and_replace(map_string: str, pp_cfg: PPConfig):
     new_str = map_string
     for kv in pp_cfg.variables.items():
         print(kv[0], kv[1], sep=' = ')
@@ -45,17 +48,19 @@ def find_and_replace(map_string: str, pp_cfg: PP):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('map', type=Path,
-                        help='the original map file')
-    parser.add_argument('output_dir', type=Path,
-                        help='where to put the new processed map file')
+                        help='the full path of the target map file')
+    parser.add_argument('output', type=Path,
+                        help='the full path of the to-be-created file')
+    parser.add_argument('cfg_path', type=Path, help='the full path of the YAML config')
     args = parser.parse_args()
 
     q_map_path: Path = args.map
-    q_dir_path: Path = args.output_dir
-    new_map_path = q_dir_path / q_map_path.name
+    q_output: Path = args.output
+    q_cfg: Path = args.cfg_path
+    new_map_path = q_output
     print(new_map_path)
 
-    cfg: PP = PP.loads(q_map_path.parent / FILENAME)
+    cfg: PPConfig = PPConfig.loads(q_cfg)
     map_string = q_map_path.read_text()
 
     processed_map_string = find_and_replace(map_string, cfg)
