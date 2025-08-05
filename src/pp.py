@@ -1,22 +1,28 @@
 '''preprocessor / postprocessor'''
 
 from app.parse import parse, TBObject
+from app.bcolors import colorize, bcolors
 from dataclasses import dataclass
 import yaml
 from pathlib import Path
 import argparse
+# import app.parse as p
+# p.verbose = True
 
 # TODO
 # variables as KV pairs ex: $blue_light = 0 50 150
 # autoclip illusionaries with like a "@clip 1" KV or something
 # instanced vars within groups
 
-# todo: tutorialize or automate BAT file
-# prefer an absolute path; pass the BAT to TB
-# python "I:\rabbit_quake\src\pp.py" %1 %2
 
-PREFIX_GENERAL_DEFAULT = '@'
-PREFIX_VARIABLE_DEFAULT = '$'
+CHAR_GENERAL_DEFAULT = '@'
+CHAR_VAR_IN_DEFAULT = '${'
+CHAR_VAR_OUT_DEFAULT = '}'
+CHAR_DICT_DEFAULT = {
+    'general': CHAR_GENERAL_DEFAULT,
+    'variable_in': CHAR_VAR_IN_DEFAULT,
+    'variable_out': CHAR_VAR_OUT_DEFAULT
+}
 
 
 @dataclass
@@ -24,8 +30,9 @@ class PPConfig:
     version: int = -1
     variables = {}
     '''key-value pairs to find-and-replace'''
-    prefix_general: str = PREFIX_GENERAL_DEFAULT
-    prefix_variable: str = PREFIX_VARIABLE_DEFAULT
+    char_general: str = CHAR_GENERAL_DEFAULT
+    char_variable_in: str = CHAR_VAR_IN_DEFAULT
+    char_variable_out: str = CHAR_VAR_OUT_DEFAULT
 
     @staticmethod
     def loads(yaml_path: Path):
@@ -34,14 +41,21 @@ class PPConfig:
         new_pp = PPConfig()
         new_pp.version = loaded['version']
         new_pp.variables = loaded.get('variables')
+        prefix: dict = loaded.get('prefix', CHAR_DICT_DEFAULT)
+        new_pp.char_general = prefix.get('general', CHAR_GENERAL_DEFAULT)
+        new_pp.char_variable_in = prefix.get('variable_in', CHAR_VAR_IN_DEFAULT)
+        new_pp.char_variable_out = prefix.get('variable_out', CHAR_VAR_OUT_DEFAULT)
         return new_pp
 
 
 def find_and_replace(map_string: str, pp_cfg: PPConfig):
+    # a regex pattern like r"%.+?%" could work, but this is simpler i think
     new_str = map_string
+    print('== FIND AND REPLACE VARIABLES ==')
     for kv in pp_cfg.variables.items():
-        print(kv[0], kv[1], sep=' = ')
-        new_str = new_str.replace(pp_cfg.prefix_variable + kv[0], kv[1])
+        variable_sandwich = f'{pp_cfg.char_variable_in}{kv[0]}{pp_cfg.char_variable_out}'
+        new_str = new_str.replace(variable_sandwich, kv[1])
+        print(variable_sandwich, colorize(kv[1], bcolors.OKCYAN), sep=' = ')
     return new_str
 
 
@@ -63,7 +77,12 @@ if __name__ == '__main__':
     cfg: PPConfig = PPConfig.loads(q_cfg)
     map_string = q_map_path.read_text()
 
-    processed_map_string = find_and_replace(map_string, cfg)
+    quake_map = parse(map_string)
+    for o in quake_map:
+        print('--->', o)
 
-    new_map_path.touch()
-    new_map_path.write_text(processed_map_string)
+    if cfg.variables:
+        map_string = find_and_replace(map_string, cfg)
+
+        new_map_path.touch()
+        new_map_path.write_text(map_string)
