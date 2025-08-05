@@ -14,6 +14,12 @@ import argparse
 # autoclip illusionaries with like a "@clip 1" KV or something
 # instanced vars within groups
 
+# inspired by...
+# MESS
+# see: https://developer.valvesoftware.com/wiki/MESS_(Macro_Entity_Scripting_System)
+# see: https://pwitvoet.github.io/mess/
+# see: https://github.com/pwitvoet/mess
+
 
 CHAR_GENERAL_DEFAULT = '@'
 CHAR_VAR_IN_DEFAULT = '${'
@@ -21,7 +27,7 @@ CHAR_VAR_OUT_DEFAULT = '}'
 CHAR_DICT_DEFAULT = {
     'general': CHAR_GENERAL_DEFAULT,
     'variable_in': CHAR_VAR_IN_DEFAULT,
-    'variable_out': CHAR_VAR_OUT_DEFAULT
+    'variable_out': CHAR_VAR_OUT_DEFAULT,
 }
 
 
@@ -37,7 +43,6 @@ class PPConfig:
     @staticmethod
     def loads(yaml_path: Path):
         loaded: dict = yaml.safe_load(yaml_path.open())
-        print(loaded)
         new_pp = PPConfig()
         new_pp.version = loaded['version']
         new_pp.variables = loaded.get('variables')
@@ -51,11 +56,11 @@ class PPConfig:
 def find_and_replace(map_string: str, pp_cfg: PPConfig):
     # a regex pattern like r"%.+?%" could work, but this is simpler i think
     new_str = map_string
-    print('== FIND AND REPLACE VARIABLES ==')
+    print(colorize('FIND AND REPLACE VARIABLES', bcolors.UNDERLINE))
     for kv in pp_cfg.variables.items():
         variable_sandwich = f'{pp_cfg.char_variable_in}{kv[0]}{pp_cfg.char_variable_out}'
         new_str = new_str.replace(variable_sandwich, kv[1])
-        print(variable_sandwich, colorize(kv[1], bcolors.OKCYAN), sep=' = ')
+        print(f'{variable_sandwich:<15} {colorize(kv[1], bcolors.OKCYAN)}')
     return new_str
 
 
@@ -79,7 +84,7 @@ if __name__ == '__main__':
 
     quake_map = parse(map_string)
     for o in quake_map:
-        print('--->', o)
+        print('--->', colorize(o, bcolors.OKBLUE))
 
     if cfg.variables:
         map_string = find_and_replace(map_string, cfg)
