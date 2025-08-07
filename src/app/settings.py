@@ -2,8 +2,8 @@ import tomllib
 import yaml
 import re
 from pathlib import Path
-from app.bcolors import *
-from app.parse import TBObject
+from src.app.bcolors import *
+from src.app.parse import TBObject
 
 
 def get_cfg_file_contents():

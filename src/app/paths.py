@@ -1,5 +1,5 @@
 from pathlib import Path
-import app.bcolors as bcolors
+import src.app.bcolors as bcolors
 
 CFG = Path('./cfg')
 TEMP = Path('./.temp').resolve()

@@ -4,10 +4,7 @@
 import struct
 from pathlib import Path
 from PIL import Image
-if __name__ == '__main__':
-    import palette as pal
-else:
-    import app.palette as pal
+import src.app.palette as pal
 
 
 class WAD:

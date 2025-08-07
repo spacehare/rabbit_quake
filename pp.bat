@@ -1,1 +1,2 @@
-python %~dp0\src\pp.py %1 %2 %3
+cd %~dp0
+py -m src.pp %1 %2 %3

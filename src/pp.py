@@ -5,8 +5,8 @@ import argparse
 from pathlib import Path
 import yaml
 from dataclasses import dataclass
-from app.bcolors import colorize, bcolors
-from app.parse import parse_whole_map, Brush, Entity
+from src.app.bcolors import colorize, bcolors
+from src.app.parse import parse_whole_map, Brush, Entity
 
 # inspired by...
 # MESS

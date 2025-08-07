@@ -5,7 +5,7 @@
 import re
 from typing import Any
 from dataclasses import dataclass, field
-import app.bcolors as bcolors
+import src.app.bcolors as bcolors
 
 verbose = False
 
@@ -189,7 +189,6 @@ class Entity(QProp):
     @staticmethod
     def loads(string: str):
         kv: KV = KV.loads(string)
-        print('loads', kv.kvdict)
         brushes_in_ent = PATTERN_BRUSHES_IN_ENT.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
         return Entity(kv=kv, brushes=brushes)

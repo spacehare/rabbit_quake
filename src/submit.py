@@ -3,10 +3,11 @@ import markdown2
 import zipfile as zf
 from pathlib import Path
 from datetime import datetime, timezone
-from app.bcolors import *
-from app.settings import Settings
+from src.app.bcolors import *
+from src.app.settings import Settings
 
 # TODO read bsp and find dependencies
+# TODO allow 7z output
 
 
 def create_unique_slug() -> str:
