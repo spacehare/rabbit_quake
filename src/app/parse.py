@@ -1,13 +1,13 @@
+'''parse Valve220 quake .map files'''
+# https://quakewiki.org/wiki/Quake_Map_Format
+# https://developer.valvesoftware.com/wiki/MAP_(file_format)
+
 import re
 from typing import Any
-from collections import namedtuple
 from dataclasses import dataclass, field
-if __name__ == '__main__':
-    import bcolors
-else:
-    import app.bcolors as bcolors
+import app.bcolors as bcolors
 
-verbose = True
+verbose = False
 
 
 def verbose_print(*args):
@@ -15,33 +15,18 @@ def verbose_print(*args):
         print(*args)
 
 
-'''parse Valve220 quake .map files'''
-
-# TODO make this not terrible
-
-r_num = re.compile(r'-?\b\d+\.?\d*(?:e-\d+)?\b')
-r_plane = re.compile(rf'(?P<digit>{r_num.pattern})|(?P<texname>(?<=\) )\b.+?(?= \[))')
-
-r_num_in_key = re.compile(r'(-?\d+\.?\d*(?:e-\d+)?)')
-r_tex_name = re.compile(r'(?!\()(?<=\) )(.+?)(?= \[)')
-r_plane_in_brush = re.compile(r'\([^{}\n]+[^\n]$', re.MULTILINE)
-# r_plane_old = re.compile(r'(?P<digit>(-?\b\d+\.?\d*(?:e-\d+)?)\b)|(?P<texname>(?<=\) )\b.+?(?= \[))')
-r_keyval = re.compile(r'\"(.+)\" \"(.+)\"', re.MULTILINE)
-r_keyval_alt = r'([^\"]+)\"\s*\"([^\"]*)'
-r_brushes_in_ent = re.compile(r'(?<=\{\n)[^\{]+(?=\n\})')
-
-brace_pattern = re.compile(r'({|})')
-key_value_pattern = re.compile(r'([^"]+)"\s*"([^"]*)')
+PATTERN_NUMBER = re.compile(r'-?\b\d+\.?\d*(?:e-\d+)?\b')
+PATTERN_NUMBER_IN_KEY = re.compile(r'(-?\d+\.?\d*(?:e-\d+)?)')
+PATTERN_PLANE_IN_BRUSH = re.compile(r'\([^{}\n]+[^\n]$', re.MULTILINE)
+PATTERN_KEY_VALUE_LINE = re.compile(r'^"(.*)" "(.*)"$', re.MULTILINE)
+PATTERN_BRUSHES_IN_ENT = re.compile(r'(?<=\{\n)[^\{]+(?=\n\})')
 
 
 def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | None:
-    m = r_num_in_key.findall(string)
+    m = PATTERN_NUMBER_IN_KEY.findall(string)
     if m:
         out = m[place]
         return int(out) if force_int else float(out)
-
-
-Vertex = namedtuple('Vertex', ['x', 'y', 'z'])
 
 
 class QProp:
@@ -77,7 +62,7 @@ class Point(QProp):
 
     @staticmethod
     def loads(string: str):
-        points = r_num.findall(string)
+        points = PATTERN_NUMBER.findall(string)
         if len(points) == 3:
             return (Point(*points))
 
@@ -158,7 +143,7 @@ class Brush(QProp):
 
     @staticmethod
     def loads(string: str):
-        plane_strings: list[str] = r_plane_in_brush.findall(string)
+        plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
         planes: list[Plane] = [possible_plane for ps in plane_strings if (possible_plane := Plane.loads(ps))]
         if planes:
             return Brush(planes)
@@ -179,7 +164,7 @@ class KV(QProp):
 
     @staticmethod
     def loads(string: str):
-        found = r_keyval.finditer(string)
+        found = PATTERN_KEY_VALUE_LINE.finditer(string)
         kvdict = {}
         for m in found:
             groups = m.groups()
@@ -205,7 +190,7 @@ class Entity(QProp):
     def loads(string: str):
         kv: KV = KV.loads(string)
         print('loads', kv.kvdict)
-        brushes_in_ent = r_brushes_in_ent.findall(string)
+        brushes_in_ent = PATTERN_BRUSHES_IN_ENT.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
         return Entity(kv=kv, brushes=brushes)
 
@@ -236,6 +221,7 @@ class Entity(QProp):
                 self.kv.kvdict[key] = txt.replace(PLACEHOLDER, str(num))
 
 
+# used in tb.py
 class QuakeMap(QProp):
     def __init__(self, kv: KV, brushes: list[Brush] | None, entities: list[Entity] | None):
         self.kv = kv
@@ -280,9 +266,6 @@ class TBObject:
 
 
 def parse(text: str) -> list[TBObject]:
-    # TODO: rewrite this into a new function.
-    # -> the expectation in a MAP file is that there will be many root-level entities and then brushes inside of those.
-    # -> so i can check "depth" or something like that to determine if it's a brush or an entity
     LINES = text.splitlines()
     root_level_objects: list[TBObject] = []
     stack = []
@@ -312,7 +295,7 @@ def parse(text: str) -> list[TBObject]:
 
             case '"':
                 if current:
-                    for k, v in key_value_pattern.findall(line):
+                    for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
                         current.kv[k] = v
 
             case '(':
@@ -326,9 +309,6 @@ def parse(text: str) -> list[TBObject]:
     return root_level_objects
 
 
-type Obj = Entity | Brush | None
-
-
 def parse_whole_map(text: str) -> list[Entity]:
     LINES = text.splitlines()
     root_entities: list[Entity] = []
@@ -339,7 +319,7 @@ def parse_whole_map(text: str) -> list[Entity]:
     count = 0
     for line in LINES:
         count += 1
-        verbose_print('__', f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE))
+        verbose_print(' ', f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE))
         match line[:1]:
             # entering an object
             case '{':
@@ -365,14 +345,11 @@ def parse_whole_map(text: str) -> list[Entity]:
 
             case '"':
                 if current_ent:
-                    for k, v in key_value_pattern.findall(line):
+                    for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
                         current_ent.kv.kvdict[k] = v
 
             case '(':
                 if current_brush:
                     current_brush.planes.append(Plane.deconstruct_line(line))
 
-    print(f'PARSED {len(root_entities)} entities with parse2()')
-    for r in root_entities:
-        print(r.classname, len(r.brushes))
     return root_entities
