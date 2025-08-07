@@ -20,13 +20,16 @@ TEST_SUBMIT_PATH: Path = Path('./assets/submit')
 class TestSubmit(unittest.TestCase):
     def setUp(self):
         self.ex_map = TEST_SUBMIT_PATH
-        self.ex_zip = submit.compress(self.ex_map, paths.TEMP)
+        self.zip = submit.compress(self.ex_map, paths.TEMP, mode=submit.Mode.ZIP)
+        self.seven_zip = submit.compress(self.ex_map, paths.TEMP, mode=submit.Mode.SEVEN)
 
     def tearDown(self) -> None:
-        self.ex_zip.unlink()
+        self.zip.unlink()
+        self.seven_zip.unlink()
 
     def test_submit(self):
-        self.assertTrue(self.ex_zip.exists())
+        self.assertTrue(self.zip.exists())
+        self.assertTrue(self.seven_zip.exists())
 
 
 class TestGenerate(unittest.TestCase):
