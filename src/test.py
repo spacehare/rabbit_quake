@@ -14,12 +14,13 @@ from pathlib import Path
 # python -m unittest src.test.TestSubmit
 
 TEST_MAP_PATH: Path = Path('./assets/test.map')
+TEST_SUBMIT_PATH: Path = Path('./assets/submit')
 
 
 class TestSubmit(unittest.TestCase):
     def setUp(self):
-        self.ex_map = TEST_MAP_PATH
-        self.ex_zip = submit.zip(self.ex_map, paths.TEMP)
+        self.ex_map = TEST_SUBMIT_PATH
+        self.ex_zip = submit.compress(self.ex_map, paths.TEMP)
 
     def tearDown(self) -> None:
         self.ex_zip.unlink()

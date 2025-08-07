@@ -26,7 +26,7 @@ def is_path_ok(path: Path, whitelist) -> bool:
     return allow
 
 
-def zip(submission: Path, output_parent: Path, *, convert_markdown=False):
+def compress(submission: Path, output_parent: Path, *, convert_markdown=False):
     name = [p for p in submission.rglob('*') if p.suffix == '.bsp'][0].stem
     if not name:
         print('could not find a BSP file, exiting')
@@ -61,4 +61,4 @@ if __name__ == '__main__':
 
     output_parent = args.output_dir or args.submission
 
-    zip(args.submission, output_parent, convert_markdown=args.md)
+    compress(args.submission, output_parent, convert_markdown=args.md)
