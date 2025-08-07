@@ -58,13 +58,14 @@ def find_and_replace(map_string: str, pp_cfg: PPConfig):
     return new_str
 
 
-def clip(ent: Entity, obj_list):
+def clip(ent: Entity):
     output_brushes: list[Brush] = []
     for brush in ent.brushes:
         clone = copy.deepcopy(brush)
         for l in clone.planes:
             l.texture_name = 'clip'
         output_brushes.append(clone)
+    return output_brushes
 
 
 if __name__ == '__main__':
@@ -87,18 +88,25 @@ if __name__ == '__main__':
     map_string = find_and_replace(map_string, cfg)
 
     ents: list[Entity] = parse_whole_map(map_string)
+    new_ents: list[Entity] = []
     new_str = ''
     for ent in ents:
         for key, value in ent.kv.kvdict.items():
             if key.startswith('@') and int(value) == 1:
                 if key == cfg.char_general + 'clip':
                     print(f'clipping {ent.classname}')
-                    clip(ent, ents)
+                    new_brushes = clip(ent)
+                    print(len(new_ents[0].brushes))
+                    new_ents[0].brushes.extend(new_brushes)
+                    print(len(new_ents[0].brushes))
                 if key == cfg.char_general + 'delete':
                     print(f'deleting {ent.classname}')
                     break
         else:
-            new_str += ent.dumps() + '\n'
+            new_ents.append(ent)
+
+    for ent in new_ents:
+        new_str += ent.dumps() + '\n'
 
     new_map_path.touch()
     new_map_path.write_text(new_str)
