@@ -13,8 +13,8 @@ from pathlib import Path
 # python -m unittest -h
 # python -m unittest src.test.TestSubmit
 
-TEST_MAP_PATH: Path = Path('./assets/test.map')
-TEST_SUBMIT_PATH: Path = Path('./assets/submit')
+TEST_MAP_PATH: Path = Path('./assets/tests/test.map')
+TEST_SUBMIT_PATH: Path = Path('./assets/tests/maps')
 
 
 class TestSubmit(unittest.TestCase):
