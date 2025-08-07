@@ -1,12 +1,13 @@
 import re
 from typing import Any
 from collections import namedtuple
+from dataclasses import dataclass, field
 if __name__ == '__main__':
-    verbose = True
     import bcolors
 else:
     import app.bcolors as bcolors
-    verbose = False
+
+verbose = True
 
 
 def verbose_print(*args):
@@ -127,14 +128,6 @@ class Plane(QProp):
         return f'( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}'
 
     @staticmethod
-    def _loads2(string: str):
-        numbers = r_num.findall(string)
-        p_points = Points(Point(*numbers[0:3]), Point(*numbers[3:6]), Point(*numbers[6:9]))
-        p_tex = r_tex_name.findall(string)[0]
-        p_uv = UV(UvPoint(Point(*numbers[9:12]), numbers[12], numbers[18]), UvPoint(Point(*numbers[13:16]), numbers[16], numbers[19]))
-        return Plane(p_points, p_tex, p_uv, numbers[17])
-
-    @staticmethod
     def loads(string: str):
         return Plane.deconstruct_line(string)
 
@@ -142,13 +135,13 @@ class Plane(QProp):
     def deconstruct_line(line: str):
         items = line.split()
         p_points = Points(
-            Point(*items[1:4]),
-            Point(*items[6:9]),
-            Point(*items[11:14]))
-        p_tex = items[15]
-        p_uv = UV(UvPoint(Point(*items[17:20]), items[20], items[29]),
-                  UvPoint(Point(*items[23:26]), items[26], items[30]))
-        p_rotation = items[28]
+            Point(*[float(i) for i in items[1:4]]),
+            Point(*[float(i) for i in items[6:9]]),
+            Point(*[float(i) for i in items[11:14]]))
+        p_tex: str = items[15]
+        p_uv = UV(UvPoint(Point(*[float(i) for i in items[17:20]]), float(items[20]), float(items[29])),
+                  UvPoint(Point(*[float(i) for i in items[23:26]]), float(items[26]), float(items[30])))
+        p_rotation = float(items[28])
         return Plane(
             points=p_points,
             texture_name=p_tex,
@@ -157,8 +150,8 @@ class Plane(QProp):
 
 
 class Brush(QProp):
-    def __init__(self, planes: list[Plane]):
-        self.planes = planes
+    def __init__(self, planes: list[Plane] = []):
+        self.planes: list[Plane] = planes or []
 
     def dumps(self):
         return '{\n' + '\n'.join(str(plane.dumps()) for plane in self.planes) + '\n}'
@@ -170,10 +163,13 @@ class Brush(QProp):
         if planes:
             return Brush(planes)
 
+    def __str__(self):
+        return f'brush with {len(self.planes)} planes'
 
+
+@dataclass
 class KV(QProp):
-    def __init__(self, kvdict: dict):
-        self.kvdict = kvdict
+    kvdict: dict[str, Any] = field(default_factory=dict)
 
     def __repr__(self):
         return str(self.kvdict)
@@ -191,15 +187,15 @@ class KV(QProp):
         return KV(kvdict)
 
 
+@dataclass
 class Entity(QProp):
-    def __init__(self, kv: KV, brushes: list[Brush] | None = None):
-        self.kv = kv
-        self.brushes = brushes
-        # self.children = children
+    brushes: list[Brush] = field(default_factory=list)
+    kv: KV = field(default_factory=KV)
 
     def dumps(self):
         out = '{\n'
-        out += self.kv.dumps()
+        if self.kv:
+            out += self.kv.dumps()
         if self.brushes:
             out += '\n'.join(brush.dumps() for brush in self.brushes)
         out += '\n}' if self.brushes else '}'
@@ -211,7 +207,7 @@ class Entity(QProp):
         print('loads', kv.kvdict)
         brushes_in_ent = r_brushes_in_ent.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
-        return Entity(kv, brushes)
+        return Entity(kv=kv, brushes=brushes)
 
     @property
     def classname(self):
@@ -277,17 +273,21 @@ class TBObject:
 
     @property
     def classname(self):
-        return self.kv.get('classname')
+        return self.kv.get('classname', 'Brush?')
 
-    def __repr__(self):
-        return f'{self.kv.get('classname')} ~ children: {len(self.children)}'
+    def __str__(self):
+        return f'{self.classname} ({len(self.children)})'
 
 
 def parse(text: str) -> list[TBObject]:
+    # TODO: rewrite this into a new function.
+    # -> the expectation in a MAP file is that there will be many root-level entities and then brushes inside of those.
+    # -> so i can check "depth" or something like that to determine if it's a brush or an entity
     LINES = text.splitlines()
     root_level_objects: list[TBObject] = []
     stack = []
-    current: TBObject | None = None
+    current = None
+
     for line in LINES:
         verbose_print('\t', bcolors.colorize(line, bcolors.bcolors.OKBLUE))
         match line[:1]:
@@ -317,9 +317,7 @@ def parse(text: str) -> list[TBObject]:
 
             case '(':
                 if current:
-                    m = r_plane.search(line)
-                    if m:
-                        current.planes.append(Plane.loads(m.string))
+                    current.planes.append(Plane.deconstruct_line(line))
 
             # case '/':
             #     if current:
@@ -328,38 +326,53 @@ def parse(text: str) -> list[TBObject]:
     return root_level_objects
 
 
-if __name__ == '__main__':
-    ex = '''
-// entity 0
-{
-"mapversion" "220"
-"wad" "I:/Quake/Dev/wad/prototype_1_3.wad;I:/Quake/Dev/wad/makkon_trim_guide.wad;I:/Quake/Dev/wad/makkon_tech.wad;I:/Quake/Dev/wad/makkon_industrial.wad;I:/Quake/Dev/wad/makkon_concrete.wad;I:/Quake/Game/quakespasm-0.95.0_win64/rm1.1/rm_mechanics.wad"
-"classname" "worldspawn"
-"_tb_def" "external:I:/Quake/Game/quakespasm-0.95.0_win64/remobilize_test15/remobilize.fgd"
-"message" "nascent myopia"
-"style" "1"
-"_wateralpha" ".4"
-"reset_items" "2"
-"_tb_mod" "remobilize_test15"
-"worldtype" "2"
-"_bounce" "1"
-"_bouncescale" "1"
-"_bouncecolorscale" "1"
-"light" "60"
-"_minlight_color" "255 237 255"
-"_surflightsubdivision" "8"
-// brush 0
-{
-( -640 128 160 ) ( -640 129 160 ) ( -640 128 161 ) 128_grey_1 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
-( -640 64 160 ) ( -640 64 161 ) ( -639 64 160 ) 128_grey_1 [ 1.0000000000000002 0 0 64 ] [ 0 0 -1.0000000000000002 0 ] 0 1 1
-( -640 128 160 ) ( -639 128 160 ) ( -640 129 160 ) 128_grey_1 [ 0 1.0000000000000002 0 0 ] [ -1.0000000000000002 0 0 -32 ] 0 1 1
-( -448 384 192 ) ( -448 385 192 ) ( -447 384 192 ) 128_grey_1 [ 0 1.0000000000000002 0 0 ] [ 1.0000000000000002 0 0 64 ] 0 1 1
-( -448 384 192 ) ( -447 384 192 ) ( -448 384 193 ) 128_grey_1 [ -1.0000000000000002 0 0 0 ] [ 0 0 -1.0000000000000002 0 ] 0 1 1
-( -272 384 192 ) ( -272 384 193 ) ( -272 385 192 ) 128_grey_1 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
-}
-}
+type Obj = Entity | Brush | None
 
-'''
 
-    o = parse(ex)
-    verbose_print(o)
+def parse_whole_map(text: str) -> list[Entity]:
+    LINES = text.splitlines()
+    root_entities: list[Entity] = []
+    current_ent: Entity | None = None
+    current_brush: Brush | None = None
+    depth = 0
+
+    count = 0
+    for line in LINES:
+        count += 1
+        verbose_print('__', f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE))
+        match line[:1]:
+            # entering an object
+            case '{':
+                depth += 1
+
+                if depth == 1:
+                    current_ent = Entity()
+                elif depth == 2:
+                    current_brush = Brush()
+
+            # exiting an object
+            case '}':
+                depth -= 1
+
+                if current_brush and current_ent:
+                    current_ent.brushes.append(current_brush)
+
+                if depth == 0 and current_ent:
+                    root_entities.append(current_ent)
+                    current_ent = None
+
+                current_brush = None
+
+            case '"':
+                if current_ent:
+                    for k, v in key_value_pattern.findall(line):
+                        current_ent.kv.kvdict[k] = v
+
+            case '(':
+                if current_brush:
+                    current_brush.planes.append(Plane.deconstruct_line(line))
+
+    print(f'PARSED {len(root_entities)} entities with parse2()')
+    for r in root_entities:
+        print(r.classname, len(r.brushes))
+    return root_entities

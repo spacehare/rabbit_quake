@@ -1,18 +1,12 @@
 '''preprocessor / postprocessor'''
 
-from app.parse import parse, TBObject
-from app.bcolors import colorize, bcolors
-from dataclasses import dataclass
-import yaml
-from pathlib import Path
+import copy
 import argparse
-# import app.parse as p
-# p.verbose = True
-
-# TODO
-# variables as KV pairs ex: $blue_light = 0 50 150
-# autoclip illusionaries with like a "@clip 1" KV or something
-# instanced vars within groups
+from pathlib import Path
+import yaml
+from dataclasses import dataclass
+from app.bcolors import colorize, bcolors
+from app.parse import parse_whole_map, Brush, Entity
 
 # inspired by...
 # MESS
@@ -56,12 +50,21 @@ class PPConfig:
 def find_and_replace(map_string: str, pp_cfg: PPConfig):
     # a regex pattern like r"%.+?%" could work, but this is simpler i think
     new_str = map_string
-    print(colorize('FIND AND REPLACE VARIABLES', bcolors.UNDERLINE))
-    for kv in pp_cfg.variables.items():
-        variable_sandwich = f'{pp_cfg.char_variable_in}{kv[0]}{pp_cfg.char_variable_out}'
-        new_str = new_str.replace(variable_sandwich, kv[1])
-        print(f'{variable_sandwich:<15} {colorize(kv[1], bcolors.OKCYAN)}')
+    print(colorize('FIND-AND-REPLACE VARIABLES', bcolors.UNDERLINE))
+    for key, value in pp_cfg.variables.items():
+        variable_sandwich = f'{pp_cfg.char_variable_in}{key}{pp_cfg.char_variable_out}'
+        new_str = new_str.replace(variable_sandwich, value)
+        print(f'{variable_sandwich:<15} {colorize(value, bcolors.OKCYAN)}')
     return new_str
+
+
+def clip(ent: Entity, obj_list):
+    output_brushes: list[Brush] = []
+    for brush in ent.brushes:
+        clone = copy.deepcopy(brush)
+        for l in clone.planes:
+            l.texture_name = 'clip'
+        output_brushes.append(clone)
 
 
 if __name__ == '__main__':
@@ -81,13 +84,21 @@ if __name__ == '__main__':
 
     cfg: PPConfig = PPConfig.loads(q_cfg)
     map_string = q_map_path.read_text()
+    map_string = find_and_replace(map_string, cfg)
 
-    quake_map = parse(map_string)
-    for o in quake_map:
-        print('--->', colorize(o, bcolors.OKBLUE))
+    ents: list[Entity] = parse_whole_map(map_string)
+    new_str = ''
+    for ent in ents:
+        for key, value in ent.kv.kvdict.items():
+            if key.startswith('@') and int(value) == 1:
+                if key == cfg.char_general + 'clip':
+                    print(f'clipping {ent.classname}')
+                    clip(ent, ents)
+                if key == cfg.char_general + 'delete':
+                    print(f'deleting {ent.classname}')
+                    break
+        else:
+            new_str += ent.dumps() + '\n'
 
-    if cfg.variables:
-        map_string = find_and_replace(map_string, cfg)
-
-        new_map_path.touch()
-        new_map_path.write_text(map_string)
+    new_map_path.touch()
+    new_map_path.write_text(new_str)
