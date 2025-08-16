@@ -1,4 +1,5 @@
 PyYAML==6.0.1
+beartype==0.21.0
 
 # tb
 ahk==1.7.0
