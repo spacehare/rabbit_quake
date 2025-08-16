@@ -25,3 +25,7 @@
 - [wadcleaver](https://www.slipseer.com/index.php?resources/wadcleaver.268/)
 - [Quake Web Tools](https://qssm.quakeone.com/tools/QuakeWebTools)
 - [q1tools](https://q1tools.github.io/)
+
+# recommendations
+
+- [ImageMagick](https://imagemagick.org/)
