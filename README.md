@@ -17,3 +17,11 @@
 - `wav.py` ⚠ requires [ffmpeg](https://ffmpeg.org/)
   - convert audio files to quake-compatible `.wav` files
   - if you have [chocolatey](https://chocolatey.org/): `choco install ffmpeg`
+
+# similar tools
+
+- [qpakman](https://github.com/lavenderdotpet/qpakman/releases)
+- [pectin](https://github.com/4LT/pectin)
+- [wadcleaver](https://www.slipseer.com/index.php?resources/wadcleaver.268/)
+- [Quake Web Tools](https://qssm.quakeone.com/tools/QuakeWebTools)
+- [q1tools](https://q1tools.github.io/)

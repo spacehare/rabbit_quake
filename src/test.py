@@ -5,6 +5,7 @@ import src.jamgen as jamgen
 import src.app.paths as paths
 import src.submit as submit
 import src.app.parse as parse
+import src.jampack as jampack
 from src.app.settings import Settings
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from pathlib import Path
 
 TEST_MAP_PATH: Path = Path('./assets/tests/test.map')
 TEST_SUBMIT_PATH: Path = Path('./assets/tests/maps')
+TEST_PACK_PATH: Path = Path('./assets/tests/pack')
 
 
 class TestSubmit(unittest.TestCase):
@@ -46,6 +48,11 @@ class TestGenerate(unittest.TestCase):
 class TestAutosave(unittest.TestCase):
     def test_autosave_get(self):
         self.assertIsNotNone(autosave.get_all_autosaves())
+
+
+class TestPack(unittest.TestCase):
+    def test_pack(self):
+        jampack.package_submissions
 
 
 class TestParser(unittest.TestCase):

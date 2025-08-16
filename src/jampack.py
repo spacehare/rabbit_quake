@@ -1,28 +1,28 @@
 from pathlib import Path
 import zipfile
 import py7zr
-import app.paths as paths
-import app.settings as settings
+import src.app.paths as paths
+import src.app.settings as settings
 import argparse
-from app.settings import Settings
-import app.bcolors as bcolors
+from src.app.settings import Settings
+import src.app.bcolors as bcolors
 import shutil
 import struct
-import app.parse as parse
-import app.bsp
-import app
+import src.app.parse as parse
+import src.app.bsp
+import src.app as app
 
 _whitelist_map = Settings.jampack_whitelist
 
 
 def get_dep_patterns(bsp_path: Path):
-    tb_objects = app.bsp.read_bsp(bsp_path)
+    bsp = app.bsp.read_bsp(bsp_path)
     filters = Settings.jampack_patterns
     dependency_patterns: list[tuple[str, Path | None]] = []
 
     for filter in filters:
-        for tb_object in tb_objects:
-            possible = filter.get_dependency_patterns(tb_object)
+        for ent in bsp.entities:
+            possible = filter.get_dependency_patterns(ent)
             if possible:
                 for same in possible:
                     dependency_patterns.append((same, filter.dest))
@@ -145,8 +145,8 @@ if __name__ == '__main__':
                         help='copy the files to their destinations within the output folder')
     args = parser.parse_args()
 
-    folder = args.folder
-    output = args.output
+    folder = Path(args.folder)
+    output = Path(args.output)
     copy = args.copy
 
     if folder == output:

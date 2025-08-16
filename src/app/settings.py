@@ -3,7 +3,7 @@ import yaml
 import re
 from pathlib import Path
 from src.app.bcolors import *
-from src.app.parse import TBObject
+from src.app.parse import Entity
 
 
 def get_cfg_file_contents():
@@ -79,7 +79,7 @@ class JampackDependencyPattern:
                  value_regexs: str | None = None,
                  stem_append: str | None = None,
                  stem_prepend: str | None = None,
-                 dest: Path | None = None
+                 dest: Path | str | None = None
                  ):
         # if no keys to filter, search every entity
         self.keys = keys
@@ -89,20 +89,20 @@ class JampackDependencyPattern:
         self.stem_prepend = stem_prepend
         self.value_regex = value_regexs
         self.classnames = classnames
-        self.dest = dest
+        self.dest = Path(dest) if dest else None
 
-    def get_dependency_patterns(self, tb_object: TBObject):
+    def get_dependency_patterns(self, ent: Entity):
         dependency_patterns: list[str] = []
         self.stem_append = self.stem_append or ''
         self.stem_prepend = self.stem_prepend or ''
 
         # dependencies will be found in the values of the key/value pairs
-        for k, v in tb_object.kv.items():
+        for k, v in ent.kv.kvdict.items():
             ok_keys = self.keys == None
             ok_value_patterns = self.value_patterns == None
 
             # classname
-            if not (self.classnames == None or bool(self.classnames and tb_object.classname in self.classnames)):
+            if not (self.classnames == None or bool(self.classnames and ent.classname in self.classnames)):
                 return
 
             # keys
@@ -146,7 +146,7 @@ class Settings:
     jampack_whitelist: list[JampackRelationship] = []
     for i in _raw_jampack_whitelist:
         jampack_whitelist.append(JampackRelationship(
-            dest=i['destination'],
+            dest=Path(i['destination']),
             patterns=i['patterns'],
             except_patterns=i.get('except_patterns'),
             except_regexs=i.get('except_regexs')),
@@ -183,7 +183,7 @@ def replace_var(what: str):
 
 
 class TemplateCopyPair:
-    def __init__(self, files: list[Path], dest: Path):
+    def __init__(self, files: list[Path | str], dest: Path):
         self.files: list[Path] = [Path(f) for f in files]
         self.dest: Path = Path(dest)
 
@@ -191,5 +191,5 @@ class TemplateCopyPair:
 class Template:
     copy_list: list[TemplateCopyPair] = []
     for i in _contents['template'].get('copy'):
-        copy_list.append(TemplateCopyPair(i['files'], i['destination']))
+        copy_list.append(TemplateCopyPair(i['files'], Path(i['destination'])))
     folders: list[Path] = [Path(replace_var(p)) for p in _contents['template']['folders']]
