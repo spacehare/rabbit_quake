@@ -29,3 +29,6 @@
 # recommendations
 
 - [ImageMagick](https://imagemagick.org/)
+- [TrenchBroom](https://trenchbroom.github.io/)
+- [EricW Tools](https://github.com/ericwa/ericw-tools/releases)
+- [EricW Tools documentation](https://ericw-tools.readthedocs.io/en/latest/)
