@@ -7,8 +7,6 @@ from dataclasses import dataclass, field
 # TODO make sure this works with bsp and bsp2 files
 # https://www.gamers.org/dEngine/quake/spec/quake-spec34/qkspec_4.htm
 
-entry = Struct('2l')
-
 
 @dataclass
 class Entry():
@@ -31,7 +29,6 @@ class BSP():
 
 ST_VERSION = Struct('l')
 ST_ENTRY = Struct('2l')
-ST_HEADER = Struct('<31l')
 ST_VERSION = Struct('l')
 
 
@@ -53,7 +50,6 @@ def read_bsp(bsp_path: Path) -> BSP:
                 qmap = parse_whole_map(text)
                 nbsp.entities = qmap
 
-    print(nbsp.entities)
     return nbsp
 
 
