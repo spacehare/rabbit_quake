@@ -14,7 +14,7 @@ from pathlib import Path
 # python -m unittest -h
 # python -m unittest src.test.TestSubmit
 
-TEST_MAP_PATH: Path = Path('./assets/tests/test.map')
+TEST_MAP_PATH: Path = Path('./assets/tests/pack/mapsrc/packtest.map')
 TEST_SUBMIT_PATH: Path = Path('./assets/tests/maps')
 TEST_PACK_PATH: Path = Path('./assets/tests/pack')
 
@@ -57,14 +57,15 @@ class TestPack(unittest.TestCase):
 
 class TestParser(unittest.TestCase):
     def test_parser(self):
-        map_text = TEST_MAP_PATH.read_text()
+        MAP_TEXT = TEST_MAP_PATH.read_text()
 
-        entity = parse.Entity.loads(map_text)
-        entity_dumped = entity.dumps()
-        entity_loaded_from_dumped = parse.Entity.loads(entity_dumped)
-        redump = entity_loaded_from_dumped.dumps()
+        entities1 = parse.parse_whole_map(MAP_TEXT)
+        dumps1 = [e.dumps() for e in entities1]
 
-        self.assertEqual(entity_dumped, redump)
+        entities2 = [parse.Entity.loads(s) for s in dumps1]
+        dumps2 = [e.dumps() for e in entities2]
+
+        self.assertEqual(dumps1, dumps2)
 
 
 if __name__ == '__main__':

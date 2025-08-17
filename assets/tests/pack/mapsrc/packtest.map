@@ -65,6 +65,7 @@
 {
 "classname" "monster_dog"
 "origin" "-64 -64 24"
+"angle" "30"
 }
 // entity 2
 {
@@ -75,11 +76,15 @@
 {
 "classname" "monster_dog"
 "origin" "32 0 24"
+"angle" "45"
 }
 // entity 4
 {
 "classname" "light_fluoro"
 "origin" "-8 -8 104"
+"delay" "5"
+"wait" ".5"
+"light" "250"
 }
 // entity 5
 {

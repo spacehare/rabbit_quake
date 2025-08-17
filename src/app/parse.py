@@ -153,23 +153,18 @@ class Brush(QProp):
 
 
 @dataclass
-class KV(QProp):
-    kvdict: dict[str, Any] = field(default_factory=dict)
-
-    def __repr__(self):
-        return str(self.kvdict)
-
+class KV(QProp, dict[str, Any]):
     def dumps(self):
-        return '\n'.join([f'"{k}" "{v}"' for k, v in self.kvdict.items()]) + '\n'
+        return '\n'.join([f'"{k}" "{v}"' for k, v in self.items()]) + '\n'
 
     @staticmethod
     def loads(string: str):
         found = PATTERN_KEY_VALUE_LINE.finditer(string)
-        kvdict = {}
+        kvdict = KV()
         for m in found:
             groups = m.groups()
             kvdict |= {groups[0]: groups[1]}
-        return KV(kvdict)
+        return kvdict
 
 
 @dataclass
@@ -195,29 +190,32 @@ class Entity(QProp):
 
     @property
     def classname(self):
-        return self.kv.kvdict['classname']
+        return self.kv['classname']
 
     @property
     def targetname(self):
-        return self.kv.kvdict.get('targetname')
+        return self.kv.get('targetname')
 
     @property
     def target(self):
-        return self.kv.kvdict.get('target')
+        return self.kv.get('target')
 
     def iterate(self, key: str, *, val: int = 1, set_to_val: bool = False) -> None:
         PLACEHOLDER = '@🐇@'
-        possible_val = self.kv.kvdict.get(key)
+        possible_val = self.kv.get(key)
         if possible_val:
             num = get_num_in_key(possible_val)
             txt = str(possible_val).replace(str(num), PLACEHOLDER)
             if num:
-                print(f'found {num} in {self.kv.kvdict[key]}')
+                print(f'found {num} in {self.kv[key]}')
                 if set_to_val:
                     num = val
                 else:
                     num += val
-                self.kv.kvdict[key] = txt.replace(PLACEHOLDER, str(num))
+                self.kv[key] = txt.replace(PLACEHOLDER, str(num))
+
+    def __eq__(self, value: object) -> bool:
+        return super().__eq__(value)
 
 
 # used in tb.py
@@ -229,19 +227,19 @@ class QuakeMap(QProp):
 
     @property
     def wad(self):
-        return self.kv.kvdict['wad']
+        return self.kv['wad']
 
     @property
     def mod(self) -> str:
-        return self.kv.kvdict['_tb_mod']
+        return self.kv['_tb_mod']
 
     @property
     def message(self):
-        return self.kv.kvdict['message']
+        return self.kv['message']
 
     @property
     def mapversion(self):
-        return self.kv.kvdict['mapversion']
+        return self.kv['mapversion']
 
     @staticmethod
     def loads(string: str):
@@ -345,7 +343,7 @@ def parse_whole_map(text: str) -> list[Entity]:
             case '"':
                 if current_ent:
                     for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
-                        current_ent.kv.kvdict[k] = v
+                        current_ent.kv[k] = v
 
             case '(':
                 if current_brush:
