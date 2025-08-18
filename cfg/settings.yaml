@@ -19,6 +19,7 @@ cfg_whitelist:
   remobilize.cfg:
     - remobilize_test15
 
+# search through key-value pairs
 dependencies:
   # sound effects
   - which: value
@@ -41,8 +42,8 @@ dependencies:
       - which: key
         condition: equals
         what: sounds
-      - condition: entity_has_patterns
-        pattern_type: and
+      - pattern_type: and
+        in_entity: true
         patterns:
           - which: key
             condition: equals

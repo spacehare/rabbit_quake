@@ -71,6 +71,7 @@ def make_dependency_pattern(d: dict):
         patterns = [make_dependency_pattern(p) for p in _patterns_raw]
         pattern_type = d.get('pattern_type', '')
         destination = d.get('destination')
+        in_entity = d.get('in_entity', False)
 
         new_pattern = deps.Pattern(
             which=which,
@@ -78,7 +79,8 @@ def make_dependency_pattern(d: dict):
             what=what,
             patterns=patterns,
             pattern_type=pattern_type,
-            destination=destination
+            destination=destination,
+            in_entity=in_entity,
         )
         return new_pattern
     else:
