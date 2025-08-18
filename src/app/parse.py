@@ -200,6 +200,7 @@ class Entity(QProp):
     def target(self):
         return self.kv.get('target')
 
+    # TODO move this out of this class
     def iterate(self, key: str, *, val: int = 1, set_to_val: bool = False) -> None:
         PLACEHOLDER = '@🐇@'
         possible_val = self.kv.get(key)

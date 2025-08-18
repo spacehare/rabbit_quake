@@ -5,17 +5,13 @@ keybinds:
   iterate: "!v"
   pc_close_loop: "!+v"
 
-pp:
-  prefix_general: "@"
-  prefix_variable: "$"
-
 paths:
   trenchbroom: I:\Quake\TrenchBroom-Win64-v2024.1-Release
   trenchbroom_preferences: C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json
   ericw: I:\Quake\ericw
   engine_exes:
-    - I:\Quake\Game\quakespasm-0.95.0_win64\quakespasm.exe
-    - I:\Quake\Game\quakespasm-0.95.0_win64\ironwail.exe
+    - I:\Quake\Game\engines\quakespasm.exe
+    - I:\Quake\Game\engines\ironwail.exe
   configs: I:\Quake\cfg
   maps: I:\Quake\Dev\maps
 
@@ -23,25 +19,41 @@ cfg_whitelist:
   remobilize.cfg:
     - remobilize_test15
 
+dependencies:
+  # sound effects
+  - which: value
+    condition: endswith
+    what: .wav
+    destination: sound
+  # models
+  - which: value
+    condition: endswith
+    what: .mdl
+    destination: null
+  # skyboxes
+  - which: key
+    condition: equals
+    what: sky
+    destination: gfx/env
+  # music
+  - pattern_type: and
+    patterns:
+      - which: key
+        condition: equals
+        what: sounds
+      - condition: entity_has_patterns
+        pattern_type: and
+        patterns:
+          - which: key
+            condition: equals
+            what: classname
+          - which: value
+            condition: equals
+            what: [worldspawn, misc_changemusic]
+    destination: gfx/env
+
 jampack:
   folder_to_pak: pakme
-  dependencies:
-    - value_patterns:
-        - "*.wav"
-      destination: sound
-    - value_patterns:
-        - "*.mdl"
-    - keys:
-        - sky
-      stem_append: "*.tga"
-      destination: gfx/env
-    - classnames:
-        - misc_changemusic
-        - worldspawn
-      keys:
-        - sounds
-      stem_prepend: track
-      destination: music
   allow:
     - patterns:
         - descript.ion

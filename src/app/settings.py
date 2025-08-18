@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from src.app.bcolors import *
 from src.app.parse import Entity
+from src.app import deps
 
 
 def get_cfg_file_contents():
@@ -61,68 +62,27 @@ class Keybinds:
     pc_close_loop = _get_bind(_contents['keybinds'], 'pc_close_loop')
 
 
-class JampackRelationship:
-    def __init__(self, *, dest: Path, patterns: list[str], except_patterns=None, except_regexs=None):
-        self.dest = dest
-        self.patterns = patterns
-        self.except_patterns = except_patterns
-        self.except_regexs = except_regexs
+def make_dependency_pattern(d: dict):
+    if d.get('patterns'):
+        which = d.get('which', '')
+        condition = d.get('condition', '')
+        what = d.get('what', '')
+        _patterns_raw = d.get('patterns', [])
+        patterns = [make_dependency_pattern(p) for p in _patterns_raw]
+        pattern_type = d.get('pattern_type', '')
+        destination = d.get('destination')
 
-
-class JampackDependencyPattern:
-    # TODO this class doesn't make sense being here, but i also don't want a circular import
-    def __init__(self, *,
-                 classnames: list[str] | None = None,
-                 keys: list[str] | None = None,
-                 keys_regexs: list[str] | None = None,
-                 value_patterns: list[str] | None = None,
-                 value_regexs: str | None = None,
-                 stem_append: str | None = None,
-                 stem_prepend: str | None = None,
-                 dest: Path | str | None = None
-                 ):
-        # if no keys to filter, search every entity
-        self.keys = keys
-        self.keys_regex = keys_regexs
-        self.value_patterns = value_patterns
-        self.stem_append = stem_append
-        self.stem_prepend = stem_prepend
-        self.value_regex = value_regexs
-        self.classnames = classnames
-        self.dest = Path(dest) if dest else None
-
-    def get_dependency_patterns(self, ent: Entity):
-        dependency_patterns: list[str] = []
-        self.stem_append = self.stem_append or ''
-        self.stem_prepend = self.stem_prepend or ''
-
-        # dependencies will be found in the values of the key/value pairs
-        for k, v in ent.kv.kvdict.items():
-            ok_keys = self.keys == None
-            ok_value_patterns = self.value_patterns == None
-
-            # classname
-            if not (self.classnames == None or bool(self.classnames and ent.classname in self.classnames)):
-                return
-
-            # keys
-            if self.keys:
-                if k in self.keys:  # don't break, one entity might have multiple key matches. like a monster with a custom .mdl and .wav
-                    ok_keys = True
-
-            if self.value_patterns:
-                for pattern in self.value_patterns:
-                    if Path(v).match(pattern):
-                        ok_value_patterns = True
-
-            if all([ok_keys, ok_value_patterns]):
-                p = Path(v)
-                out_path = f'{self.stem_prepend}{p.stem}{self.stem_append}{p.suffix}'
-                dependency_patterns.append(str(p.parent / out_path))
-
-        if dependency_patterns:
-            # print(colorize(set(dependency_patterns), bcolors.OKGREEN))
-            return set(dependency_patterns)
+        new_pattern = deps.Pattern(
+            which=which,
+            condition=condition,
+            what=what,
+            patterns=patterns,
+            pattern_type=pattern_type,
+            destination=destination
+        )
+        return new_pattern
+    else:
+        return deps.Pattern(**d)
 
 
 class Settings:
@@ -143,28 +103,18 @@ class Settings:
     maps: list[Path] = [p for p in maps_path.iterdir()]
     cfg_whitelist = _contents.get('cfg_whitelist') or {}
     submit_whitelist = _contents['submit']['allowed']
-    jampack_whitelist: list[JampackRelationship] = []
-    for i in _raw_jampack_whitelist:
-        jampack_whitelist.append(JampackRelationship(
-            dest=Path(i['destination']),
-            patterns=i['patterns'],
-            except_patterns=i.get('except_patterns'),
-            except_regexs=i.get('except_regexs')),
-        )
-    jampack_patterns: list[JampackDependencyPattern] = []
-    for p in _contents['jampack']['dependencies']:
-        p = dict(p)
-        new = JampackDependencyPattern(
-            keys=p.get('keys'),
-            keys_regexs=p.get('keys_regexs'),
-            value_patterns=p.get('value_patterns'),
-            value_regexs=p.get('value_regexs'),
-            stem_append=p.get('stem_append'),
-            stem_prepend=p.get('stem_prepend'),
-            classnames=p.get('classnames'),
-            dest=p.get('destination'),
-        )
-        jampack_patterns.append(new)
+    # jampack_whitelist: list[Relationship] = []
+    # for i in _raw_jampack_whitelist:
+    #     jampack_whitelist.append(Relationship(
+    #         dest=Path(i['destination']),
+    #         patterns=i['patterns'],
+    #         except_patterns=i.get('except_patterns', []),
+    #         except_regexs=i.get('except_regexs', [])),
+    #     )
+    # dependencies = [deps.Pattern(**dict(p)) for p in _contents['dependencies']]
+    dependencies = []
+    for i in _contents['dependencies']:
+        dependencies.append(make_dependency_pattern(i))
 
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html

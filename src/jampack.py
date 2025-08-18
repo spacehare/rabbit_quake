@@ -1,33 +1,18 @@
-from pathlib import Path
-import zipfile
-import py7zr
-import src.app.paths as paths
-import src.app.settings as settings
-import argparse
+exit()
+from src.app.deps import DependencyPattern, Relationship
+from src.app import deps
+from src.app import bsp
 from src.app.settings import Settings
 import src.app.bcolors as bcolors
+import zipfile
+import py7zr
+import argparse
 import shutil
-import struct
-import src.app.parse as parse
-import src.app.bsp
-import src.app as app
+from pathlib import Path
+
+
 
 _whitelist_map = Settings.jampack_whitelist
-
-
-def get_dep_patterns(bsp_path: Path):
-    bsp = app.bsp.read_bsp(bsp_path)
-    filters = Settings.jampack_patterns
-    dependency_patterns: list[tuple[str, Path | None]] = []
-
-    for filter in filters:
-        for ent in bsp.entities:
-            possible = filter.get_dependency_patterns(ent)
-            if possible:
-                for same in possible:
-                    dependency_patterns.append((same, filter.dest))
-
-    return set(dependency_patterns)
 
 
 def dest_from_whitelist(file: Path):
@@ -44,6 +29,7 @@ def dest_from_whitelist(file: Path):
 
 
 def get_valid_files(submission_files: list[Path]):
+    return
     # TODO i need to get the proper path put into the output folder
     # so ex:
     #   file match: dogjam_rabbit/gfx/env/rabbit/mak_nightsky1_bk.tga
@@ -63,7 +49,7 @@ def get_valid_files(submission_files: list[Path]):
         # get dependency patterns from the bsp
         if item.suffix == '.bsp':
             bsp_file = item
-            dep_patterns = get_dep_patterns(bsp_file)
+            dep_patterns = deps.get_dep_patterns(bsp.read_bsp(bsp_file).entities, Settings.dependency_patterns)
 
     # find the files from the dependency patterns
     for item in submission_files:
@@ -89,11 +75,12 @@ def get_valid_files(submission_files: list[Path]):
     for thing in valid_set:
         print(' >> -', bcolors.colorize(thing, bcolors.bcolors.OKBLUE))
     for thing in invalid_set:
-        print(' >> x', bcolors.colorize(thing, bcolors.bcolors.WARNING))
+        print(' >> x', bcolors.colorize(thing, bcolors.bcolors.FAIL))
     return valid_set
 
 
-def package_submissions(in_folder: Path, out_folder: Path, copy: bool):
+def package_submissions(in_folder: Path, out_folder: Path, should_copy: bool):
+    return
     submissions = in_folder.glob('*')
 
     # create folders that don't yet exist
@@ -108,7 +95,7 @@ def package_submissions(in_folder: Path, out_folder: Path, copy: bool):
         if submission.is_dir():
             files = get_valid_files([p for p in submission.rglob('*')])
             for item, dest in files:
-                if copy:
+                if should_copy:
                     shutil.copy(item, out_folder / item)
 
         elif submission.suffix == '.zip2':

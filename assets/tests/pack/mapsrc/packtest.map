@@ -6,6 +6,7 @@
 "wad" "..\..\hare.wad"
 "classname" "worldspawn"
 "sky" "dark_passage_"
+"sounds" "255"
 // brush 0
 {
 ( -128 -64 -64 ) ( -128 -63 -64 ) ( -128 -64 -63 ) hare_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 270 1 1
