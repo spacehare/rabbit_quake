@@ -33,6 +33,12 @@ def is_path_ok(path: Path, whitelist) -> bool:
     return allow
 
 
+def try_md_to_html(*, afile: Path, convert_markdown: bool, root: Path, zipper: zipfile.ZipFile | py7zr.SevenZipFile):
+    if afile.suffix == '.md' and convert_markdown:
+        html = markdown2.markdown_path(afile, extras=['tables'])
+        zipper.writestr(str(afile.relative_to(root).with_suffix('.html')), html)
+
+
 def compress(submission: Path, output_parent: Path, *, convert_markdown=False, mode: Mode):
     assert mode in Mode
 
@@ -46,23 +52,18 @@ def compress(submission: Path, output_parent: Path, *, convert_markdown=False, m
     print('output file:', versioned_output)
     ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p, Settings.submit_whitelist)]
 
-    def try_md_to_html(afile: Path, zipper: zipfile.ZipFile | py7zr.SevenZipFile):
-        if afile.suffix == '.md' and convert_markdown:
-            html = markdown2.markdown_path(file, extras=['tables'])
-            zipper.writestr(str(afile.relative_to(submission).with_suffix('.html')), html)
-
     match mode:
         case Mode.ZIP:
             with zipfile.ZipFile(versioned_output, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for file in ok_files:
-                    try_md_to_html(file, zip_file)
+                    try_md_to_html(afile=file, zipper=zip_file, convert_markdown=convert_markdown, root=submission)
 
                     zip_file.write(file, arcname=file.relative_to(submission))
                     print('ZIP ->', file.relative_to(submission))
         case Mode.SEVEN:
             with py7zr.SevenZipFile(versioned_output, 'w') as seven_zip_file:
                 for file in ok_files:
-                    try_md_to_html(file, seven_zip_file)
+                    try_md_to_html(afile=file, zipper=seven_zip_file, convert_markdown=convert_markdown, root=submission)
 
                     seven_zip_file.writeall(file, arcname=str(file.relative_to(submission)))
                     print(' 7Z ->', file.relative_to(submission))
