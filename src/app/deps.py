@@ -79,19 +79,14 @@ class Check:
     patterns: list[Pattern]
 
     def check(self, ent: Entity) -> bool:
-        filter_keys: list[str] = []
-
-        for pattern in self.patterns:
-            keys = pattern.get_keys_from_entity(ent)
-            filter_keys.extend(keys)
-
-            print(keys)
+        groups = [p.get_keys_from_entity(ent) for p in self.patterns]
+        print(groups)
 
         match self.c_type:
             case GroupTypes.ALL:
-                pass
+                return all(groups)
             case GroupTypes.ANY:
-                pass
+                return any(groups)
 
         # tags = check.get('tags')
         # if tags:
@@ -146,8 +141,7 @@ class Master:
             print('found checks')
             results: list[bool] = []
 
-            for check in self.checks:
-                v = check.check(ent)
+            results.extend([c.check(ent) for c in self.checks])
 
             # if the checks fail
             if not all(results):
