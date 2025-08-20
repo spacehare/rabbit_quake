@@ -49,8 +49,9 @@ dependencies:
   - name: MUSIC
     destination: music
     checks:
-      - type: all # make sure a key-value pair matches both of these at once
-        tags: [same_key, elsewhere_in_ent]
+      # make sure a key-value pair matches both of these patterns at once
+      - type: all
+        tags: [same_key]
         patterns:
           - pattern:
               which: key

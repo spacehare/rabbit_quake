@@ -20,7 +20,7 @@ class GroupTypes(StrEnum):
 
 class GroupTags(StrEnum):
     SAME_KEY = 'same_key'
-    ELSEWHERE_IN_ENT = 'elsewhere_in_ent'
+    # ELSEWHERE_IN_ENT = 'elsewhere_in_ent'
 
 
 @dataclass(kw_only=True)
@@ -92,13 +92,11 @@ class Check:
                             counts: list[int] = [0] * len(groups[0])
 
                             for idx, key in enumerate(groups[0]):
-                                print('~~>', key)
                                 for group in groups[1:]:
                                     for k in group:
                                         if k == key:
                                             counts[idx] += 1
 
-                            print('cts', counts)
                             count_matches_group_size: bool = False
                             for count in counts:
                                 if count == len(groups[0]):
@@ -107,9 +105,11 @@ class Check:
                             boolean_list.append(count_matches_group_size)
                         else:
                             boolean_list.append(True)
-                    case GroupTags.ELSEWHERE_IN_ENT:
-                        result = len(groups) == len(self.patterns)
-                        boolean_list.append(result)
+
+                    # this is deprecated until i can figure out something better
+                    # case GroupTags.ELSEWHERE_IN_ENT:
+                    #     result = len(groups) == len(self.patterns)
+                    #     boolean_list.append(result)
 
         match self.c_type:
             case GroupTypes.ALL:
@@ -117,7 +117,6 @@ class Check:
             case GroupTypes.ANY:
                 boolean_list.append(any(groups))
 
-        print('ok_list:', boolean_list)
         return all(boolean_list)
 
     @staticmethod
