@@ -50,7 +50,7 @@ dependencies:
     destination: music
     checks:
       - type: all # make sure a key-value pair matches both of these at once
-        tags: [same_key, in_ent]
+        tags: [same_key, elsewhere_in_ent]
         patterns:
           - pattern:
               which: key

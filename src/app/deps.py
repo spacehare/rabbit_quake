@@ -20,7 +20,7 @@ class GroupTypes(StrEnum):
 
 class GroupTags(StrEnum):
     SAME_KEY = 'same_key'
-    IN_ENT = 'in_ent'
+    ELSEWHERE_IN_ENT = 'elsewhere_in_ent'
 
 
 @dataclass(kw_only=True)
@@ -80,23 +80,45 @@ class Check:
 
     def check(self, ent: Entity) -> bool:
         groups = [p.get_keys_from_entity(ent) for p in self.patterns]
-        print(groups)
+        print('GROUPS:', groups)
+
+        ok = []
+
+        if self.tags:
+            for tag in self.tags:
+                match tag:
+                    case GroupTags.SAME_KEY:
+                        if len(groups) > 1:
+                            counts: list[int] = [0] * len(groups[0])
+
+                            for idx, key in enumerate(groups[0]):
+                                print('~~>', key)
+                                for group in groups[1:]:
+                                    for k in group:
+                                        if k == key:
+                                            counts[idx] += 1
+
+                            print('cts', counts)
+                            count_matches_group_size: bool = False
+                            for count in counts:
+                                if count == len(groups[0]):
+                                    count_matches_group_size = True
+                                    break
+                            ok.append(count_matches_group_size)
+                        else:
+                            ok.append(True)
+                    case GroupTags.ELSEWHERE_IN_ENT:
+                        result = len(groups) == len(self.patterns)
+                        ok.append(result)
 
         match self.c_type:
             case GroupTypes.ALL:
-                return all(groups)
+                ok.append(all(groups))
             case GroupTypes.ANY:
-                return any(groups)
+                ok.append(any(groups))
 
-        # tags = check.get('tags')
-        # if tags:
-        #     # same_key
-        #     same_key = filter_keys.count(filter_keys[0]) == len(filter_keys)
-
-        #     # in_ent
-        #     in_ent = len(filter_keys) == len(group_patterns)
-
-        return False
+        print('ok_list:', ok)
+        return all(ok)
 
     @staticmethod
     def from_dict(d: dict) -> 'Check':
@@ -132,24 +154,19 @@ class Master:
     def get_keys_from_entity(self, ent: Entity, depth=0) -> list[str] | None:
         print('master:', self.name)
 
-        output_keys = []
-
         if not self.output_patterns:
             print('master pattern needs at least one "output" pattern')
 
         if self.checks:
-            print('found checks')
-            results: list[bool] = []
-
-            results.extend([c.check(ent) for c in self.checks])
+            results: list[bool] = [c.check(ent) for c in self.checks]
 
             # if the checks fail
             if not all(results):
                 return None
 
+        output_keys = []
         # find outputs
         for pattern in self.output_patterns:
-            print(pattern)
             keys = pattern.get_keys_from_entity(ent)
             output_keys.extend(keys)
 
