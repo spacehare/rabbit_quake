@@ -82,7 +82,7 @@ class Check:
         groups = [p.get_keys_from_entity(ent) for p in self.patterns]
         print('GROUPS:', groups)
 
-        ok = []
+        boolean_list = []
 
         if self.tags:
             for tag in self.tags:
@@ -104,21 +104,21 @@ class Check:
                                 if count == len(groups[0]):
                                     count_matches_group_size = True
                                     break
-                            ok.append(count_matches_group_size)
+                            boolean_list.append(count_matches_group_size)
                         else:
-                            ok.append(True)
+                            boolean_list.append(True)
                     case GroupTags.ELSEWHERE_IN_ENT:
                         result = len(groups) == len(self.patterns)
-                        ok.append(result)
+                        boolean_list.append(result)
 
         match self.c_type:
             case GroupTypes.ALL:
-                ok.append(all(groups))
+                boolean_list.append(all(groups))
             case GroupTypes.ANY:
-                ok.append(any(groups))
+                boolean_list.append(any(groups))
 
-        print('ok_list:', ok)
-        return all(ok)
+        print('ok_list:', boolean_list)
+        return all(boolean_list)
 
     @staticmethod
     def from_dict(d: dict) -> 'Check':
