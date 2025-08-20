@@ -71,27 +71,34 @@ class Pattern:
 
 @dataclass(kw_only=True)
 class Master:
+    '''holds other patterns, and decides what to do with those patterns'''
     name: str
     destination: str
-    checks: dict
+    checks: dict | None = None
+    outputs: list
 
     def get_keys_from_entity(self, ent: Entity, depth=0) -> list[str] | None:
         print('master:', self.name)
 
         matches = []
-        output_dict: dict | None = None
-        output_pattern: Pattern | None = None
+        output_patterns: list[Pattern] = []
         # output_result_key: str | None = None
 
-        output_dict = self.checks.get('output')
-        if output_dict:
-            output_pattern = Pattern(**output_dict.get('pattern'))
+        if not self.outputs:
+            print('master pattern needs at least one "output" pattern')
 
-        if not output_pattern:
-            print('each master pattern must have an "output" pattern')
-            return
+        for output in self.outputs:
+            output_patterns.append(Pattern(**output.get('pattern')))
 
-        keys = output_pattern.get_keys_from_entity(ent)
+        for pattern in output_patterns:
+            keys = pattern.get_keys_from_entity(ent)
+
+            if self.checks:
+                # are there subpatterns to evaluate?
+                side_conditions_dict = self.checks.get('if')
+                if side_conditions_dict:
+
+                    if False:
+                        keys = []
 
         return keys
-        # return output_result_key

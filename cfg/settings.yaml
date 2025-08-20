@@ -24,27 +24,24 @@ dependencies:
   # sound effects
   - name: SOUND_EFFECTS
     destination: sound
-    checks:
-      output:
-        pattern:
+    outputs:
+      - pattern:
           which: value
           condition: endswith
           what: .wav
   # models
   - name: MODELS
     destination: "*"
-    checks:
-      output:
-        pattern:
+    outputs:
+      - pattern:
           which: value
           condition: endswith
           what: .mdl
   # skyboxes
   - name: SKYBOXES
     destination: gfx/env
-    checks:
-      output:
-        pattern:
+    outputs:
+      - pattern:
           which: key
           condition: equals
           what: sky
@@ -64,8 +61,8 @@ dependencies:
               which: value
               condition: equals
               what: [worldspawn, misc_changemusic]
-      output:
-        pattern:
+    outputs:
+      - pattern:
           which: key
           condition: equals
           what: sounds
