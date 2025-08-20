@@ -7,6 +7,8 @@
 "classname" "worldspawn"
 "sky" "dark_passage_"
 "sounds" "255"
+"_tb_mod" "copper"
+"_tb_def" "external:I:/Quake/Game/engines/copper/copper.fgd"
 // brush 0
 {
 ( -128 -64 -64 ) ( -128 -63 -64 ) ( -128 -64 -63 ) hare_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 270 1 1
@@ -64,38 +66,23 @@
 }
 // entity 1
 {
-"classname" "monster_dog"
-"origin" "-64 -64 24"
-"angle" "30"
-}
-// entity 2
-{
-"classname" "monster_dog"
-"origin" "-64 64 24"
-}
-// entity 3
-{
-"classname" "monster_dog"
-"origin" "32 0 24"
-"angle" "45"
-}
-// entity 4
-{
 "classname" "light_fluoro"
 "origin" "-8 -8 104"
 "delay" "5"
 "wait" ".5"
 "light" "250"
 }
-// entity 5
+// entity 2
 {
 "classname" "info_player_start"
 "origin" "80 80 24"
 "angle" "180"
 }
-// entity 6
+// entity 3
 {
-"classname" "func_detail"
+"classname" "func_button"
+"noise" "error_ct.wav"
+"sounds" "-1"
 // brush 0
 {
 ( 96 -128 0 ) ( 96 -127 0 ) ( 96 -128 1 ) hare_03 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
@@ -105,4 +92,9 @@
 ( 128 -96 16 ) ( 129 -96 16 ) ( 128 -96 17 ) hare_03 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
 ( 128 -96 16 ) ( 128 -96 17 ) ( 128 -95 16 ) hare_03 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
 }
+}
+// entity 4
+{
+"classname" "weapon_supershotgun"
+"origin" "-64 -32 0"
 }

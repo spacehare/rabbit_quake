@@ -19,39 +19,56 @@ cfg_whitelist:
   remobilize.cfg:
     - remobilize_test15
 
-# search through key-value pairs
+# search through key-value pairs per entity
 dependencies:
   # sound effects
-  - which: value
-    condition: endswith
-    what: .wav
+  - name: SOUND_EFFECTS
     destination: sound
+    checks:
+      output:
+        pattern:
+          which: value
+          condition: endswith
+          what: .wav
   # models
-  - which: value
-    condition: endswith
-    what: .mdl
-    destination: null
+  - name: MODELS
+    destination: "*"
+    checks:
+      output:
+        pattern:
+          which: value
+          condition: endswith
+          what: .mdl
   # skyboxes
-  - which: key
-    condition: equals
-    what: sky
+  - name: SKYBOXES
     destination: gfx/env
+    checks:
+      output:
+        pattern:
+          which: key
+          condition: equals
+          what: sky
   # music
-  - pattern_type: and
-    patterns:
-      - which: key
-        condition: equals
-        what: sounds
-      - pattern_type: and
-        in_entity: true
-        patterns:
-          - which: key
-            condition: equals
-            what: classname
-          - which: value
-            condition: equals
-            what: [worldspawn, misc_changemusic]
-    destination: gfx/env
+  - name: MUSIC
+    destination: music
+    checks:
+      if:
+        all: # make sure a key-value pair matches both of these at once
+          - same_key: true
+            pattern:
+              which: key
+              condition: equals
+              what: classname
+          - same_key: true
+            pattern:
+              which: value
+              condition: equals
+              what: [worldspawn, misc_changemusic]
+      output:
+        pattern:
+          which: key
+          condition: equals
+          what: sounds
 
 jampack:
   folder_to_pak: pakme

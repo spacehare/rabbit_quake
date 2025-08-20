@@ -4,6 +4,7 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from src.app.parse import Entity, KV
 from enum import StrEnum
+from src.app.bcolors import colorize, bcolors
 
 
 class Conditions(StrEnum):
@@ -13,8 +14,10 @@ class Conditions(StrEnum):
 
 
 class PatternTypes(StrEnum):
-    AND = 'and'
-    OR = 'or'
+    # AND = 'and'
+    # OR = 'or'
+    ANY = 'any'
+    ALL = 'all'
 
 
 @dataclass(kw_only=True)
@@ -22,46 +25,20 @@ class Pattern:
     which: str = ''
     condition: Conditions | str
     what: str | list[str] = ''
-    patterns: list['Pattern'] = field(default_factory=list)
-    pattern_type: PatternTypes | str = ''
-    destination: str | None = None
-    in_entity: bool = False
+
+    def match(self, key: str, value: str):
+        return match_pattern(key, value, self)
 
 
-@dataclass
-class MatchOutput:
-    key: str
-    value: str
-    entity: Entity
+@dataclass(kw_only=True)
+class Master:
+    name: str
+    destination: str
+    checks: dict
 
 
-def deal_with_subpatterns(ent: Entity, pattern: Pattern):
-    in_ent: bool = pattern.in_entity
-
-    if pattern.patterns:
-        pattern_type = pattern.pattern_type
-        value_list = []
-        ok: bool = False
-
-        for p_pattern in pattern.patterns:
-            mt = find_match(ent, p_pattern)
-            value_list.append(mt)
-            if mt:
-                print(mt.key, mt.value)
-
-        match pattern_type:
-            case PatternTypes.AND:
-                ok = all(value_list)
-            case PatternTypes.OR:
-                ok = any(value_list)
-
-        print('ok', ok)
-
-        return value_list[0] if ok else None
-
-
-def find_true(key: str, value: str, pattern: Pattern) -> bool:
-    '''for a key-value pair, check against a pattern'''
+def match_pattern(key: str, value: str, pattern: Pattern) -> bool:
+    '''for a single key-value pair, check against a pattern'''
 
     # check if we are matching against a key or a value
     which = None
@@ -96,14 +73,24 @@ def find_true(key: str, value: str, pattern: Pattern) -> bool:
     return False
 
 
-def find_match(ent: Entity, pattern: Pattern) -> MatchOutput | None:
-    subpattern_output = deal_with_subpatterns(ent, pattern)
-    if subpattern_output:
-        return subpattern_output
+def get_key(ent: Entity, master: Master, depth=0) -> str | None:
+    matches = []
+    output_result = None
+    output_dict = None
+    output_pattern: Pattern | None = None
 
-    for k, v in ent.kv.items():
-        outcome = find_true(k, v, pattern)
-        if outcome:
-            return MatchOutput(k, v, ent)
+    print('master:', master.name)
+    output_dict = master.checks.get('output')
+    if output_dict:
+        output_pattern = Pattern(**output_dict.get('pattern'))
 
-    return None
+    if not output_pattern:
+        print('each master pattern must have an "output" pattern')
+        return
+
+    for key, value in ent.kv.items():
+        is_match = match_pattern(key, value, output_pattern)
+        if is_match:
+            output_result = key
+
+    return output_result

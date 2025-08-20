@@ -63,28 +63,32 @@ class Keybinds:
 
 
 def make_dependency_pattern(d: dict):
-    if d.get('patterns'):
-        which = d.get('which', '')
-        condition = d.get('condition', '')
-        what = d.get('what', '')
-        _patterns_raw = d.get('patterns', [])
-        patterns = [make_dependency_pattern(p) for p in _patterns_raw]
-        pattern_type = d.get('pattern_type', '')
-        destination = d.get('destination')
-        in_entity = d.get('in_entity', False)
+    # TODO this doesn't work recursively
+    pass
+    # if d.get('subpatterns'):
+    #     which = d.get('which', '')
+    #     condition = d.get('condition', '')
+    #     what = d.get('what', '')
+    #     _subpatterns_raw = d.get('subpatterns', [])
+    #     patterns = [make_dependency_pattern(p) for p in _subpatterns_raw]
+    #     pattern_type = d.get('subpattern_type', '')
+    #     destination = d.get('destination')
+    #     subpattern_anywhere_in_entity = d.get('subpattern_anywhere_in_entity', False)
+    #     name = d.get('name', '')
 
-        new_pattern = deps.Pattern(
-            which=which,
-            condition=condition,
-            what=what,
-            patterns=patterns,
-            pattern_type=pattern_type,
-            destination=destination,
-            in_entity=in_entity,
-        )
-        return new_pattern
-    else:
-        return deps.Pattern(**d)
+    #     new_pattern = deps.Pattern(
+    #         which=which,
+    #         condition=condition,
+    #         what=what,
+    #         subpatterns=patterns,
+    #         subpattern_type=pattern_type,
+    #         destination=destination,
+    #         subpattern_anywhere_in_entity=subpattern_anywhere_in_entity,
+    #         name=name,
+    #     )
+    #     return new_pattern
+    # else:
+    #     return deps.Pattern(**d)
 
 
 class Settings:
@@ -114,9 +118,9 @@ class Settings:
     #         except_regexs=i.get('except_regexs', [])),
     #     )
     # dependencies = [deps.Pattern(**dict(p)) for p in _contents['dependencies']]
-    dependencies = []
-    for i in _contents['dependencies']:
-        dependencies.append(make_dependency_pattern(i))
+    # dependencies = []
+    # for i in _contents['dependencies']:
+    #     dependencies.append(make_dependency_pattern(i))
 
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
