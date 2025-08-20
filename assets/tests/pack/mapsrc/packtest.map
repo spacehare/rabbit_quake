@@ -9,6 +9,7 @@
 "sounds" "255"
 "_tb_mod" "copper"
 "_tb_def" "external:I:/Quake/Game/engines/copper/copper.fgd"
+"fake_key" "worldspawn"
 // brush 0
 {
 ( -128 -64 -64 ) ( -128 -63 -64 ) ( -128 -64 -63 ) hare_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 270 1 1

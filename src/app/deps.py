@@ -109,24 +109,32 @@ class Master:
 
         for pattern in self.output_patterns:
             print(pattern)
-            output_keys.append(*pattern.get_keys_from_entity(ent))
+            output_keys.extend(pattern.get_keys_from_entity(ent))
 
-        # if self.checks:
-        #     print('found checks')
-        #     for check in self.checks:
-        #         group_type: str = check['type']
-        #         group_tags: list[str] = check['tags']
-        #         group_patterns: list[Pattern] = [Pattern(**p) for p in check['patterns']]
-        #         pass
+        if self.checks:
+            print('found checks')
+            results: list[bool] = []
 
-        #         match group_type:
-        #             case GroupTypes.ALL:
-        #                 pass
-        #             case GroupTypes.ANY:
-        #                 pass
+            for check in self.checks:
+                filter_keys: list[str] = []
 
-        #     # if checks fail
-        #     if False:
-        #         output_keys = []
+                group_type: str = check['type']
+                group_tags: list[str] = check['tags']
+                group_patterns: list[Pattern] = [Pattern(**p['pattern']) for p in check['patterns']]
+
+                for pattern in group_patterns:
+                    keys = pattern.get_keys_from_entity(ent)
+                    filter_keys.extend(keys)
+                    print(keys)
+
+                match group_type:
+                    case GroupTypes.ALL:
+                        pass
+                    case GroupTypes.ANY:
+                        pass
+
+            # if the checks fail
+            if not all(results):
+                return None
 
         return output_keys
