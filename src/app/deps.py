@@ -13,9 +13,7 @@ class Conditions(StrEnum):
     EQUALS = 'equals'
 
 
-class PatternTypes(StrEnum):
-    # AND = 'and'
-    # OR = 'or'
+class GroupTypes(StrEnum):
     ANY = 'any'
     ALL = 'all'
 
@@ -69,36 +67,66 @@ class Pattern:
         return results
 
 
+# @dataclass
+# class PatternGroup:
+#     group_type: GroupTypes
+#     patterns: list[Pattern]
+
+
 @dataclass(kw_only=True)
 class Master:
     '''holds other patterns, and decides what to do with those patterns'''
     name: str
     destination: str
-    checks: dict | None = None
-    outputs: list
+    output_patterns: list[Pattern]
+    checks: list | None = None
+
+    @staticmethod
+    def from_dict(d: dict):
+        checks: list = d.get('checks', [])
+        name = d.get('name', 'unnamed pattern')
+        dest: str = d['destination']
+        outputs = [Pattern(**p['pattern']) for p in d['outputs']]
+
+        if not any([checks, name, outputs]):
+            print('could not create Master from dict')
+            return
+        else:
+            return Master(
+                name=name,
+                destination=dest,
+                output_patterns=outputs,
+                checks=checks,
+            )
 
     def get_keys_from_entity(self, ent: Entity, depth=0) -> list[str] | None:
         print('master:', self.name)
 
-        matches = []
-        output_patterns: list[Pattern] = []
-        # output_result_key: str | None = None
+        output_keys = []
 
-        if not self.outputs:
+        if not self.output_patterns:
             print('master pattern needs at least one "output" pattern')
 
-        for output in self.outputs:
-            output_patterns.append(Pattern(**output.get('pattern')))
+        for pattern in self.output_patterns:
+            print(pattern)
+            output_keys.append(*pattern.get_keys_from_entity(ent))
 
-        for pattern in output_patterns:
-            keys = pattern.get_keys_from_entity(ent)
+        # if self.checks:
+        #     print('found checks')
+        #     for check in self.checks:
+        #         group_type: str = check['type']
+        #         group_tags: list[str] = check['tags']
+        #         group_patterns: list[Pattern] = [Pattern(**p) for p in check['patterns']]
+        #         pass
 
-            if self.checks:
-                # are there subpatterns to evaluate?
-                side_conditions_dict = self.checks.get('if')
-                if side_conditions_dict:
+        #         match group_type:
+        #             case GroupTypes.ALL:
+        #                 pass
+        #             case GroupTypes.ANY:
+        #                 pass
 
-                    if False:
-                        keys = []
+        #     # if checks fail
+        #     if False:
+        #         output_keys = []
 
-        return keys
+        return output_keys

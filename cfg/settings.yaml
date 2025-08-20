@@ -49,15 +49,14 @@ dependencies:
   - name: MUSIC
     destination: music
     checks:
-      if:
-        all: # make sure a key-value pair matches both of these at once
-          - same_key: true
-            pattern:
+      - type: all # make sure a key-value pair matches both of these at once
+        tags: [same_key, in_ent]
+        patterns:
+          - pattern:
               which: key
               condition: equals
               what: classname
-          - same_key: true
-            pattern:
+          - pattern:
               which: value
               condition: equals
               what: [worldspawn, misc_changemusic]
