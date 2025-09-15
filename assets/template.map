@@ -5,7 +5,7 @@
 "mapversion" "220"
 "wad" ""
 "classname" "worldspawn"
-"message" "TITLE GOES HERE"
+"message" ""
 // ericw
 "_dirt" "1"
 "_dirtdepth" "128"
