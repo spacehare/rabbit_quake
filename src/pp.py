@@ -58,6 +58,9 @@ def find_and_replace(map_string: str, pp_cfg: PPConfig):
     return new_str
 
 
+# TODO: make this work with notrace too
+# TODO: make this more generic. instead of "clip" make a more general function
+# instead of "@clip: 1" it could be like "@add: clip" maybe
 def clip(ent: Entity):
     output_brushes: list[Brush] = []
     for brush in ent.brushes:
