@@ -63,7 +63,6 @@ class Keybinds:
     pc_close_loop = _get_bind(_contents['keybinds'], 'pc_close_loop')
 
 
-@dataclass
 class Settings:
     # TODO this is so fucking ugly to look at. it does not spark joy
     _ericw = _contents['paths'].get('ericw')
