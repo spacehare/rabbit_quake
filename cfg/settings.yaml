@@ -68,34 +68,34 @@ dependencies:
           what: sounds
 
 jampack:
-  folder_to_pak: pakme
+  deny:
+    - regex: 'autosave..+\.\d+\.map'
+    - path: "*.prt"
+    - path: "*.log"
+    - path: "*.texinfo.json"
   allow:
     - patterns:
-        - descript.ion
-        - "*.def"
-        - "*.fgd"
-        - "*.json"
-        - "*.pak"
-        - "*.dat"
-        - "*.rc"
-      destination: .
-    - patterns:
-        - "*.map"
-      except_patterns:
-        - autosave/*.map
-      except_regexs:
-        - autosave..+\.\d+\.map
+        - path: "*.map"
       destination: mapsrc
     - patterns:
-        - "*.bsp"
-        - "*.lit"
-      destination: maps
+        - path: descript.ion
+        - path: "*.def"
+        - path: "*.fgd"
+        - path: "*.json"
+        - path: "*.pak"
+        - path: "*.dat"
+        - path: "*.rc"
+      destination: .
     - patterns:
-        - "*.txt"
-        - "*.html"
-        - "*.md"
-        - readme/*
+        - path: "*.txt"
+        - path: "*.html"
+        - path: "*.md"
+        - path: readme/*
       destination: readme
+    - patterns:
+        - path: "*.bsp"
+        - path: "*.lit"
+      destination: maps
 
 submit:
   allowed:

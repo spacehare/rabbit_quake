@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 from src.app.bcolors import *
 from src.app.parse import Entity
-from src.app import deps
+from .deps import Master
+from dataclasses import dataclass, field
 
 
 def get_cfg_file_contents():
@@ -62,41 +63,14 @@ class Keybinds:
     pc_close_loop = _get_bind(_contents['keybinds'], 'pc_close_loop')
 
 
-def make_dependency_pattern(d: dict):
-    # TODO this doesn't work recursively
-    pass
-    # if d.get('subpatterns'):
-    #     which = d.get('which', '')
-    #     condition = d.get('condition', '')
-    #     what = d.get('what', '')
-    #     _subpatterns_raw = d.get('subpatterns', [])
-    #     patterns = [make_dependency_pattern(p) for p in _subpatterns_raw]
-    #     pattern_type = d.get('subpattern_type', '')
-    #     destination = d.get('destination')
-    #     subpattern_anywhere_in_entity = d.get('subpattern_anywhere_in_entity', False)
-    #     name = d.get('name', '')
-
-    #     new_pattern = deps.Pattern(
-    #         which=which,
-    #         condition=condition,
-    #         what=what,
-    #         subpatterns=patterns,
-    #         subpattern_type=pattern_type,
-    #         destination=destination,
-    #         subpattern_anywhere_in_entity=subpattern_anywhere_in_entity,
-    #         name=name,
-    #     )
-    #     return new_pattern
-    # else:
-    #     return deps.Pattern(**d)
-
-
+@dataclass
 class Settings:
     # TODO this is so fucking ugly to look at. it does not spark joy
     _ericw = _contents['paths'].get('ericw')
     _engine_exes: list[Path] = make_listpath(
         _contents['paths'].get('engine_exes'))
     _raw_jampack_whitelist: list[dict] = _contents['jampack']['allow']
+    jampack: dict = _contents['jampack']
 
     name = _contents['name']
     trenchbroom = Path(_contents['paths'].get('trenchbroom'))
@@ -109,18 +83,9 @@ class Settings:
     maps: list[Path] = [p for p in maps_path.iterdir()]
     cfg_whitelist = _contents.get('cfg_whitelist') or {}
     submit_whitelist = _contents['submit']['allowed']
-    # jampack_whitelist: list[Relationship] = []
-    # for i in _raw_jampack_whitelist:
-    #     jampack_whitelist.append(Relationship(
-    #         dest=Path(i['destination']),
-    #         patterns=i['patterns'],
-    #         except_patterns=i.get('except_patterns', []),
-    #         except_regexs=i.get('except_regexs', [])),
-    #     )
-    # dependencies = [deps.Pattern(**dict(p)) for p in _contents['dependencies']]
-    # dependencies = []
-    # for i in _contents['dependencies']:
-    #     dependencies.append(make_dependency_pattern(i))
+
+
+S_MASTERS: list[Master] = [mas for d in _contents['dependencies'] if (mas := Master.from_dict(d))]
 
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
