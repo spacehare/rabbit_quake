@@ -91,7 +91,7 @@ if __name__ == '__main__':
     new_ents: list[Entity] = []
     new_str = ''
     for ent in ents:
-        for key, value in ent.kv.kvdict.items():
+        for key, value in ent.kv.items():
             if key.startswith('@') and int(value) == 1:
                 if key == cfg.char_general + 'clip':
                     print(f'clipping {ent.classname}')
