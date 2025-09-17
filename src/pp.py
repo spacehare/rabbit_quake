@@ -102,7 +102,7 @@ if __name__ == '__main__':
                     print(len(new_ents[0].brushes))
                     new_ents[0].brushes.extend(new_brushes)
                     print(len(new_ents[0].brushes))
-                if key == cfg.char_general + 'delete':
+                if (key == cfg.char_general + 'delete') and int(value) == 1:
                     print(f'deleting {ent.classname}')
                     break
         else:
