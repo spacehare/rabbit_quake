@@ -102,6 +102,22 @@ def replace_var(what: str):
     return output
 
 
+@dataclass
+class Symlink:
+    target: str
+    destination: Path
+
+    @staticmethod
+    def from_dict(d: dict) -> 'Symlink':
+        return Symlink(
+            replace_var(d['target']),
+            Path(replace_var(d['destination'])),
+        )
+
+
+symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents['symlink']]
+
+
 class TemplateCopyPair:
     def __init__(self, files: list[Path | str], dest: Path):
         self.files: list[Path] = [Path(f) for f in files]

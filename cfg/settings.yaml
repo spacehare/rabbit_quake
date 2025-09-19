@@ -125,6 +125,9 @@ template:
         - assets\template.map
         - assets/todo.md
       destination: .
+    - files:
+        - assets/readme.md
+      destination: readme
 
 ericw:
   bsp: maps
@@ -148,3 +151,15 @@ ericw:
         - -noambient
       light:
         - -extra4
+
+symlink:
+  - target: gfx/env/{name}
+    destination: gfx/env
+  - target: sound/{name}
+    destination: sound
+  - target: maps/*.bsp
+    destination: maps
+  - target: maps/*.lit
+    destination: maps
+  - target: music/track*.*
+    destination: music
