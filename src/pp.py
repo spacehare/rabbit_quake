@@ -79,27 +79,32 @@ if __name__ == '__main__':
                         help='the full path of the target map file')
     parser.add_argument('output', type=Path,
                         help='the full path of the to-be-created file')
-    parser.add_argument('cfg_path', type=Path, help='the full path of the YAML config')
+    parser.add_argument('cfg_path', type=Path, nargs='?',
+                        help='the full path of the YAML config')
     args = parser.parse_args()
 
     q_map_path: Path = args.map
     q_output_path: Path = args.output
-    q_cfg_path: Path = args.cfg_path
+    q_cfg_path: Path | None = args.cfg_path
     new_map_path = q_output_path
     print(new_map_path)
 
-    cfg: PPConfig = PPConfig.loads(q_cfg_path)
     map_string = q_map_path.read_text()
-    map_string = find_and_replace(map_string, cfg)
-
     entities: list[Entity] = parse_whole_map(map_string)
     new_ents: list[Entity] = []
     new_str = ''
+    cfg: PPConfig
 
-    # in-YAML exec
-    for action in cfg.actions:
-        if ex := action.get('exec'):
-            exec(ex)
+    if q_cfg_path and q_cfg_path.exists():
+        cfg: PPConfig = PPConfig.loads(q_cfg_path)
+        map_string = find_and_replace(map_string, cfg)
+
+        # in-YAML exec
+        for action in cfg.actions:
+            if ex := action.get('exec'):
+                exec(ex)
+    else:
+        cfg = PPConfig()
 
     # in-MAP keys
     for ent in entities:
