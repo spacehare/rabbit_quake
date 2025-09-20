@@ -1,0 +1,22 @@
+# required
+
+version: 0
+
+# optional
+
+prefix:
+  general: "@"
+  variable_in: "%"
+  variable_out: "%"
+variables:
+  red: "255 0 0"
+  green: "0 255 0"
+  blue: "0 0 255"
+  up: -1
+  down: -2
+actions:
+  - exec: |
+      for ent in entities:
+        if ent.kv['classname'] == 'func_door':
+          ent.kv.setdefault('_minlight', '50')
+          ent.kv.setdefault('sounds', '2')

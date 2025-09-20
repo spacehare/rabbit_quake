@@ -4,7 +4,7 @@ import copy
 import argparse
 from pathlib import Path
 import yaml
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from src.app.bcolors import colorize, bcolors
 from src.app.parse import parse_whole_map, Brush, Entity
 
@@ -33,6 +33,7 @@ class PPConfig:
     char_general: str = CHAR_GENERAL_DEFAULT
     char_variable_in: str = CHAR_VAR_IN_DEFAULT
     char_variable_out: str = CHAR_VAR_OUT_DEFAULT
+    actions: list[dict] = field(default_factory=list)
 
     @staticmethod
     def loads(yaml_path: Path):
@@ -44,6 +45,7 @@ class PPConfig:
         new_pp.char_general = prefix.get('general', CHAR_GENERAL_DEFAULT)
         new_pp.char_variable_in = prefix.get('variable_in', CHAR_VAR_IN_DEFAULT)
         new_pp.char_variable_out = prefix.get('variable_out', CHAR_VAR_OUT_DEFAULT)
+        new_pp.actions = loaded.get('actions', [])
         return new_pp
 
 
@@ -53,7 +55,7 @@ def find_and_replace(map_string: str, pp_cfg: PPConfig):
     print(colorize('FIND-AND-REPLACE VARIABLES', bcolors.UNDERLINE))
     for key, value in pp_cfg.variables.items():
         variable_sandwich = f'{pp_cfg.char_variable_in}{key}{pp_cfg.char_variable_out}'
-        new_str = new_str.replace(variable_sandwich, value)
+        new_str = new_str.replace(variable_sandwich, str(value))
         print(f'{variable_sandwich:<15} {colorize(value, bcolors.OKCYAN)}')
     return new_str
 
@@ -81,25 +83,32 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     q_map_path: Path = args.map
-    q_output: Path = args.output
-    q_cfg: Path = args.cfg_path
-    new_map_path = q_output
+    q_output_path: Path = args.output
+    q_cfg_path: Path = args.cfg_path
+    new_map_path = q_output_path
     print(new_map_path)
 
-    cfg: PPConfig = PPConfig.loads(q_cfg)
+    cfg: PPConfig = PPConfig.loads(q_cfg_path)
     map_string = q_map_path.read_text()
     map_string = find_and_replace(map_string, cfg)
 
-    ents: list[Entity] = parse_whole_map(map_string)
+    entities: list[Entity] = parse_whole_map(map_string)
     new_ents: list[Entity] = []
     new_str = ''
-    for ent in ents:
+
+    # in-YAML exec
+    for action in cfg.actions:
+        if ex := action.get('exec'):
+            exec(ex)
+
+    # in-MAP keys
+    for ent in entities:
         for key, value in ent.kv.items():
             if key.startswith('@') and int(value) == 1:
                 if key == cfg.char_general + 'clip':
-                    print(f'clipping {ent.classname}')
+                    print(f'clipping {ent.classname}. brushes: ', end='')
                     new_brushes = clip(ent)
-                    print(len(new_ents[0].brushes))
+                    print(len(new_ents[0].brushes), end=' -> ')
                     new_ents[0].brushes.extend(new_brushes)
                     print(len(new_ents[0].brushes))
                 if (key == cfg.char_general + 'delete') and int(value) == 1:
