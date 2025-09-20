@@ -113,11 +113,11 @@ class Plane(QProp):
         return f'( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}'
 
     @staticmethod
-    def loads(string: str):
+    def loads(string: str) -> 'Plane':
         return Plane.deconstruct_line(string)
 
     @staticmethod
-    def deconstruct_line(line: str):
+    def deconstruct_line(line: str) -> 'Plane':
         items = line.split()
         p_points = Points(
             Point(*[float(i) for i in items[1:4]]),
@@ -142,7 +142,7 @@ class Brush(QProp):
         return '{\n' + '\n'.join(str(plane.dumps()) for plane in self.planes) + '\n}'
 
     @staticmethod
-    def loads(string: str):
+    def loads(string: str) -> 'Brush | None':
         plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
         planes: list[Plane] = [possible_plane for ps in plane_strings if (possible_plane := Plane.loads(ps))]
         if planes:
@@ -158,7 +158,7 @@ class KV(QProp, dict[str, Any]):
         return '\n'.join([f'"{k}" "{v}"' for k, v in self.items()]) + '\n'
 
     @staticmethod
-    def loads(string: str):
+    def loads(string: str) -> 'KV':
         found = PATTERN_KEY_VALUE_LINE.finditer(string)
         kvdict = KV()
         for m in found:
@@ -182,7 +182,7 @@ class Entity(QProp):
         return out
 
     @staticmethod
-    def loads(string: str):
+    def loads(string: str) -> 'Entity':
         kv: KV = KV.loads(string)
         brushes_in_ent = PATTERN_BRUSHES_IN_ENT.findall(string)
         brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
@@ -243,7 +243,7 @@ class QuakeMap(QProp):
         return self.kv['mapversion']
 
     @staticmethod
-    def loads(string: str):
+    def loads(string: str) -> 'QuakeMap':
         kv: KV = KV.loads(string)
         return QuakeMap(kv, [], [])
 
