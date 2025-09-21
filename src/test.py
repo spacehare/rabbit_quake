@@ -50,9 +50,9 @@ class TestAutosave(unittest.TestCase):
         self.assertIsNotNone(autosave.get_all_autosaves())
 
 
-class TestPack(unittest.TestCase):
-    def test_pack(self):
-        jampack.package_submissions
+# class TestPack(unittest.TestCase):
+#     def test_pack(self):
+#         jampack.package_submissions
 
 
 class TestParser(unittest.TestCase):

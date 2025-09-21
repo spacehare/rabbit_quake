@@ -33,10 +33,10 @@ def is_path_ok(path: Path, whitelist) -> bool:
     return allow
 
 
-def try_md_to_html(*, afile: Path, convert_markdown: bool, root: Path, zipper: zipfile.ZipFile | py7zr.SevenZipFile):
-    if afile.suffix == '.md' and convert_markdown:
-        html = markdown2.markdown_path(afile, extras=['tables'])
-        zipper.writestr(str(afile.relative_to(root).with_suffix('.html')), html)
+def try_md_to_html(*, file_path: Path, convert_markdown: bool, root: Path, zipper: zipfile.ZipFile | py7zr.SevenZipFile):
+    if file_path.suffix == '.md' and convert_markdown:
+        html = markdown2.markdown_path(file_path, extras=['tables'])
+        zipper.writestr(str(file_path.relative_to(root).with_suffix('.html')), html)
 
 
 def compress(submission: Path, output_parent: Path, *, convert_markdown=False, mode: Mode):
@@ -48,25 +48,23 @@ def compress(submission: Path, output_parent: Path, *, convert_markdown=False, m
         exit()
 
     ext = '.zip' if mode == Mode.ZIP else '.7z'
-    versioned_output: Path = output_parent / Path(f'{name}-{create_unique_slug()}{ext}')
+    versioned_output: Path = output_parent / Path(f'{name}-{create_unique_slug()}').with_suffix(ext)
     print('output file:', versioned_output)
     ok_files = [p for p in submission.rglob('*') if p.is_file() and is_path_ok(p, Settings.submit_whitelist)]
+    zipper = None
 
     match mode:
         case Mode.ZIP:
-            with zipfile.ZipFile(versioned_output, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                for file in ok_files:
-                    try_md_to_html(afile=file, zipper=zip_file, convert_markdown=convert_markdown, root=submission)
-
-                    zip_file.write(file, arcname=file.relative_to(submission))
-                    print('ZIP ->', file.relative_to(submission))
+            zipper = zipfile.ZipFile(versioned_output, 'w', zipfile.ZIP_DEFLATED)
         case Mode.SEVEN:
-            with py7zr.SevenZipFile(versioned_output, 'w') as seven_zip_file:
-                for file in ok_files:
-                    try_md_to_html(afile=file, zipper=seven_zip_file, convert_markdown=convert_markdown, root=submission)
+            zipper = py7zr.SevenZipFile(versioned_output, 'w')
 
-                    seven_zip_file.writeall(file, arcname=str(file.relative_to(submission)))
-                    print(' 7Z ->', file.relative_to(submission))
+    if zipper:
+        for file in ok_files:
+            try_md_to_html(file_path=file, zipper=zipper, convert_markdown=convert_markdown, root=submission)
+            zipper.write(file, arcname=str(file.relative_to(submission)))
+            print('compressed ->', file.relative_to(submission))
+        zipper.close()
 
     print(f'{Ind.mark()}, zipped {len(ok_files)} files into {versioned_output}')
     return versioned_output

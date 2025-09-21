@@ -5,7 +5,7 @@ import src.app.settings as settings
 import src.app.bcolors as bcolors
 
 
-def gen(parent_folder: Path, stem: str, create: bool = True):
+def gen(parent_folder: Path, stem: str, create: bool = True) -> Path:
     if not parent_folder.exists() and create:
         parent_folder.mkdir()
 
@@ -28,6 +28,8 @@ def gen(parent_folder: Path, stem: str, create: bool = True):
 
         if create:
             shutil.copyfile(pair.file, dest)
+
+    return parent_folder / stem
 
 
 if __name__ == '__main__':
