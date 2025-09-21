@@ -1,12 +1,14 @@
 """preprocessor / postprocessor"""
 
-import copy
 import argparse
-from pathlib import Path
-import yaml
+import copy
 from dataclasses import dataclass, field
-from src.app.bcolors import colorize, bcolors
-from src.app.parse import parse_whole_map, Brush, Entity
+from pathlib import Path
+
+import yaml
+
+from src.app.bcolors import bcolors, colorize
+from src.app.parse import Brush, Entity, parse_whole_map
 
 # inspired by...
 # MESS

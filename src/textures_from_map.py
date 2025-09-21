@@ -1,6 +1,6 @@
-from pathlib import Path
-import re
 import argparse
+import re
+from pathlib import Path
 
 PATTERN_TEXTURE = re.compile(r".+\) (.+?) \[")
 

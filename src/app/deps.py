@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from src.app.parse import Entity, KV
+
+from src.app.parse import KV, Entity
 
 
 @dataclass(kw_only=True)

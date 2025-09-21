@@ -3,7 +3,9 @@
 
 import struct
 from pathlib import Path
+
 from PIL import Image
+
 import src.app.palette as pal
 
 

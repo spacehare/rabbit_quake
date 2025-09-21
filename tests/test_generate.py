@@ -1,7 +1,8 @@
-import unittest
 import shutil
-import src.jamgen as jamgen
+import unittest
+
 import src.app.paths as paths
+import src.jamgen as jamgen
 
 
 class TestGenerate(unittest.TestCase):

@@ -1,8 +1,8 @@
 import unittest
-import src.submit as submit
-import src.app.paths as paths
 from pathlib import Path
 
+import src.app.paths as paths
+import src.submit as submit
 
 TEST_SUBMIT_PATH: Path = Path("./assets/tests/maps")
 

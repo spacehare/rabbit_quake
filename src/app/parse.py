@@ -3,8 +3,9 @@
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
 
 import re
-from typing import Any
 from dataclasses import dataclass, field
+from typing import Any
+
 import src.app.bcolors as bcolors
 
 verbose = False

@@ -1,12 +1,14 @@
 import argparse
+import enum
+import zipfile
+from datetime import datetime, timezone
+from pathlib import Path
+
 import markdown2
 import py7zr
-import zipfile
-from pathlib import Path
-from datetime import datetime, timezone
+
 from src.app.bcolors import *
 from src.app.settings import Settings
-import enum
 
 # TODO read bsp and find dependencies
 # TODO allow 7z output

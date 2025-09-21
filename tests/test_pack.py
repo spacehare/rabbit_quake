@@ -1,6 +1,8 @@
 import unittest
-import src.autosave as autosave
 from pathlib import Path
+
+import src.autosave as autosave
+
 # import tempfile
 
 

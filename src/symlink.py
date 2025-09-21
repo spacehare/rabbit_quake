@@ -1,8 +1,8 @@
-from .app import settings
-from pathlib import Path
-from .app.bcolors import bcolors, colorize
 import argparse
+from pathlib import Path
 
+from .app import settings
+from .app.bcolors import bcolors, colorize
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

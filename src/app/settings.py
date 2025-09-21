@@ -1,11 +1,14 @@
-import tomllib
-import yaml
 import re
+import tomllib
+from dataclasses import dataclass, field
 from pathlib import Path
+
+import yaml
+
 from src.app.bcolors import *
 from src.app.parse import Entity
+
 from .deps import Master
-from dataclasses import dataclass, field
 
 
 def get_cfg_file_contents():

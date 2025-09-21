@@ -1,5 +1,5 @@
-import math
 import argparse
+import math
 
 # makkon textures are 512 x 512
 

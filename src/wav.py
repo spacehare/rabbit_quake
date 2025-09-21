@@ -1,6 +1,6 @@
 import argparse
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 # ffmpeg -i input.mp3 output.wav
 # ffmpeg -i input.mp3 -ac 1 -ar 44100 -sample_fmt s16 output.wav

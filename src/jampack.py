@@ -1,13 +1,15 @@
-from .app import bsp
-from .app.settings import S_MASTERS, Settings
-from .app.bcolors import bcolors, colorize
-import zipfile
-import py7zr
 import argparse
 import shutil
-from pathlib import Path
+import zipfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import NamedTuple
+
+import py7zr
+
+from .app import bsp
+from .app.bcolors import bcolors, colorize
+from .app.settings import S_MASTERS, Settings
 
 
 class Pair(NamedTuple):

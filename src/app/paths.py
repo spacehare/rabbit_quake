@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import src.app.bcolors as bcolors
 
 CFG = Path("./cfg")

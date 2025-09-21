@@ -1,9 +1,10 @@
 """split a skybox image into 6 TGA images"""
 
-from PIL import Image
+import argparse
 import os
 from pathlib import Path
-import argparse
+
+from PIL import Image
 
 path2___ = os.path.abspath("") + "/"
 

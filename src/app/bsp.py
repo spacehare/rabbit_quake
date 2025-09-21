@@ -1,8 +1,9 @@
 import struct
-from struct import Struct
-from pathlib import Path
-from src.app.parse import Entity, Brush, parse_whole_map
 from dataclasses import dataclass, field
+from pathlib import Path
+from struct import Struct
+
+from src.app.parse import Brush, Entity, parse_whole_map
 
 # TODO make sure this works with bsp and bsp2 files
 # https://www.gamers.org/dEngine/quake/spec/quake-spec34/qkspec_4.htm

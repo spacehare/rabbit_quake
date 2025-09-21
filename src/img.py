@@ -1,10 +1,12 @@
-from pathlib import Path
 import argparse
-from PIL import Image, ImageColor, ImagePalette, ImageFilter
-from PIL.Image import Dither
-from app.bcolors import *
 import re
+from pathlib import Path
+
+from PIL import Image, ImageColor, ImageFilter, ImagePalette
+from PIL.Image import Dither
+
 import app.palette as pal
+from app.bcolors import *
 from app.palette import palette_image_from_tuples
 
 # TODO give warning when image is not div by 16

@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from app.settings import Settings
 
 cfg_files = [f for f in Settings.configs.glob("*")]

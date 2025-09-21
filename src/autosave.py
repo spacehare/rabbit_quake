@@ -1,8 +1,9 @@
-from pathlib import Path
-import src.app.settings as settings
-from src.app.bcolors import *
 import argparse
+from pathlib import Path
+
+import src.app.settings as settings
 import src.app.shared as shared
+from src.app.bcolors import *
 
 autosave_path: Path = Path("autosave")
 autosave_str = "autosave"

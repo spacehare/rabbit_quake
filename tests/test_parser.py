@@ -1,7 +1,7 @@
 import unittest
-import src.app.parse as parse
 from pathlib import Path
 
+import src.app.parse as parse
 
 TEST_MAP_PATH: Path = Path("./assets/tests/pack/mapsrc/packtest.map")
 

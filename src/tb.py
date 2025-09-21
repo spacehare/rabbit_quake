@@ -1,16 +1,18 @@
 """WINDOWS ONLY"""
 
-import subprocess
 import os
-import re
 import platform
-import app.ericw as ericw
-from ahk import directives, keys, AHK
-from ahk.keys import KEYS
+import re
+import subprocess
 from pathlib import Path
-from app.parse import Entity, Brush, QuakeMap
-from app.settings import Settings, Keybinds
+
+from ahk import AHK, directives, keys
+from ahk.keys import KEYS
+
+import app.ericw as ericw
 from app.bcolors import *
+from app.parse import Brush, Entity, QuakeMap
+from app.settings import Keybinds, Settings
 
 if platform.system() != "Windows":
     print(colorize("this script is Windows only", bcolors.FAIL))
