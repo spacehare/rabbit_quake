@@ -6,7 +6,7 @@ import src.app.bcolors as bcolors
 
 
 def gen(parent_folder: Path, stem: str, create: bool = True):
-    if not parent_folder.exists():
+    if not parent_folder.exists() and create:
         parent_folder.mkdir()
 
     print('-- create --')
