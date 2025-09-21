@@ -5,28 +5,32 @@ import src.app.settings as settings
 import src.app.bcolors as bcolors
 
 
-def gen(where: Path, prefix: str, name: str = ''):
-    stem = f'{prefix}_{name or settings.Settings.name}'
-    complete_out = where / stem
+def gen(parent_folder: Path, stem: str):
+    if not parent_folder.exists():
+        parent_folder.mkdir()
 
-    for folder in settings.Template.folders:
-        (complete_out / folder).mkdir(parents=True)
+    print('-- create --')
+    for item in settings.template.touch:
+        item_path: Path = Path(item.replace("{mapstem}", stem))
+        path: Path = parent_folder / item_path
 
-    for rel in settings.Template.copy_list:
-        for file in rel.files:
-            shutil.copyfile(file, Path(complete_out / file.with_stem(stem).name))
+        if path.is_file():
+            path.touch()
+        else:
+            path.mkdir(parents=True)
 
-    print(bcolors.Ind.mark(True), complete_out)
-    return complete_out
+    print('-- copy --')
+    for pair in settings.template.copy_pairs:
+        dest = str(pair.destination).replace("{mapstem}", stem)
+        shutil.copyfile(pair.file, parent_folder / dest)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('out', type=Path,
-                        help='where to make the new folder')
-    parser.add_argument('prefix', type=str,
-                        help=f'the prefix before the map name. ex: qbj, ej3, sm225 = qbj_{settings.Settings.name}, ej3_{settings.Settings.name}, sm225_{settings.Settings.name}')
-    parser.add_argument('--name', '-n', type=str,
-                        help=f'name of the map')
+    parser.add_argument('new_folder', type=Path,
+                        help="the new folder's path")
+    parser.add_argument('stem', type=str,
+                        help=f"the stem of the map. ex: qbj_rabbit, rm_myopia")
     args = parser.parse_args()
-    gen(args.out, args.prefix, args.name or '')
+
+    gen(args.new_folder, args.stem)

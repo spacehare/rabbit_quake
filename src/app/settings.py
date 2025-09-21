@@ -95,9 +95,9 @@ SVARS = {
 }
 
 
-def replace_var(what: str):
+def replace_var(what: str, replacements: dict = SVARS):
     output: str = ''
-    for k, v in SVARS.items():
+    for k, v in replacements.items():
         output = what.replace(k, v)
     return output
 
@@ -118,14 +118,30 @@ class Symlink:
 symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents['symlink']]
 
 
+@dataclass
 class TemplateCopyPair:
-    def __init__(self, files: list[Path | str], dest: Path):
-        self.files: list[Path] = [Path(f) for f in files]
-        self.dest: Path = Path(dest)
+    file: Path
+    destination: Path
+
+    @staticmethod
+    def from_dict(d: dict) -> 'TemplateCopyPair':
+        file = Path(replace_var(d['file']))
+        destination = Path(replace_var(d['destination']))
+
+        return TemplateCopyPair(file, destination)
 
 
+@dataclass
 class Template:
-    copy_list: list[TemplateCopyPair] = []
-    for i in _contents['template'].get('copy'):
-        copy_list.append(TemplateCopyPair(i['files'], Path(i['destination'])))
-    folders: list[Path] = [Path(replace_var(p)) for p in _contents['template']['folders']]
+    touch: list[str] = field(default_factory=list)
+    copy_pairs: list[TemplateCopyPair] = field(default_factory=list)
+
+    @staticmethod
+    def from_dict(d: dict) -> 'Template':
+        touch = [replace_var(e) for e in d.get('touch', [])]
+        copy_pairs = [TemplateCopyPair.from_dict(e) for e in d.get('copy', [])]
+
+        return Template(touch, copy_pairs)
+
+
+template: Template = Template.from_dict(_contents['template'])

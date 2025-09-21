@@ -84,23 +84,24 @@ submit:
     - progs/**/*.mdl
 
 template:
-  folders:
+  touch:
     - maps
     - mapsrc
     - music
-    - gfx/env/{name}
-    - sound/{name}
-    - progs/{name}
+    - gfx/env/{mapstem}
+    - sound/{mapstem}
+    - progs/{mapstem}
     - readme
     - build
   copy:
-    - files:
-        - assets\template.map
-        - assets/todo.md
-      destination: .
-    - files:
-        - assets/readme.md
-      destination: readme
+    - file: assets\template.map
+      destination: maps/{mapstem}.map
+    - file: assets\template.yaml
+      destination: maps/{mapstem}.yaml
+    - file: assets/todo.md
+      destination: todo.md
+    - file: assets/readme.md
+      destination: readme/{mapstem}.md
 
 ericw:
   bsp: maps
