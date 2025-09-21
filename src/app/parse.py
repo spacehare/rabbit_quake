@@ -1,4 +1,4 @@
-'''parse Valve220 quake .map files'''
+"""parse Valve220 quake .map files"""
 # https://quakewiki.org/wiki/Quake_Map_Format
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
 
@@ -15,11 +15,11 @@ def verbose_print(*args):
         print(*args)
 
 
-PATTERN_NUMBER = re.compile(r'-?\b\d+\.?\d*(?:e-\d+)?\b')
-PATTERN_NUMBER_IN_KEY = re.compile(r'(-?\d+\.?\d*(?:e-\d+)?)')
-PATTERN_PLANE_IN_BRUSH = re.compile(r'\([^{}\n]+[^\n]$', re.MULTILINE)
+PATTERN_NUMBER = re.compile(r"-?\b\d+\.?\d*(?:e-\d+)?\b")
+PATTERN_NUMBER_IN_KEY = re.compile(r"(-?\d+\.?\d*(?:e-\d+)?)")
+PATTERN_PLANE_IN_BRUSH = re.compile(r"\([^{}\n]+[^\n]$", re.MULTILINE)
 PATTERN_KEY_VALUE_LINE = re.compile(r'^"(.*)" "(.*)"$', re.MULTILINE)
-PATTERN_BRUSHES_IN_ENT = re.compile(r'(?<=\{\n)[^\{]+(?=\n\})')
+PATTERN_BRUSHES_IN_ENT = re.compile(r"(?<=\{\n)[^\{]+(?=\n\})")
 
 
 def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | None:
@@ -31,7 +31,7 @@ def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | No
 
 class QProp:
     def dumps(self) -> str:
-        return ''
+        return ""
 
     @staticmethod
     def loads(string: str) -> Any:
@@ -42,7 +42,7 @@ class QProp:
 
 
 class Point(QProp):
-    '''X Y Z'''
+    """X Y Z"""
 
     def __init__(self, x: float, y: float, z: float):
         self.x = x
@@ -58,23 +58,23 @@ class Point(QProp):
         yield self.z
 
     def dumps(self):
-        return (' '.join([str(p) for p in self]))
+        return " ".join([str(p) for p in self])
 
     @staticmethod
     def loads(string: str):
         points = PATTERN_NUMBER.findall(string)
         if len(points) == 3:
-            return (Point(*points))
+            return Point(*points)
 
 
-class UvPoint():
+class UvPoint:
     def __init__(self, point: Point, offset: float, scale: float):
         self.point = point
         self.offset = offset
         self.scale = scale
 
 
-class UV():
+class UV:
     def __init__(self, u: UvPoint, v: UvPoint):
         self.u = u
         self.v = v
@@ -84,7 +84,7 @@ class UV():
         yield self.v
 
 
-class Points():
+class Points:
     def __init__(self, a: Point, b: Point, c: Point):
         self.a = a
         self.b = b
@@ -96,7 +96,7 @@ class Points():
         yield self.c
 
     def __repr__(self):
-        return f'{self.a} {self.b} {self.c}'
+        return f"{self.a} {self.b} {self.c}"
 
 
 class Plane(QProp):
@@ -107,31 +107,38 @@ class Plane(QProp):
         self.rotation = rotation
 
     def __repr__(self):
-        return f'Plane(Points({self.points}), {self.texture_name}, {self.uv}, {self.rotation})'
+        return f"Plane(Points({self.points}), {self.texture_name}, {self.uv}, {self.rotation})"
 
     def dumps(self):
-        return f'( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}'
+        return f"( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}"
 
     @staticmethod
-    def loads(string: str) -> 'Plane':
+    def loads(string: str) -> "Plane":
         return Plane.deconstruct_line(string)
 
     @staticmethod
-    def deconstruct_line(line: str) -> 'Plane':
+    def deconstruct_line(line: str) -> "Plane":
         items = line.split()
         p_points = Points(
             Point(*[float(i) for i in items[1:4]]),
             Point(*[float(i) for i in items[6:9]]),
-            Point(*[float(i) for i in items[11:14]]))
+            Point(*[float(i) for i in items[11:14]]),
+        )
         p_tex: str = items[15]
-        p_uv = UV(UvPoint(Point(*[float(i) for i in items[17:20]]), float(items[20]), float(items[29])),
-                  UvPoint(Point(*[float(i) for i in items[23:26]]), float(items[26]), float(items[30])))
+        p_uv = UV(
+            UvPoint(
+                Point(*[float(i) for i in items[17:20]]),
+                float(items[20]),
+                float(items[29]),
+            ),
+            UvPoint(
+                Point(*[float(i) for i in items[23:26]]),
+                float(items[26]),
+                float(items[30]),
+            ),
+        )
         p_rotation = float(items[28])
-        return Plane(
-            points=p_points,
-            texture_name=p_tex,
-            uv=p_uv,
-            rotation=p_rotation)
+        return Plane(points=p_points, texture_name=p_tex, uv=p_uv, rotation=p_rotation)
 
 
 class Brush(QProp):
@@ -139,26 +146,30 @@ class Brush(QProp):
         self.planes: list[Plane] = planes or []
 
     def dumps(self):
-        return '{\n' + '\n'.join(str(plane.dumps()) for plane in self.planes) + '\n}'
+        return "{\n" + "\n".join(str(plane.dumps()) for plane in self.planes) + "\n}"
 
     @staticmethod
-    def loads(string: str) -> 'Brush | None':
+    def loads(string: str) -> "Brush | None":
         plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
-        planes: list[Plane] = [possible_plane for ps in plane_strings if (possible_plane := Plane.loads(ps))]
+        planes: list[Plane] = [
+            possible_plane
+            for ps in plane_strings
+            if (possible_plane := Plane.loads(ps))
+        ]
         if planes:
             return Brush(planes)
 
     def __str__(self):
-        return f'brush with {len(self.planes)} planes'
+        return f"brush with {len(self.planes)} planes"
 
 
 @dataclass
 class KV(QProp, dict[str, Any]):
     def dumps(self):
-        return '\n'.join([f'"{k}" "{v}"' for k, v in self.items()]) + '\n'
+        return "\n".join([f'"{k}" "{v}"' for k, v in self.items()]) + "\n"
 
     @staticmethod
-    def loads(string: str) -> 'KV':
+    def loads(string: str) -> "KV":
         found = PATTERN_KEY_VALUE_LINE.finditer(string)
         kvdict = KV()
         for m in found:
@@ -173,42 +184,46 @@ class Entity(QProp):
     kv: KV = field(default_factory=KV)
 
     def dumps(self):
-        out = '{\n'
+        out = "{\n"
         if self.kv:
             out += self.kv.dumps()
         if self.brushes:
-            out += '\n'.join(brush.dumps() for brush in self.brushes)
-        out += '\n}' if self.brushes else '}'
+            out += "\n".join(brush.dumps() for brush in self.brushes)
+        out += "\n}" if self.brushes else "}"
         return out
 
     @staticmethod
-    def loads(string: str) -> 'Entity':
+    def loads(string: str) -> "Entity":
         kv: KV = KV.loads(string)
         brushes_in_ent = PATTERN_BRUSHES_IN_ENT.findall(string)
-        brushes = [possible_brush for brush in brushes_in_ent if (possible_brush := Brush.loads(brush))]
+        brushes = [
+            possible_brush
+            for brush in brushes_in_ent
+            if (possible_brush := Brush.loads(brush))
+        ]
         return Entity(kv=kv, brushes=brushes)
 
     @property
     def classname(self):
-        return self.kv['classname']
+        return self.kv["classname"]
 
     @property
     def targetname(self):
-        return self.kv.get('targetname')
+        return self.kv.get("targetname")
 
     @property
     def target(self):
-        return self.kv.get('target')
+        return self.kv.get("target")
 
     # TODO move this out of this class
     def iterate(self, key: str, *, val: int = 1, set_to_val: bool = False) -> None:
-        PLACEHOLDER = '@🐇@'
+        PLACEHOLDER = "@🐇@"
         possible_val = self.kv.get(key)
         if possible_val:
             num = get_num_in_key(possible_val)
             txt = str(possible_val).replace(str(num), PLACEHOLDER)
             if num:
-                print(f'found {num} in {self.kv[key]}')
+                print(f"found {num} in {self.kv[key]}")
                 if set_to_val:
                     num = val
                 else:
@@ -221,29 +236,31 @@ class Entity(QProp):
 
 # used in tb.py
 class QuakeMap(QProp):
-    def __init__(self, kv: KV, brushes: list[Brush] | None, entities: list[Entity] | None):
+    def __init__(
+        self, kv: KV, brushes: list[Brush] | None, entities: list[Entity] | None
+    ):
         self.kv = kv
         self.brushes = brushes
         self.entities = entities
 
     @property
     def wad(self):
-        return self.kv['wad']
+        return self.kv["wad"]
 
     @property
     def mod(self) -> str:
-        return self.kv['_tb_mod']
+        return self.kv["_tb_mod"]
 
     @property
     def message(self):
-        return self.kv['message']
+        return self.kv["message"]
 
     @property
     def mapversion(self):
-        return self.kv['mapversion']
+        return self.kv["mapversion"]
 
     @staticmethod
-    def loads(string: str) -> 'QuakeMap':
+    def loads(string: str) -> "QuakeMap":
         kv: KV = KV.loads(string)
         return QuakeMap(kv, [], [])
 
@@ -257,10 +274,10 @@ class TBObject:
 
     @property
     def classname(self):
-        return self.kv.get('classname', 'Brush?')
+        return self.kv.get("classname", "Brush?")
 
     def __str__(self):
-        return f'{self.classname} ({len(self.children)})'
+        return f"{self.classname} ({len(self.children)})"
 
 
 def parse(text: str) -> list[TBObject]:
@@ -270,10 +287,10 @@ def parse(text: str) -> list[TBObject]:
     current = None
 
     for line in LINES:
-        verbose_print('\t', bcolors.colorize(line, bcolors.bcolors.OKBLUE))
+        verbose_print("\t", bcolors.colorize(line, bcolors.bcolors.OKBLUE))
         match line[:1]:
             # entering an object
-            case '{':
+            case "{":
                 new = TBObject()
 
                 if current:
@@ -283,7 +300,7 @@ def parse(text: str) -> list[TBObject]:
                 current = new
 
             # exiting an object
-            case '}':
+            case "}":
                 if stack:
                     current = stack.pop()
                 else:
@@ -296,7 +313,7 @@ def parse(text: str) -> list[TBObject]:
                     for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
                         current.kv[k] = v
 
-            case '(':
+            case "(":
                 if current:
                     current.planes.append(Plane.deconstruct_line(line))
 
@@ -317,10 +334,12 @@ def parse_whole_map(text: str) -> list[Entity]:
     count = 0
     for line in LINES:
         count += 1
-        verbose_print(' ', f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE))
+        verbose_print(
+            " ", f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE)
+        )
         match line[:1]:
             # entering an object
-            case '{':
+            case "{":
                 depth += 1
 
                 if depth == 1:
@@ -329,7 +348,7 @@ def parse_whole_map(text: str) -> list[Entity]:
                     current_brush = Brush()
 
             # exiting an object
-            case '}':
+            case "}":
                 depth -= 1
 
                 if current_brush and current_ent:
@@ -346,7 +365,7 @@ def parse_whole_map(text: str) -> list[Entity]:
                     for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
                         current_ent.kv[k] = v
 
-            case '(':
+            case "(":
                 if current_brush:
                     current_brush.planes.append(Plane.deconstruct_line(line))
 

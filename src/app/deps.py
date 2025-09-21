@@ -4,19 +4,20 @@ from src.app.parse import Entity, KV
 
 @dataclass(kw_only=True)
 class Master:
-    '''holds other patterns, and decides what to do with those patterns'''
+    """holds other patterns, and decides what to do with those patterns"""
+
     name: str
     destination: str
     str_eval: str = ""
     str_exec: str = ""
 
     @staticmethod
-    def from_dict(d: dict) -> 'Master':
+    def from_dict(d: dict) -> "Master":
         return Master(
-            name=d.get('name', 'unnamed pattern'),
-            destination=d['destination'],
-            str_eval=d.get('eval', ""),
-            str_exec=d.get('exec', ""),
+            name=d.get("name", "unnamed pattern"),
+            destination=d["destination"],
+            str_eval=d.get("eval", ""),
+            str_exec=d.get("exec", ""),
         )
 
     def check(self, entity: Entity) -> list[str] | None:
@@ -30,7 +31,7 @@ class Master:
         elif self.str_exec:
             namespace = {}
             exec(self.str_exec, context, namespace)
-            output = namespace.get('output')
+            output = namespace.get("output")
 
         if isinstance(output, str):
             output = [output]

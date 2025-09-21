@@ -6,7 +6,7 @@ import src.app.paths as paths
 
 class TestGenerate(unittest.TestCase):
     def setUp(self) -> None:
-        stem = 'abc_username'
+        stem = "abc_username"
         self.ex_jam = paths.TEMP / stem
         jamgen.gen(self.ex_jam, stem)
 
@@ -17,5 +17,5 @@ class TestGenerate(unittest.TestCase):
         self.assertTrue(self.ex_jam.exists())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

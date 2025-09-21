@@ -26,12 +26,12 @@ NO_BRIGHTS_WITH_TRANS_IMG = palette_image_from_tuples(NO_BRIGHTS_WITH_TRANS_LIST
 
 TEX_MAX_CHARS = 16
 TEX_SIZE_MOD = 16
-PRE_TRANS = '{'
-PRE_WATER = '*'
-PRE_ANIMATED = '+'
-PRE_TOGGLE = '+A'
-PRE_SKY = 'sky'
-R_NUM_STEM_SUFFIX = re.compile(r'(.*?)(\d+$)')
+PRE_TRANS = "{"
+PRE_WATER = "*"
+PRE_ANIMATED = "+"
+PRE_TOGGLE = "+A"
+PRE_SKY = "sky"
+R_NUM_STEM_SUFFIX = re.compile(r"(.*?)(\d+$)")
 
 
 def get_files(path: Path):
@@ -49,7 +49,7 @@ def alpha_to_pink(img: Image.Image, alpha_cutoff=254):
 
 
 def palettize(img: Image.Image, palette: Image.Image):
-    img = img.convert('RGB')
+    img = img.convert("RGB")
     colors = palette.getcolors()
     if colors:
         img = img.quantize(colors=len(colors), palette=palette, dither=Dither.NONE)
@@ -57,10 +57,10 @@ def palettize(img: Image.Image, palette: Image.Image):
 
 
 def split_pink(img: Image.Image):
-    '''takes 1 RGB image, returns 2 RGBA images'''
-    if img.mode != 'RGB':
-        raise TypeError('image must be RGB')
-    img_ex: Image.Image = Image.new('RGBA', img.size, color=PLACEHOLDER_RGBA_0)
+    """takes 1 RGB image, returns 2 RGBA images"""
+    if img.mode != "RGB":
+        raise TypeError("image must be RGB")
+    img_ex: Image.Image = Image.new("RGBA", img.size, color=PLACEHOLDER_RGBA_0)
     img_opaque: Image.Image = img_ex.copy()
     img_trans: Image.Image = img_ex.copy()
 
@@ -77,7 +77,7 @@ def pad_zeroes_in_stem_int(img_path: Path, zero_count: int = 3):
     search = re.search(R_NUM_STEM_SUFFIX, img_path.stem)
     groups = search.groups() if search else None
     if groups:
-        padded = f'{groups[0]}{groups[1].zfill(zero_count)}'
+        padded = f"{groups[0]}{groups[1].zfill(zero_count)}"
         return Path(img_path.parent, padded + img_path.suffix)
     return img_path
 
@@ -86,11 +86,11 @@ def is_img_quake_trans(img: Image.Image):
     colors = img.getcolors()
     if colors:
         for color in colors:
-            if img.mode == 'RGB':
+            if img.mode == "RGB":
                 if color[1] == TRANS_RGB:
                     return True
             else:
-                raise TypeError('image must be RGB')
+                raise TypeError("image must be RGB")
 
     return False
 
@@ -102,8 +102,8 @@ def prepend_trans(img_path: Path, img: Image.Image):
 
 
 def prepend(file: Path, prefix: str):
-    underscore = '_' if not prefix.endswith('_') else ''
-    return Path(file.parent, f'{prefix}{underscore}{file.name}')
+    underscore = "_" if not prefix.endswith("_") else ""
+    return Path(file.parent, f"{prefix}{underscore}{file.name}")
 
 
 def batch_rm_dupes(folder: Path):
@@ -112,7 +112,7 @@ def batch_rm_dupes(folder: Path):
 
 
 def remove_alpha_channel(img: Image.Image):
-    return img.convert('RGB')
+    return img.convert("RGB")
 
 
 def resize(img: Image.Image, scale=2):
@@ -123,12 +123,14 @@ def wadpack():
     pass
 
 
-def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alpha_cutoff):
+def fix(
+    img_path: Path, out_img_folder: Path, prefix: str = "", *, zeroes=3, alpha_cutoff
+):
     with Image.open(img_path) as img:
         out_path = out_img_folder / img_path.name
 
         # alter image
-        img = img.convert('RGBA')
+        img = img.convert("RGBA")
         img = alpha_to_pink(img, alpha_cutoff)
         img = remove_alpha_channel(img)
 
@@ -137,7 +139,7 @@ def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alp
         # img_opaque.save(name.parent / (name.stem + '_OPAQUE' + name.suffix))
 
         img_opaque = palettize(img_opaque, QUAKE_PALETTE_IMG)
-        img_opaque = img_opaque.convert('RGBA')
+        img_opaque = img_opaque.convert("RGBA")
 
         img = Image.alpha_composite(img_opaque, img_trans)
         img = remove_alpha_channel(img)
@@ -150,33 +152,37 @@ def fix(img_path: Path, out_img_folder: Path, prefix: str = '', *, zeroes=3, alp
         if prefix:
             new_name = prepend(new_name, prefix)
         if is_img_quake_trans(img):
-            print('TRANS!!!!!!!')
+            print("TRANS!!!!!!!")
             # FIXME prepend_trans isnt working :( :(
             # new_name = prepend_trans(new_name, img)
         new_name = pad_zeroes_in_stem_int(new_name, zeroes)
         return out_path.rename(new_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_path', type=Path)
-    parser.add_argument('output_path', type=Path)
-    parser.add_argument('--prepend', action='store_true')
-    parser.add_argument('--rmdupes', action='store_true')
-    parser.add_argument('--rmalpha', action='store_true')
-    parser.add_argument('--add_trans_prefix', action='store_true')
-    parser.add_argument('--fix', '-f', action='store_true')
-    parser.add_argument('--prefix', '-p', help='prefix to prepend to each image')
-    parser.add_argument('--scale', type=int, help='scale image by this multiplier')
-    parser.add_argument('--zeroes', '-z', type=int, help='how many zeroes to prepend to numbers')
-    parser.add_argument('--alpha_cutoff', '-a', type=int, help='below this alpha value will turn pink')
+    parser.add_argument("input_path", type=Path)
+    parser.add_argument("output_path", type=Path)
+    parser.add_argument("--prepend", action="store_true")
+    parser.add_argument("--rmdupes", action="store_true")
+    parser.add_argument("--rmalpha", action="store_true")
+    parser.add_argument("--add_trans_prefix", action="store_true")
+    parser.add_argument("--fix", "-f", action="store_true")
+    parser.add_argument("--prefix", "-p", help="prefix to prepend to each image")
+    parser.add_argument("--scale", type=int, help="scale image by this multiplier")
+    parser.add_argument(
+        "--zeroes", "-z", type=int, help="how many zeroes to prepend to numbers"
+    )
+    parser.add_argument(
+        "--alpha_cutoff", "-a", type=int, help="below this alpha value will turn pink"
+    )
     args = parser.parse_args()
 
     input = args.input_path
     output = args.output_path
 
-    print('INPUT ', colorize(input, bcolors.OKBLUE))
-    print('OUTPUT', colorize(output, bcolors.OKBLUE))
+    print("INPUT ", colorize(input, bcolors.OKBLUE))
+    print("OUTPUT", colorize(output, bcolors.OKBLUE))
     if input.is_dir():
         for f in get_files(input):
             if args.scale:
@@ -190,5 +196,11 @@ if __name__ == '__main__':
         #     fix(input, output)
         if input.is_dir():
             for file in get_files(input):
-                finished = fix(file, output, prefix=args.prefix, zeroes=args.zeroes or 3, alpha_cutoff=args.alpha_cutoff or 254)
+                finished = fix(
+                    file,
+                    output,
+                    prefix=args.prefix,
+                    zeroes=args.zeroes or 3,
+                    alpha_cutoff=args.alpha_cutoff or 254,
+                )
                 print(Ind.mark(), finished)

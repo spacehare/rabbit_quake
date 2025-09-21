@@ -9,12 +9,12 @@ from dataclasses import dataclass, field
 
 
 def get_cfg_file_contents():
-    possible_cfgs = Path('cfg/').glob('settings.*')
+    possible_cfgs = Path("cfg/").glob("settings.*")
     file_path: Path = (*possible_cfgs,)[0]
-    print('found settings file at %s' % file_path)
-    if file_path.suffix == '.toml':
+    print("found settings file at %s" % file_path)
+    if file_path.suffix == ".toml":
         return tomllib.loads(file_path.read_text())
-    elif file_path.suffix == '.yaml':
+    elif file_path.suffix == ".yaml":
         return yaml.safe_load(file_path.open())
 
     exit()
@@ -28,10 +28,10 @@ banned_chars = re.compile(r'[<>:"\\\/|?*]')
 # https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
 # https://www.autohotkey.com/docs/v2/KeyList.htm
 AHK_KEY_DEFAULTS = {
-    'compile': '!c',
-    'launch': '!`',
-    'iterate': '!v',
-    'pc_close_loop': '!+v'
+    "compile": "!c",
+    "launch": "!`",
+    "iterate": "!v",
+    "pc_close_loop": "!+v",
 }
 
 
@@ -45,7 +45,7 @@ def make_listpath(what) -> list[Path]:
     elif type(what) is str:
         return [*Path(what).iterdir()]
     else:
-        raise TypeError(f'{what} of type {type(what)} is not list or str')
+        raise TypeError(f"{what} of type {type(what)} is not list or str")
 
 
 class Engine:
@@ -57,46 +57,44 @@ class Engine:
 
 
 class Keybinds:
-    compile = _get_bind(_contents['keybinds'], 'compile')
-    launch = _get_bind(_contents['keybinds'], 'launch')
-    iterate = _get_bind(_contents['keybinds'], 'iterate')
-    pc_close_loop = _get_bind(_contents['keybinds'], 'pc_close_loop')
+    compile = _get_bind(_contents["keybinds"], "compile")
+    launch = _get_bind(_contents["keybinds"], "launch")
+    iterate = _get_bind(_contents["keybinds"], "iterate")
+    pc_close_loop = _get_bind(_contents["keybinds"], "pc_close_loop")
 
 
 class Settings:
     # TODO this is so fucking ugly to look at. it does not spark joy
-    _ericw = _contents['paths'].get('ericw')
-    _engine_exes: list[Path] = make_listpath(
-        _contents['paths'].get('engine_exes'))
-    _raw_jampack_whitelist: list[dict] = _contents['jampack']['allow']
-    jampack: dict = _contents['jampack']
+    _ericw = _contents["paths"].get("ericw")
+    _engine_exes: list[Path] = make_listpath(_contents["paths"].get("engine_exes"))
+    _raw_jampack_whitelist: list[dict] = _contents["jampack"]["allow"]
+    jampack: dict = _contents["jampack"]
 
-    name = _contents['name']
-    trenchbroom = Path(_contents['paths'].get('trenchbroom'))
-    trenchbroom_exe = trenchbroom / 'trenchbroom.exe'
-    trenchbroom_prefs = Path(_contents['paths'].get(
-        'trenchbroom_preferences'))
+    name = _contents["name"]
+    trenchbroom = Path(_contents["paths"].get("trenchbroom"))
+    trenchbroom_exe = trenchbroom / "trenchbroom.exe"
+    trenchbroom_prefs = Path(_contents["paths"].get("trenchbroom_preferences"))
     engines: list[Engine] = list([Engine(Path(exe)) for exe in _engine_exes])
-    configs = Path(_contents['paths'].get('configs'))
-    maps_path = Path(_contents['paths'].get('maps'))
+    configs = Path(_contents["paths"].get("configs"))
+    maps_path = Path(_contents["paths"].get("maps"))
     maps: list[Path] = [p for p in maps_path.iterdir()]
-    cfg_whitelist = _contents.get('cfg_whitelist') or {}
-    submit_whitelist = _contents['submit']['allowed']
+    cfg_whitelist = _contents.get("cfg_whitelist") or {}
+    submit_whitelist = _contents["submit"]["allowed"]
 
 
-S_MASTERS: list[Master] = [mas for d in _contents['dependencies'] if (mas := Master.from_dict(d))]
+S_MASTERS: list[Master] = [
+    mas for d in _contents["dependencies"] if (mas := Master.from_dict(d))
+]
 
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
 # https://ericwa.github.io/ericw-tools/doc/vis.html
 # https://ericwa.github.io/ericw-tools/doc/light.html
-SVARS = {
-    '{name}': Settings.name
-}
+SVARS = {"{name}": Settings.name}
 
 
 def replace_var(what: str, replacements: dict = SVARS):
-    output: str = ''
+    output: str = ""
     for k, v in replacements.items():
         output = what.replace(k, v)
     return output
@@ -108,14 +106,14 @@ class Symlink:
     destination: Path
 
     @staticmethod
-    def from_dict(d: dict) -> 'Symlink':
+    def from_dict(d: dict) -> "Symlink":
         return Symlink(
-            replace_var(d['target']),
-            Path(replace_var(d['destination'])),
+            replace_var(d["target"]),
+            Path(replace_var(d["destination"])),
         )
 
 
-symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents['symlink']]
+symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents["symlink"]]
 
 
 @dataclass
@@ -124,9 +122,9 @@ class TemplateCopyPair:
     destination: Path
 
     @staticmethod
-    def from_dict(d: dict) -> 'TemplateCopyPair':
-        file = Path(replace_var(d['file']))
-        destination = Path(replace_var(d['destination']))
+    def from_dict(d: dict) -> "TemplateCopyPair":
+        file = Path(replace_var(d["file"]))
+        destination = Path(replace_var(d["destination"]))
 
         return TemplateCopyPair(file, destination)
 
@@ -137,11 +135,11 @@ class Template:
     copy_pairs: list[TemplateCopyPair] = field(default_factory=list)
 
     @staticmethod
-    def from_dict(d: dict) -> 'Template':
-        touch = [replace_var(e) for e in d.get('touch', [])]
-        copy_pairs = [TemplateCopyPair.from_dict(e) for e in d.get('copy', [])]
+    def from_dict(d: dict) -> "Template":
+        touch = [replace_var(e) for e in d.get("touch", [])]
+        copy_pairs = [TemplateCopyPair.from_dict(e) for e in d.get("copy", [])]
 
         return Template(touch, copy_pairs)
 
 
-template: Template = Template.from_dict(_contents['template'])
+template: Template = Template.from_dict(_contents["template"])

@@ -1,4 +1,5 @@
 from PIL import Image
+
 QUAKE_RGB_TUPLES = [
     (0, 0, 0),
     (15, 15, 15),
@@ -258,7 +259,7 @@ QUAKE_RGB_TUPLES = [
     (159, 91, 83),
 ]
 
-QUAKE_IMG = Image.new('P', (len(QUAKE_RGB_TUPLES), 1))
+QUAKE_IMG = Image.new("P", (len(QUAKE_RGB_TUPLES), 1))
 
 
 def tuples_as_flat_list(src: list):
@@ -268,7 +269,7 @@ def tuples_as_flat_list(src: list):
 def palette_image_from_tuples(p: list) -> Image.Image:
     w = len(p)
     h = 1
-    img = Image.new('P', (w, h))
+    img = Image.new("P", (w, h))
     for x in range(w):
         for y in range(h):
             img.putpixel((x, y), p[x])
@@ -279,13 +280,13 @@ def image_to_palette_indexes(img: Image.Image, palette=QUAKE_RGB_TUPLES) -> list
     data = list(img.getdata())  # type: ignore
     indexes: list[int] = []
 
-    if img.mode == 'P':
+    if img.mode == "P":
         indexes = data
-    elif img.mode == 'RGB':
+    elif img.mode == "RGB":
         for rgb_tuple in data:
             idx = palette.index(rgb_tuple)
             indexes.append(idx)
     else:
-        raise ValueError('image must be P mode or RGB mode')
+        raise ValueError("image must be P mode or RGB mode")
 
     return indexes

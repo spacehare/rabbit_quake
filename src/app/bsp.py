@@ -9,8 +9,8 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class Entry():
-    STRUCT = Struct('2l')
+class Entry:
+    STRUCT = Struct("2l")
     offset: int
     size: int
 
@@ -21,21 +21,21 @@ class Entry():
 
 
 @dataclass
-class BSP():
+class BSP:
     version = None
     entries: list[Entry] = field(default_factory=list)
     entities: list[Entity] = field(default_factory=list)
 
 
-ST_VERSION = Struct('l')
-ST_ENTRY = Struct('2l')
-ST_VERSION = Struct('l')
+ST_VERSION = Struct("l")
+ST_ENTRY = Struct("2l")
+ST_VERSION = Struct("l")
 
 
 def read_bsp(bsp_path: Path) -> BSP:
-    print('reading bsp %s' % bsp_path)
+    print("reading bsp %s" % bsp_path)
     nbsp = BSP()
-    with open(bsp_path, 'rb') as f:
+    with open(bsp_path, "rb") as f:
         version = ST_VERSION.unpack(f.read(ST_VERSION.size))
         entries: list[Entry] = []
         for _ in range(15):
@@ -46,7 +46,7 @@ def read_bsp(bsp_path: Path) -> BSP:
             f.seek(entry.offset)
             data = f.read(entry.size)
             if entry == entries[0]:
-                text: str = data.decode('utf-8', 'backslashreplace')
+                text: str = data.decode("utf-8", "backslashreplace")
                 qmap = parse_whole_map(text)
                 nbsp.entities = qmap
 
@@ -54,15 +54,15 @@ def read_bsp(bsp_path: Path) -> BSP:
 
 
 def read_bsp_entities(bsp_path: Path) -> list[Entity]:
-    '''legacy version, just gets entities'''
-    with open(bsp_path, 'rb') as f:
+    """legacy version, just gets entities"""
+    with open(bsp_path, "rb") as f:
         f.read(4)
         header = f.read(48)
-        lumps = struct.unpack('12l', header)
+        lumps = struct.unpack("12l", header)
         offset = lumps[0]
         length = lumps[1]
         f.seek(offset)
         data = f.read(length)
-        text = data.decode('utf-8')
+        text = data.decode("utf-8")
         ents = parse_whole_map(text)
         return ents

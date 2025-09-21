@@ -3,7 +3,7 @@ import src.app.parse as parse
 from pathlib import Path
 
 
-TEST_MAP_PATH: Path = Path('./assets/tests/pack/mapsrc/packtest.map')
+TEST_MAP_PATH: Path = Path("./assets/tests/pack/mapsrc/packtest.map")
 
 
 class TestParser(unittest.TestCase):
@@ -19,5 +19,5 @@ class TestParser(unittest.TestCase):
         self.assertEqual(dumps1, dumps2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

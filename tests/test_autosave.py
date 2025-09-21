@@ -7,5 +7,5 @@ class TestAutosave(unittest.TestCase):
         self.assertIsNotNone(autosave.get_all_autosaves())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

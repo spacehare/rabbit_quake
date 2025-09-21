@@ -11,7 +11,7 @@ class RightTriangle:
         self.c = math.sqrt(a**2 + b**2)
 
     def __str__(self):
-        return f'{self.a}, {self.b}, {self.c}'
+        return f"{self.a}, {self.b}, {self.c}"
 
 
 class Shape:
@@ -27,10 +27,10 @@ class Shape:
 
     def get_x_scale(self, texture_width: int, truncate=True):
         scale = self.perimeter / texture_width
-        return f'{scale:.6f}' if truncate else scale
+        return f"{scale:.6f}" if truncate else scale
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # czg8s_128u = Shape([*[RightTriangle(16, 48)] * 8])
     # czg12s_128u = Shape([*[32] * 4,
     #                     *[RightTriangle(16, 32)] * 8])
@@ -43,7 +43,14 @@ if __name__ == '__main__':
     #                      ])
 
     def display(text, shape: Shape, width):
-        print(text, len(shape.sides), 'x scale', shape.get_x_scale(width), f'div: {width}', sep='\t')
+        print(
+            text,
+            len(shape.sides),
+            "x scale",
+            shape.get_x_scale(width),
+            f"div: {width}",
+            sep="\t",
+        )
 
     # display('czg8s_128u', czg8s_128u, 512)  # seamless
     # display('czg12s_128u', czg12s_128u, 512)  # seamless
@@ -52,9 +59,9 @@ if __name__ == '__main__':
     # display('czg24s_512u', czg24s_512u, 64 * 24)  # seamless, 1.059713
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--texture-res', '-r', type=int)
-    parser.add_argument('--triangles', '-t', help='[a, b, number of sides]', nargs='+')
-    parser.add_argument('--flats', '-f', help='[a, number of sides]', nargs='+')
+    parser.add_argument("--texture-res", "-r", type=int)
+    parser.add_argument("--triangles", "-t", help="[a, b, number of sides]", nargs="+")
+    parser.add_argument("--flats", "-f", help="[a, number of sides]", nargs="+")
     args = parser.parse_args()
     texture_res: int = args.texture_res
 
@@ -81,4 +88,4 @@ if __name__ == '__main__':
 
     shape = Shape(triangles + flats)
 
-    display('->', shape, args.texture_res or 512)
+    display("->", shape, args.texture_res or 512)
