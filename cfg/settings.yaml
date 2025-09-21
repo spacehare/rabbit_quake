@@ -95,9 +95,9 @@ template:
     - build
   copy:
     - file: assets\template.map
-      destination: maps/{mapstem}.map
+      destination: mapsrc/{mapstem}.map
     - file: assets\template.yaml
-      destination: maps/{mapstem}.yaml
+      destination: mapsrc/{mapstem}.yaml
     - file: assets/todo.md
       destination: todo.md
     - file: assets/readme.md
