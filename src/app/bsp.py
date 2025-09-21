@@ -46,7 +46,7 @@ def read_bsp(bsp_path: Path) -> BSP:
             f.seek(entry.offset)
             data = f.read(entry.size)
             if entry == entries[0]:
-                text: str = data.decode('utf-8')
+                text: str = data.decode('utf-8', 'backslashreplace')
                 qmap = parse_whole_map(text)
                 nbsp.entities = qmap
 
