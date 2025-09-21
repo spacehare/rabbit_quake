@@ -1,10 +1,5 @@
-from pathlib import Path
-from typing import NamedTuple, Literal
-from collections import namedtuple
 from dataclasses import dataclass, field
 from src.app.parse import Entity, KV
-from enum import StrEnum
-from src.app.bcolors import colorize, bcolors
 
 
 @dataclass(kw_only=True)
@@ -24,13 +19,20 @@ class Master:
             str_exec=d.get('exec', ""),
         )
 
-    def check(self, entity: Entity) -> list[str] | str | None:
-        context = {"entity": entity}
+    def check(self, entity: Entity) -> list[str] | None:
         assert not (self.str_eval and self.str_exec)
 
+        context = {"entity": entity}
+        output = None
+
         if self.str_eval:
-            return eval(self.str_eval, context)
-        if self.str_exec:
+            output = eval(self.str_eval, context)
+        elif self.str_exec:
             namespace = {}
             exec(self.str_exec, context, namespace)
-            return namespace.get('output')
+            output = namespace.get('output')
+
+        if isinstance(output, str):
+            output = [output]
+
+        return output
