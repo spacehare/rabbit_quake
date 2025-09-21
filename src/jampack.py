@@ -1,7 +1,6 @@
 from .app import bsp
 from .app.settings import S_MASTERS, Settings
 from .app.bcolors import bcolors, colorize
-from .app.deps import Pattern
 import zipfile
 import py7zr
 import argparse

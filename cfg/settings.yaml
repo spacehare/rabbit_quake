@@ -24,48 +24,21 @@ dependencies:
   # sound effects
   - name: SOUND_EFFECTS
     destination: sound
-    outputs:
-      - pattern:
-          which: value
-          condition: endswith
-          what: .wav
+    eval: "[value for key, value in entity.kv.items() if value.endswith('.wav')]"
   # models
   - name: MODELS
     destination: "*"
-    outputs:
-      - pattern:
-          which: value
-          condition: endswith
-          what: .mdl
+    eval: "[value for key, value in entity.kv.items() if value.endswith('.mdl')]"
   # skyboxes
   - name: SKYBOXES
     destination: gfx/env
-    outputs:
-      - pattern:
-          which: key
-          condition: equals
-          what: sky
+    eval: "entity.kv.get('sky')"
   # music
   - name: MUSIC
     destination: music
-    checks:
-      # make sure a key-value pair matches both of these patterns at once
-      - type: all
-        tags: [same_key]
-        patterns:
-          - pattern:
-              which: key
-              condition: equals
-              what: classname
-          - pattern:
-              which: value
-              condition: equals
-              what: [worldspawn, misc_changemusic]
-    outputs:
-      - pattern:
-          which: key
-          condition: equals
-          what: sounds
+    exec: |
+      if entity.kv['classname'] in ['worldspawn, misc_changemusic']:
+        output = entity.kv.get('sounds')
 
 jampack:
   deny:
