@@ -5,14 +5,14 @@ import src.app.settings as settings
 import src.app.bcolors as bcolors
 
 
-def gen(parent_folder: Path, stem: str, create: bool = True) -> Path:
-    if not parent_folder.exists() and create:
-        parent_folder.mkdir()
+def gen(new_folder: Path, stem: str, create: bool = True) -> None:
+    if not new_folder.exists() and create:
+        new_folder.mkdir()
 
     print('-- create --')
     for item in settings.template.touch:
         item_path: Path = Path(item.replace("{mapstem}", stem))
-        path: Path = parent_folder / item_path
+        path: Path = new_folder / item_path
         print(f'\t-> {path}')
 
         if create:
@@ -23,13 +23,11 @@ def gen(parent_folder: Path, stem: str, create: bool = True) -> Path:
 
     print('-- copy --')
     for pair in settings.template.copy_pairs:
-        dest = parent_folder / str(pair.destination).replace("{mapstem}", stem)
+        dest = new_folder / str(pair.destination).replace("{mapstem}", stem)
         print(f'\t-> {dest}')
 
         if create:
             shutil.copyfile(pair.file, dest)
-
-    return parent_folder / stem
 
 
 if __name__ == '__main__':
