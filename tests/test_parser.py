@@ -17,3 +17,7 @@ class TestParser(unittest.TestCase):
         dumps2 = [e.dumps() for e in entities2]
 
         self.assertEqual(dumps1, dumps2)
+
+
+if __name__ == '__main__':
+    unittest.main()
