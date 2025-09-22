@@ -1,3 +1,6 @@
+# https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+
+
 class bcolors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
