@@ -20,6 +20,12 @@ cfg_whitelist:
     - remobilize_test15
 
 # search through key-value pairs per entity
+# relevant variables:
+#
+# entity
+#   a dataclass. the relevant dictionary is `entity.kv`
+# output
+#   a string (used as a Path pattern) that the program will look for
 dependencies:
   # sound effects
   - name: SOUND_EFFECTS
@@ -32,13 +38,13 @@ dependencies:
   # skyboxes
   - name: SKYBOXES
     destination: gfx/env
-    eval: "entity.kv.get('sky')"
+    eval: "entity.kv.get('sky') + '*'"
   # music
   - name: MUSIC
     destination: music
     exec: |
       if entity.kv['classname'] in ['worldspawn, misc_changemusic']:
-        output = entity.kv.get('sounds')
+        output = "track" + entity.kv.get('sounds') + ".*"
 
 jampack:
   deny:
