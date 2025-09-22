@@ -1,6 +1,7 @@
 import re
 import tomllib
 from dataclasses import dataclass, field
+from enum import StrEnum
 from pathlib import Path
 
 import yaml
@@ -8,7 +9,7 @@ import yaml
 from src.app.bcolors import *
 from src.app.parse import Entity
 
-from .deps import Master
+from .deps import DependencyData
 
 
 def get_cfg_file_contents():
@@ -24,18 +25,6 @@ def get_cfg_file_contents():
 
 
 _contents: dict = get_cfg_file_contents()
-
-banned_chars = re.compile(r'[<>:"\\\/|?*]')
-
-# https://github.com/spyoungtech/ahk/blob/main/ahk/keys.py
-# https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
-# https://www.autohotkey.com/docs/v2/KeyList.htm
-AHK_KEY_DEFAULTS = {
-    "compile": "!c",
-    "launch": "!`",
-    "iterate": "!v",
-    "pc_close_loop": "!+v",
-}
 
 
 def _get_bind(dictionary: dict, key: str) -> str:
@@ -85,14 +74,6 @@ class Settings:
     submit_whitelist = _contents["submit"]["allowed"]
 
 
-S_MASTERS: list[Master] = [
-    mas for d in _contents["dependencies"] if (mas := Master.from_dict(d))
-]
-
-
-# https://ericwa.github.io/ericw-tools/doc/qbsp.html
-# https://ericwa.github.io/ericw-tools/doc/vis.html
-# https://ericwa.github.io/ericw-tools/doc/light.html
 SVARS = {"{name}": Settings.name}
 
 
@@ -114,9 +95,6 @@ class Symlink:
             replace_var(d["target"]),
             Path(replace_var(d["destination"])),
         )
-
-
-symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents["symlink"]]
 
 
 @dataclass
@@ -145,4 +123,82 @@ class Template:
         return Template(touch, copy_pairs)
 
 
+class PatternMode(StrEnum):
+    PATH = "path"
+    REGEX = "regex"
+
+
+@dataclass
+class Pattern:
+    mode: PatternMode
+    text: str
+
+    @staticmethod
+    def from_pair(d: dict) -> "Pattern | None":
+        for k, v in d.items():
+            return Pattern(PatternMode(k), v)
+
+    def check(self, path: Path) -> bool:
+        match self.mode:
+            case PatternMode.PATH:
+                result = path.match(self.text)
+                return result
+            case PatternMode.REGEX:
+                result = re.search(self.text, str(path))
+                return bool(result)
+
+
+@dataclass
+class PatternParent:
+    patterns: list[Pattern]
+    destination: str
+
+    @staticmethod
+    def from_dict(d: dict) -> "PatternParent":
+        dest = d["destination"]
+        patterns = [
+            pattern for pair in d["patterns"] if (pattern := Pattern.from_pair(pair))
+        ]
+        return PatternParent(patterns, dest)
+
+
+@dataclass
+class Jampack:
+    deny: list[Pattern]
+    allow: list[PatternParent]
+
+    @staticmethod
+    def from_dict(d: dict) -> "Jampack":
+        deny = [pattern for entry in d["deny"] if (pattern := Pattern.from_pair(entry))]
+        allow = []
+        for parent in d["allow"]:
+            patterns = [
+                pattern
+                for pair in parent["patterns"]
+                if (pattern := Pattern.from_pair(pair))
+            ]
+            pattern_parent = PatternParent(patterns, parent["destination"])
+            allow.append(pattern_parent)
+
+        if allow and deny:
+            return Jampack(deny=deny, allow=allow)
+        else:
+            raise ValueError("invalid Jampack data.")
+
+
+# https://github.com/spyoungtech/ahk/blob/main/ahk/keys.py
+# https://www.autohotkey.com/docs/v2/Hotkeys.htm#Symbols
+# https://www.autohotkey.com/docs/v2/KeyList.htm
+AHK_KEY_DEFAULTS = {
+    "compile": "!c",
+    "launch": "!`",
+    "iterate": "!v",
+    "pc_close_loop": "!+v",
+}
+banned_chars = re.compile(r'[<>:"\\\/|?*]')
+symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents["symlink"]]
 template: Template = Template.from_dict(_contents["template"])
+jampack: Jampack = Jampack.from_dict(_contents["jampack"])
+S_MASTERS: list[DependencyData] = [
+    mas for d in _contents["dependencies"] if (mas := DependencyData.from_dict(d))
+]
