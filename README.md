@@ -3,9 +3,9 @@
 - `jamgen.py`
   - generate a starter folder for a quake mapping jam
 - `submit.py`
-  - submit a quake mapping jam map as a `.zip`
+  - submit a quake mapping jam map as a `.zip` or `.7z`
 - `jampack.py`
-  - for jam hosts to put all submissions into one `.zip`
+  - for jam hosts to organize all submissions into one folder or `.zip`
 - `autosave.py`
   - view and delete autosaves
 - `symlink_cfg.py`
@@ -31,4 +31,4 @@
 - [ImageMagick](https://imagemagick.org/)
 - [TrenchBroom](https://trenchbroom.github.io/)
 - [EricW Tools](https://github.com/ericwa/ericw-tools/releases)
-- [EricW Tools documentation](https://ericw-tools.readthedocs.io/en/latest/)
+  - [EricW Tools documentation](https://ericw-tools.readthedocs.io/en/latest/)
