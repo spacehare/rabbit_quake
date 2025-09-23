@@ -43,7 +43,7 @@ def try_md_to_html(
     zipper: zipfile.ZipFile | py7zr.SevenZipFile,
 ):
     if file_path.suffix == ".md" and convert_markdown:
-        html = markdown2.markdown_path(file_path, extras=["tables"])
+        html = markdown2.markdown_path(str(file_path), extras=["tables"])
         zipper.writestr(str(file_path.relative_to(root).with_suffix(".html")), html)
 
 

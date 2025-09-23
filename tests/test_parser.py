@@ -3,7 +3,7 @@ from pathlib import Path
 
 import src.app.parse as parse
 
-TEST_MAP_PATH: Path = Path("./assets/tests/pack/mapsrc/packtest.map")
+TEST_MAP_PATH: Path = Path("./assets/tests/pack/ex_rabbit/mapsrc/packtest.map")
 
 
 class TestParser(unittest.TestCase):
