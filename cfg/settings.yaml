@@ -66,10 +66,10 @@ jampack:
         - path: "*.rc"
       destination: .
     - patterns:
+        - path: readme/*
         - path: "*.txt"
         - path: "*.html"
         - path: "*.md"
-        - path: readme/*
       destination: readme
     - patterns:
         - path: "*.bsp"
