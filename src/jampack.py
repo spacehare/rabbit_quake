@@ -57,7 +57,7 @@ def package_submission(submission_path: Path, output_path: Path, fake: bool):
                     dest = pattern_parent.destination
                     full_dest = output_path / Path(dest) / path.name
 
-                    if not fake:
+                    if not fake and not path_dealt_with:
                         if zip_file:
                             zip_file.write(path, Path(dest) / path.name)
                         else:
