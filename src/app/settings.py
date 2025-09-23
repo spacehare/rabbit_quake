@@ -141,7 +141,10 @@ class Pattern:
     def check(self, path: Path) -> bool:
         match self.mode:
             case PatternMode.PATH:
-                result = path.match(self.text)
+                if "**" in self.text:
+                    result = path.full_match(self.text)
+                else:
+                    result = path.match(self.text)
                 return result
             case PatternMode.REGEX:
                 result = re.search(self.text, str(path))

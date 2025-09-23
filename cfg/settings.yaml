@@ -75,6 +75,11 @@ jampack:
         - path: "*.bsp"
         - path: "*.lit"
       destination: maps
+    - patterns:
+        # - path: "*.tga"
+        - path: "**/gfx/env/**"
+      destination: gfx/env
+
 
 submit:
   allowed:
