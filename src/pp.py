@@ -122,6 +122,8 @@ if __name__ == "__main__":
                 if (key == cfg.char_general + "delete") and int(value) == 1:
                     print(f"deleting {ent.classname}")
                     break
+            elif value.startswith("eval"):
+                ent.kv[key] = eval(value.removeprefix("eval"))
         else:
             new_ents.append(ent)
 

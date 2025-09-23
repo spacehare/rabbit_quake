@@ -165,7 +165,7 @@ class Brush(QProp):
 
 
 @dataclass
-class KV(QProp, dict[str, Any]):
+class KV(QProp, dict[str, str]):
     def dumps(self):
         return "\n".join([f'"{k}" "{v}"' for k, v in self.items()]) + "\n"
 
