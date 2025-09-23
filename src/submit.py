@@ -26,6 +26,7 @@ def create_unique_slug() -> str:
 def is_path_ok(path: Path, whitelist) -> bool:
     allow = False
     for pattern in whitelist:
+        # FIXME this will break with recursive patterns, "**"
         allow = path.match(pattern) and pattern in whitelist
         if allow:
             break
