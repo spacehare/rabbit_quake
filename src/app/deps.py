@@ -19,7 +19,7 @@ class DependencyData:
             str_exec=d.get("exec", ""),
         )
 
-    def get_dependencies(self, entity: Entity) -> list[str] | None:
+    def get_patterns(self, entity: Entity) -> list[str] | None:
         assert not (self.str_eval and self.str_exec)
 
         context = {"entity": entity}

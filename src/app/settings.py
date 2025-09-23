@@ -202,6 +202,8 @@ banned_chars = re.compile(r'[<>:"\\\/|?*]')
 symlinks: list[Symlink] = [Symlink.from_dict(item) for item in _contents["symlink"]]
 template: Template = Template.from_dict(_contents["template"])
 jampack: Jampack = Jampack.from_dict(_contents["jampack"])
-S_MASTERS: list[DependencyData] = [
-    mas for d in _contents["dependencies"] if (mas := DependencyData.from_dict(d))
+dependencies: list[DependencyData] = [
+    dep_data
+    for d in _contents["dependencies"]
+    if (dep_data := DependencyData.from_dict(d))
 ]
