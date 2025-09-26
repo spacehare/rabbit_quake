@@ -2,8 +2,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from src.app.bcolors import Ind
-from src.app.settings import Settings, _contents, make_listpath
+from rabbitquake.app.bcolors import Ind
+from rabbitquake.app.settings import Settings, _contents, make_listpath
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
 # https://ericwa.github.io/ericw-tools/doc/vis.html

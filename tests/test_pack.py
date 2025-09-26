@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-import src.autosave as autosave
+import rabbitquake.autosave as autosave
 
 # import tempfile
 

@@ -1,9 +1,9 @@
 import argparse
 from pathlib import Path
 
-import src.app.settings as settings
-import src.app.shared as shared
-from src.app.bcolors import *
+import rabbitquake.app.settings as settings
+import rabbitquake.app.shared as shared
+from rabbitquake.app.bcolors import *
 
 autosave_path: Path = Path("autosave")
 autosave_str = "autosave"

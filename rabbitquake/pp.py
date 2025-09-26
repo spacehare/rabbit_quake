@@ -7,8 +7,8 @@ from pathlib import Path
 
 import yaml
 
-from src.app.bcolors import bcolors, colorize
-from src.app.parse import Brush, Entity, parse_whole_map
+from rabbitquake.app.bcolors import bcolors, colorize
+from rabbitquake.app.parse import Brush, Entity, parse_whole_map
 
 # inspired by...
 # MESS

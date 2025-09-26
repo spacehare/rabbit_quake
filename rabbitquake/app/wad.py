@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PIL import Image
 
-import src.app.palette as pal
+import rabbitquake.app.palette as pal
 
 
 class WAD:

@@ -1,8 +1,8 @@
 import shutil
 import unittest
 
-import src.app.paths as paths
-import src.jamgen as jamgen
+import rabbitquake.app.paths as paths
+import rabbitquake.jamgen as jamgen
 
 
 class TestGenerate(unittest.TestCase):

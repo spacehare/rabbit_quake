@@ -1,6 +1,6 @@
 import unittest
 
-import src.autosave as autosave
+import rabbitquake.autosave as autosave
 
 
 class TestAutosave(unittest.TestCase):

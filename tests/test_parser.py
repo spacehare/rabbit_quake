@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
 
-import src.app.parse as parse
-from src.app.parse import Entity
+import rabbitquake.app.parse as parse
+from rabbitquake.app.parse import Entity
 
 TEST_MAP_PATH: Path = Path("./assets/tests/pack/ex_rabbit/mapsrc/packtest.map")
 

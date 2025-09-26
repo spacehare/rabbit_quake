@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.app.parse import Entity
+from rabbitquake.app.parse import Entity
 
 
 @dataclass(kw_only=True)

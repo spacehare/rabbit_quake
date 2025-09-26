@@ -2,8 +2,8 @@ import unittest
 import zipfile
 from pathlib import Path
 
-import src.app.paths as paths
-import src.submit as submit
+import rabbitquake.app.paths as paths
+import rabbitquake.submit as submit
 
 TEST_SUBMIT_PATH: Path = Path("./assets/tests/pack/ex_rabbit")
 

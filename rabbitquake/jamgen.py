@@ -2,8 +2,8 @@ import argparse
 import shutil
 from pathlib import Path
 
-import src.app.bcolors as bcolors
-import src.app.settings as settings
+import rabbitquake.app.bcolors as bcolors
+import rabbitquake.app.settings as settings
 
 
 def gen(new_folder: Path, stem: str, create: bool = True) -> None:

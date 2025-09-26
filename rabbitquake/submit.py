@@ -7,8 +7,8 @@ from pathlib import Path
 import markdown2
 import py7zr
 
-from src.app.bcolors import *
-from src.app.settings import Settings
+from rabbitquake.app.bcolors import *
+from rabbitquake.app.settings import Settings
 
 # TODO read bsp and find dependencies
 # TODO allow 7z output

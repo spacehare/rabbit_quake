@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import src.app.bcolors as bcolors
+import rabbitquake.app.bcolors as bcolors
 
 CFG = Path("./cfg")
 TEMP = Path("./.temp").resolve()

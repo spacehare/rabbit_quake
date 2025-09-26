@@ -6,8 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from src.app.bcolors import *
-from src.app.parse import Entity
+from rabbitquake.app.bcolors import *
+from rabbitquake.app.parse import Entity
 
 from .deps import DependencyData
 
