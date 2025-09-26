@@ -30,16 +30,8 @@ def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | No
         return int(out) if force_int else float(out)
 
 
-class QProp:
-    def dumps(self) -> str:
-        return ""
-
-    @staticmethod
-    def loads(string: str) -> Any:
-        return QProp()
-
-    def __repr__(self):
-        return self.dumps()
+def to_number_string(f: float) -> str:
+    return str(int(f) if f.is_integer() else f)
 
 
 class Point(NamedTuple):
@@ -52,13 +44,13 @@ class Point(NamedTuple):
         return f"Point({self.x}, {self.y}, {self.z})"
 
     def dumps(self):
-        return " ".join([str(p) for p in self])
+        return " ".join([to_number_string(p) for p in self])
 
-    @staticmethod
-    def loads(string: str):
-        points = PATTERN_NUMBER.findall(string)
-        if len(points) == 3:
-            return Point(*points)
+    # @staticmethod
+    # def loads(string: str):
+    #     points = PATTERN_NUMBER.findall(string)
+    #     if len(points) == 3:
+    #         return Point(*points)
 
 
 @dataclass
@@ -82,7 +74,7 @@ class Points(NamedTuple):
         return f"{self.a} {self.b} {self.c}"
 
 
-class Plane(QProp):
+class Plane:
     def __init__(self, points: Points, texture_name: str, uv: UV, rotation: float):
         self.points = points
         self.texture_name = texture_name
@@ -93,11 +85,10 @@ class Plane(QProp):
         return f"Plane(Points({self.points}), {self.texture_name}, {self.uv}, {self.rotation})"
 
     def dumps(self) -> str:
-        return f"( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}"
-
-    @staticmethod
-    def loads(string: str) -> "Plane":
-        return Plane.deconstruct_line(string)
+        a = self.points.a.dumps()
+        b = self.points.b.dumps()
+        c = self.points.c.dumps()
+        return f"( {a} ) ( {b} ) ( {c} ) {self.texture_name} [ {self.uv.u.point.dumps()} {to_number_string(self.uv.u.offset)} ] [ {self.uv.v.point.dumps()} {to_number_string(self.uv.v.offset)} ] {to_number_string(self.rotation)} {to_number_string(self.uv.u.scale)} {to_number_string(self.uv.v.scale)}"
 
     @staticmethod
     def deconstruct_line(line: str) -> "Plane":
@@ -123,46 +114,49 @@ class Plane(QProp):
         p_rotation = float(items[28])
         return Plane(points=p_points, texture_name=p_tex, uv=p_uv, rotation=p_rotation)
 
+    loads = deconstruct_line
 
-class Brush(QProp):
+
+class Brush:
     def __init__(self, planes: list[Plane] = []):
         self.planes: list[Plane] = planes or []
 
     def dumps(self):
         return "{\n" + "\n".join(plane.dumps() for plane in self.planes) + "\n}"
 
-    @staticmethod
-    def loads(string: str) -> "Brush | None":
-        plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
-        planes: list[Plane] = [
-            possible_plane
-            for ps in plane_strings
-            if (possible_plane := Plane.loads(ps))
-        ]
-        if planes:
-            return Brush(planes)
+    # @staticmethod
+    # def loads(string: str) -> "Brush | None":
+    #     # plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
+    #     plane_strings: list[str] = string.splitlines()[1:-1]
+    #     planes: list[Plane] = [
+    #         possible_plane
+    #         for ps in plane_strings
+    #         if (possible_plane := Plane.loads(ps))
+    #     ]
+    #     if planes:
+    #         return Brush(planes)
 
     def __str__(self):
         return f"brush with {len(self.planes)} planes"
 
 
 @dataclass
-class KV(QProp, dict[str, str]):
+class KV(dict[str, str]):
     def dumps(self):
         return "\n".join([f'"{k}" "{v}"' for k, v in self.items()]) + "\n"
 
-    @staticmethod
-    def loads(string: str) -> "KV":
-        found = PATTERN_KEY_VALUE_LINE.finditer(string)
-        kvdict = KV()
-        for m in found:
-            groups = m.groups()
-            kvdict |= {groups[0]: groups[1]}
-        return kvdict
+    # @staticmethod
+    # def loads(string: str) -> "KV":
+    #     found = PATTERN_KEY_VALUE_LINE.finditer(string)
+    #     kvdict = KV()
+    #     for m in found:
+    #         groups = m.groups()
+    #         kvdict |= {groups[0]: groups[1]}
+    #     return kvdict
 
 
 @dataclass
-class Entity(QProp):
+class Entity:
     brushes: list[Brush] = field(default_factory=list)
     kv: KV = field(default_factory=KV)
 
@@ -177,14 +171,16 @@ class Entity(QProp):
 
     @staticmethod
     def loads(string: str) -> "Entity":
-        kv: KV = KV.loads(string)
-        brushes_in_ent = PATTERN_BRUSHES_IN_ENT.findall(string)
-        brushes = [
-            possible_brush
-            for brush in brushes_in_ent
-            if (possible_brush := Brush.loads(brush))
-        ]
-        return Entity(kv=kv, brushes=brushes)
+        return parse_whole_map(string)[0]
+
+        # kv: KV = KV.loads(string)
+        # brushes_lines = string.splitlines()[1:-1]
+        # brushes = [
+        #     possible_brush
+        #     for brush in brushes_lines
+        #     if (possible_brush := Brush.loads(brush))
+        # ]
+        # return Entity(kv=kv, brushes=brushes)
 
     @property
     def classname(self):
