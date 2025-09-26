@@ -236,14 +236,13 @@ class Entity(QProp):
 
 
 def parse_whole_map(text: str) -> list[Entity]:
-    LINES = text.splitlines()
-    root_entities: list[Entity] = []
-    current_ent: Entity | None = None
+    lines = text.splitlines()
     current_brush: Brush | None = None
+    entities: list[Entity] = []
     depth = 0
 
     count = 0
-    for line in LINES:
+    for line in lines:
         count += 1
         verbose_print(
             " ", f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE)
@@ -254,30 +253,24 @@ def parse_whole_map(text: str) -> list[Entity]:
                 depth += 1
 
                 if depth == 1:
-                    current_ent = Entity()
+                    entities.append(Entity())
                 elif depth == 2:
                     current_brush = Brush()
 
             # exiting an object
             case "}":
                 depth -= 1
-
-                if current_brush and current_ent:
-                    current_ent.brushes.append(current_brush)
-
-                if depth == 0 and current_ent:
-                    root_entities.append(current_ent)
-                    current_ent = None
+                if current_brush:
+                    entities[-1].brushes.append(current_brush)
 
                 current_brush = None
 
             case '"':
-                if current_ent:
-                    for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
-                        current_ent.kv[k] = v
+                k, v = line.split('"')[1::2]
+                entities[-1].kv[k] = v
 
             case "(":
                 if current_brush:
                     current_brush.planes.append(Plane.deconstruct_line(line))
 
-    return root_entities
+    return entities
