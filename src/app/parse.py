@@ -4,7 +4,7 @@
 
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, NamedTuple
 
 import src.app.bcolors as bcolors
 
@@ -42,21 +42,14 @@ class QProp:
         return self.dumps()
 
 
-class Point(QProp):
+class Point(NamedTuple):
     """X Y Z"""
-
-    def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+    x: float
+    y: float
+    z: float
 
     def __repr__(self):
         return f"Point({self.x}, {self.y}, {self.z})"
-
-    def __iter__(self):
-        yield self.x
-        yield self.y
-        yield self.z
 
     def dumps(self):
         return " ".join([str(p) for p in self])
@@ -68,33 +61,22 @@ class Point(QProp):
             return Point(*points)
 
 
+@dataclass
 class UvPoint:
-    def __init__(self, point: Point, offset: float, scale: float):
-        self.point = point
-        self.offset = offset
-        self.scale = scale
+    point: Point
+    offset: float
+    scale: float
 
 
-class UV:
-    def __init__(self, u: UvPoint, v: UvPoint):
-        self.u = u
-        self.v = v
-
-    def __iter__(self):
-        yield self.u
-        yield self.v
+class UV(NamedTuple):
+    u: UvPoint
+    v: UvPoint
 
 
-class Points:
-    def __init__(self, a: Point, b: Point, c: Point):
-        self.a = a
-        self.b = b
-        self.c = c
-
-    def __iter__(self):
-        yield self.a
-        yield self.b
-        yield self.c
+class Points(NamedTuple):
+    a: Point
+    b: Point
+    c: Point
 
     def __repr__(self):
         return f"{self.a} {self.b} {self.c}"
