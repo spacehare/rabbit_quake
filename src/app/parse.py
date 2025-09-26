@@ -2,32 +2,8 @@
 # https://quakewiki.org/wiki/Quake_Map_Format
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
 
-import re
 from dataclasses import dataclass, field
-from typing import Any, NamedTuple
-
-import src.app.bcolors as bcolors
-
-verbose = False
-
-
-def verbose_print(*args):
-    if verbose:
-        print(*args)
-
-
-PATTERN_NUMBER = re.compile(r"-?\b\d+\.?\d*(?:e-\d+)?\b")
-PATTERN_NUMBER_IN_KEY = re.compile(r"(-?\d+\.?\d*(?:e-\d+)?)")
-PATTERN_PLANE_IN_BRUSH = re.compile(r"\([^{}\n]+[^\n]$", re.MULTILINE)
-PATTERN_KEY_VALUE_LINE = re.compile(r'^"(.*)" "(.*)"$', re.MULTILINE)
-PATTERN_BRUSHES_IN_ENT = re.compile(r"(?<=\{\n)[^\{]+(?=\n\})")
-
-
-def get_num_in_key(string: str, *, place=-1, force_int=True) -> float | int | None:
-    m = PATTERN_NUMBER_IN_KEY.findall(string)
-    if m:
-        out = m[place]
-        return int(out) if force_int else float(out)
+from typing import NamedTuple
 
 
 def to_number_string(f: float) -> str:
@@ -45,12 +21,6 @@ class Point(NamedTuple):
 
     def dumps(self):
         return " ".join([to_number_string(p) for p in self])
-
-    # @staticmethod
-    # def loads(string: str):
-    #     points = PATTERN_NUMBER.findall(string)
-    #     if len(points) == 3:
-    #         return Point(*points)
 
 
 @dataclass
@@ -124,18 +94,6 @@ class Brush:
     def dumps(self):
         return "{\n" + "\n".join(plane.dumps() for plane in self.planes) + "\n}"
 
-    # @staticmethod
-    # def loads(string: str) -> "Brush | None":
-    #     # plane_strings: list[str] = PATTERN_PLANE_IN_BRUSH.findall(string)
-    #     plane_strings: list[str] = string.splitlines()[1:-1]
-    #     planes: list[Plane] = [
-    #         possible_plane
-    #         for ps in plane_strings
-    #         if (possible_plane := Plane.loads(ps))
-    #     ]
-    #     if planes:
-    #         return Brush(planes)
-
     def __str__(self):
         return f"brush with {len(self.planes)} planes"
 
@@ -144,15 +102,6 @@ class Brush:
 class KV(dict[str, str]):
     def dumps(self):
         return "\n".join([f'"{k}" "{v}"' for k, v in self.items()]) + "\n"
-
-    # @staticmethod
-    # def loads(string: str) -> "KV":
-    #     found = PATTERN_KEY_VALUE_LINE.finditer(string)
-    #     kvdict = KV()
-    #     for m in found:
-    #         groups = m.groups()
-    #         kvdict |= {groups[0]: groups[1]}
-    #     return kvdict
 
 
 @dataclass
@@ -173,15 +122,6 @@ class Entity:
     def loads(string: str) -> "Entity":
         return parse_whole_map(string)[0]
 
-        # kv: KV = KV.loads(string)
-        # brushes_lines = string.splitlines()[1:-1]
-        # brushes = [
-        #     possible_brush
-        #     for brush in brushes_lines
-        #     if (possible_brush := Brush.loads(brush))
-        # ]
-        # return Entity(kv=kv, brushes=brushes)
-
     @property
     def classname(self):
         return self.kv["classname"]
@@ -194,21 +134,6 @@ class Entity:
     def target(self):
         return self.kv.get("target")
 
-    # TODO move this out of this class
-    def iterate(self, key: str, *, val: int = 1, set_to_val: bool = False) -> None:
-        PLACEHOLDER = "@🐇@"
-        possible_val = self.kv.get(key)
-        if possible_val:
-            num = get_num_in_key(possible_val)
-            txt = str(possible_val).replace(str(num), PLACEHOLDER)
-            if num:
-                print(f"found {num} in {self.kv[key]}")
-                if set_to_val:
-                    num = val
-                else:
-                    num += val
-                self.kv[key] = txt.replace(PLACEHOLDER, str(num))
-
     def __eq__(self, value: object) -> bool:
         return super().__eq__(value)
 
@@ -219,12 +144,7 @@ def parse_whole_map(text: str) -> list[Entity]:
     entities: list[Entity] = []
     depth = 0
 
-    count = 0
     for line in lines:
-        count += 1
-        verbose_print(
-            " ", f"{count: 5d}", depth, bcolors.colorize(line, bcolors.bcolors.OKBLUE)
-        )
         match line[:1]:
             # entering an object
             case "{":
@@ -243,10 +163,12 @@ def parse_whole_map(text: str) -> list[Entity]:
 
                 current_brush = None
 
+            # key-value pairs
             case '"':
                 k, v = line.split('"')[1::2]
                 entities[-1].kv[k] = v
 
+            # planes
             case "(":
                 if current_brush:
                     current_brush.planes.append(Plane.deconstruct_line(line))

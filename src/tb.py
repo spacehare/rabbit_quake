@@ -9,7 +9,7 @@ from pathlib import Path
 from ahk import AHK, directives, keys
 from ahk.keys import KEYS
 
-from .app import ericw
+from .app import ericw, manip
 from .app.bcolors import *
 from .app.parse import Brush, Entity, parse_whole_map
 from .app.settings import Keybinds, Settings
@@ -124,8 +124,8 @@ def find_map_from_tb_title():
 def iterate(close_loop=False):
     print(colorize("iterating", bcolors.HEADER))
     ent = Entity.loads(copy())
-    ent.iterate("targetname")
-    ent.iterate("target", set_to_val=close_loop)
+    manip.iterate(ent, "targetname")
+    manip.iterate(ent, "target", set_to_val=close_loop)
     paste(ent.dumps())
 
 
