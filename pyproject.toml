@@ -5,8 +5,6 @@ description = "some random crappy quake tools"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "ahk>=1.8.4",
-    "ahk-binary>=2025.1.0",
     "beartype>=0.21.0",
     "markdown2>=2.5.4",
     "pillow>=11.3.0",
@@ -17,4 +15,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.13.1",
+]
+tb = [
+    "ahk>=1.8.4",
+    "ahk-binary>=2025.1.0",
 ]

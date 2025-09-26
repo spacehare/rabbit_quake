@@ -2,8 +2,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from app.bcolors import Ind
-from app.settings import Settings, _contents, make_listpath
+from src.app.bcolors import Ind
+from src.app.settings import Settings, _contents, make_listpath
 
 # https://ericwa.github.io/ericw-tools/doc/qbsp.html
 # https://ericwa.github.io/ericw-tools/doc/vis.html

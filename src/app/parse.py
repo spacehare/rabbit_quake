@@ -110,7 +110,7 @@ class Plane(QProp):
     def __repr__(self):
         return f"Plane(Points({self.points}), {self.texture_name}, {self.uv}, {self.rotation})"
 
-    def dumps(self):
+    def dumps(self) -> str:
         return f"( {self.points.a.dumps()} ) ( {self.points.b.dumps()} ) ( {self.points.c.dumps()} ) {self.texture_name} [ {self.uv.u.point.dumps()} {self.uv.u.offset} ] [ {self.uv.v.point.dumps()} {self.uv.v.offset} ] {self.rotation} {self.uv.u.scale} {self.uv.v.scale}"
 
     @staticmethod
@@ -147,7 +147,7 @@ class Brush(QProp):
         self.planes: list[Plane] = planes or []
 
     def dumps(self):
-        return "{\n" + "\n".join(str(plane.dumps()) for plane in self.planes) + "\n}"
+        return "{\n" + "\n".join(plane.dumps() for plane in self.planes) + "\n}"
 
     @staticmethod
     def loads(string: str) -> "Brush | None":
@@ -233,96 +233,6 @@ class Entity(QProp):
 
     def __eq__(self, value: object) -> bool:
         return super().__eq__(value)
-
-
-# used in tb.py
-class QuakeMap(QProp):
-    def __init__(
-        self, kv: KV, brushes: list[Brush] | None, entities: list[Entity] | None
-    ):
-        self.kv = kv
-        self.brushes = brushes
-        self.entities = entities
-
-    @property
-    def wad(self):
-        return self.kv["wad"]
-
-    @property
-    def mod(self) -> str:
-        return self.kv["_tb_mod"]
-
-    @property
-    def message(self):
-        return self.kv["message"]
-
-    @property
-    def mapversion(self):
-        return self.kv["mapversion"]
-
-    @staticmethod
-    def loads(string: str) -> "QuakeMap":
-        kv: KV = KV.loads(string)
-        return QuakeMap(kv, [], [])
-
-
-class TBObject:
-    def __init__(self, kv: dict = {}, children: list = [], planes: list[Plane] = []):
-        self.kv = kv or {}
-        self.children = children or []
-        self.planes = planes or []
-        # self.comment = comment or ''
-
-    @property
-    def classname(self):
-        return self.kv.get("classname", "Brush?")
-
-    def __str__(self):
-        return f"{self.classname} ({len(self.children)})"
-
-
-def parse(text: str) -> list[TBObject]:
-    LINES = text.splitlines()
-    root_level_objects: list[TBObject] = []
-    stack = []
-    current = None
-
-    for line in LINES:
-        verbose_print("\t", bcolors.colorize(line, bcolors.bcolors.OKBLUE))
-        match line[:1]:
-            # entering an object
-            case "{":
-                new = TBObject()
-
-                if current:
-                    current.children.append(new)
-                    stack.append(current)
-
-                current = new
-
-            # exiting an object
-            case "}":
-                if stack:
-                    current = stack.pop()
-                else:
-                    if current:
-                        root_level_objects.append(current)
-                        current = None
-
-            case '"':
-                if current:
-                    for k, v in PATTERN_KEY_VALUE_LINE.findall(line):
-                        current.kv[k] = v
-
-            case "(":
-                if current:
-                    current.planes.append(Plane.deconstruct_line(line))
-
-            # case '/':
-            #     if current:
-            #         current.comment = line[3:]
-
-    return root_level_objects
 
 
 def parse_whole_map(text: str) -> list[Entity]:

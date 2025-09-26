@@ -9,10 +9,10 @@ from pathlib import Path
 from ahk import AHK, directives, keys
 from ahk.keys import KEYS
 
-import app.ericw as ericw
-from app.bcolors import *
-from app.parse import Brush, Entity, QuakeMap
-from app.settings import Keybinds, Settings
+from .app import ericw
+from .app.bcolors import *
+from .app.parse import Brush, Entity, parse_whole_map
+from .app.settings import Keybinds, Settings
 
 if platform.system() != "Windows":
     print(colorize("this script is Windows only", bcolors.FAIL))
@@ -174,9 +174,9 @@ if __name__ == "__main__":
     print("🐇 program start")
     qmap_full = find_map_from_tb_title()
     if qmap_full:
-        qmap = QuakeMap.loads(qmap_full.data)
+        qmap: list[Entity] = parse_whole_map(qmap_full.data)
         current_map = qmap_full.filepath
-        current_mod = qmap.mod
+        current_mod = qmap[0].kv['_tb_mod']
         current_mod_folder = current_engine.folder / current_mod
         print("current mod:", colorize(current_mod, bcolors.OKCYAN))
 

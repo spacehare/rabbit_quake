@@ -414,6 +414,10 @@ dependencies = [
 dev = [
     { name = "ruff" },
 ]
+tb = [
+    { name = "ahk" },
+    { name = "ahk-binary" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -428,6 +432,10 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.13.1" }]
+tb = [
+    { name = "ahk", specifier = ">=1.8.4" },
+    { name = "ahk-binary", specifier = ">=2025.1.0" },
+]
 
 [[package]]
 name = "ruff"
