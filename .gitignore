@@ -170,6 +170,6 @@ cython_debug/
 # this repo!
 # # # # #
 .temp
-debug.py
+debug*.py
 autosave/
 !**/gfx/env
