@@ -38,7 +38,7 @@ class PPConfig:
     actions: list[dict] = field(default_factory=list)
 
     @staticmethod
-    def loads(yaml_path: Path):
+    def loads(yaml_path: Path) -> 'PPConfig':
         loaded: dict = yaml.safe_load(yaml_path.open())
         new_pp = PPConfig()
         new_pp.version = loaded["version"]
@@ -51,21 +51,21 @@ class PPConfig:
         return new_pp
 
 
-def find_and_replace(map_string: str, pp_cfg: PPConfig):
+def find_and_replace(map_string: str, pp_cfg: PPConfig) -> str:
     # a regex pattern like r"%.+?%" could work, but this is simpler i think
-    new_str = map_string
+    new_str: str = map_string
     print(colorize("FIND-AND-REPLACE VARIABLES", bcolors.UNDERLINE))
     for key, value in pp_cfg.variables.items():
         variable_sandwich = f"{pp_cfg.char_variable_in}{key}{pp_cfg.char_variable_out}"
         new_str = new_str.replace(variable_sandwich, str(value))
-        print(f"{variable_sandwich:<15} {colorize(value, bcolors.OKCYAN)}")
+        print(f"  {variable_sandwich:<15} {colorize(value, bcolors.OKCYAN)}")
     return new_str
 
 
 # TODO: make this work with notrace too
 # TODO: make this more generic. instead of "clip" make a more general function
 # instead of "@clip: 1" it could be like "@add: clip" maybe
-def clip(ent: Entity):
+def clip(ent: Entity) -> list[Brush]:
     output_brushes: list[Brush] = []
     for brush in ent.brushes:
         clone = copy.deepcopy(brush)
@@ -90,24 +90,28 @@ if __name__ == "__main__":
     q_output_path: Path = args.output
     q_cfg_path: Path | None = args.cfg_path
     new_map_path = q_output_path
+
+    print('==== STARTING pp.py ====')
     print(new_map_path)
 
     map_string = q_map_path.read_text()
-    entities: list[Entity] = parse_whole_map(map_string)
+    entities: list[Entity]
     new_ents: list[Entity] = []
-    new_str = ""
     cfg: PPConfig
 
     if q_cfg_path and q_cfg_path.exists():
+        print('found cfg path at "%s"' % q_cfg_path.absolute())
         cfg: PPConfig = PPConfig.loads(q_cfg_path)
         map_string = find_and_replace(map_string, cfg)
 
+        entities = parse_whole_map(map_string)
         # in-YAML exec
         for action in cfg.actions:
             if ex := action.get("exec"):
                 exec(ex)
     else:
         cfg = PPConfig()
+        entities = parse_whole_map(map_string)  
 
     # in-MAP keys
     for ent in entities:
@@ -127,8 +131,11 @@ if __name__ == "__main__":
         else:
             new_ents.append(ent)
 
-    for ent in new_ents:
-        new_str += ent.dumps() + "\n"
+    # new_str = ""
+    # for ent in new_ents:
+    #     new_str += ent.dumps() + "\n"
 
     new_map_path.touch()
-    new_map_path.write_text(new_str)
+    new_map_path.write_text("\n".join([ent.dumps() for ent in new_ents]))
+
+    print("==== ENDING pp.py ====")

@@ -1,2 +1,2 @@
 cd /d %~dp0
-py -m src.pp %1 %2 %3
+py -m rabbitquake.pp %1 %2 %3
