@@ -401,8 +401,6 @@ name = "rabbit-quake"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "ahk" },
-    { name = "ahk-binary" },
     { name = "beartype" },
     { name = "markdown2" },
     { name = "pillow" },
@@ -421,8 +419,6 @@ tb = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ahk", specifier = ">=1.8.4" },
-    { name = "ahk-binary", specifier = ">=2025.1.0" },
     { name = "beartype", specifier = ">=0.21.0" },
     { name = "markdown2", specifier = ">=2.5.4" },
     { name = "pillow", specifier = ">=11.3.0" },
