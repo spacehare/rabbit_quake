@@ -2,12 +2,11 @@ import argparse
 import re
 from pathlib import Path
 
-from PIL import Image, ImageColor, ImageFilter, ImagePalette
-from PIL.Image import Dither
-
 import app.palette as pal
 from app.bcolors import *
 from app.palette import palette_image_from_tuples
+from PIL import Image, ImageColor, ImageFilter, ImagePalette
+from PIL.Image import Dither
 
 # TODO give warning when image is not div by 16
 # TODO see wadcleaver
