@@ -15,7 +15,8 @@ if __name__ == "__main__":
 
     print("creating symlinks")
     for item in settings.symlinks:
-        for path in dev_folder.rglob(item.target):
+        r_target = settings.mapstem(item.target, dev_folder)
+        for path in dev_folder.rglob(r_target):
             new_path: Path = Path(mod_folder / item.destination / path.name)
 
             print(colorize(path, bcolors.UNDERLINE))

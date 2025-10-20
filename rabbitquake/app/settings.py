@@ -77,6 +77,10 @@ class Settings:
 SVARS = {"{name}": Settings.name}
 
 
+def mapstem(string: str, target_folder: Path) -> str:
+    return string.replace("{mapstem}", target_folder.stem)
+
+
 def replace_var(what: str, replacements: dict = SVARS):
     output: str = ""
     for k, v in replacements.items():

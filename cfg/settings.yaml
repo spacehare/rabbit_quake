@@ -147,9 +147,9 @@ ericw:
 
 
 symlink:
-  - target: gfx/env/{name}
+  - target: gfx/env/{mapstem}
     destination: gfx/env
-  - target: sound/{name}
+  - target: sound/{mapstem}
     destination: sound
   - target: maps/*.bsp
     destination: maps
