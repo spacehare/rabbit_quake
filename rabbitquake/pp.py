@@ -2,6 +2,8 @@
 
 import argparse
 import copy
+import importlib.util
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -36,9 +38,10 @@ class PPConfig:
     char_variable_in: str = CHAR_VAR_IN_DEFAULT
     char_variable_out: str = CHAR_VAR_OUT_DEFAULT
     actions: list[dict] = field(default_factory=list)
+    scripts: list[Path] = field(default_factory=list[Path])
 
     @staticmethod
-    def loads(yaml_path: Path) -> 'PPConfig':
+    def loads(yaml_path: Path) -> "PPConfig":
         loaded: dict = yaml.safe_load(yaml_path.open())
         new_pp = PPConfig()
         new_pp.version = loaded["version"]
@@ -48,6 +51,7 @@ class PPConfig:
         new_pp.char_variable_in = prefix.get("variable_in", CHAR_VAR_IN_DEFAULT)
         new_pp.char_variable_out = prefix.get("variable_out", CHAR_VAR_OUT_DEFAULT)
         new_pp.actions = loaded.get("actions", [])
+        new_pp.scripts = [Path(i) for i in loaded.get("scripts", [])]
         return new_pp
 
 
@@ -91,7 +95,7 @@ if __name__ == "__main__":
     q_cfg_path: Path | None = args.cfg_path
     new_map_path = q_output_path
 
-    print('==== STARTING pp.py ====')
+    print("==== STARTING pp.py ====")
     print(new_map_path)
 
     map_string = q_map_path.read_text()
@@ -105,25 +109,41 @@ if __name__ == "__main__":
         map_string = find_and_replace(map_string, cfg)
 
         entities = parse_whole_map(map_string)
+        # YAML scripts
+        for script_path in cfg.scripts:
+            # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+            actual_path = (q_cfg_path.parent / script_path).resolve()
+            if spec := importlib.util.spec_from_file_location(
+                actual_path.stem, actual_path
+            ):
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[actual_path.stem] = module
+                if spec.loader:
+                    spec.loader.exec_module(module)
+                context = {"entities": entities, "var_prefix": cfg.char_general}
+                module.main(context)
+
         # in-YAML exec
         for action in cfg.actions:
             if ex := action.get("exec"):
                 exec(ex)
     else:
         cfg = PPConfig()
-        entities = parse_whole_map(map_string)  
+        entities = parse_whole_map(map_string)
 
     # in-MAP keys
     for ent in entities:
         for key, value in ent.kv.items():
-            if key.startswith("@") and int(value) == 1:
+            if key.startswith(cfg.char_general) and value == "1":
+                # clip
                 if key == cfg.char_general + "clip":
                     print(f"clipping {ent.classname}. brushes: ", end="")
                     new_brushes = clip(ent)
                     print(len(new_ents[0].brushes), end=" -> ")
                     new_ents[0].brushes.extend(new_brushes)
                     print(len(new_ents[0].brushes))
-                if (key == cfg.char_general + "delete") and int(value) == 1:
+                # delete
+                if (key == cfg.char_general + "delete") and value == "1":
                     print(f"deleting {ent.classname}")
                     break
             elif value.startswith("eval"):
