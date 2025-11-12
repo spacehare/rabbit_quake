@@ -1,7 +1,6 @@
 """preprocessor / postprocessor"""
 
 import argparse
-import copy
 import importlib.util
 import sys
 from dataclasses import dataclass, field
@@ -66,19 +65,6 @@ def find_and_replace(map_string: str, pp_cfg: PPConfig) -> str:
     return new_str
 
 
-# TODO: make this work with notrace too
-# TODO: make this more generic. instead of "clip" make a more general function
-# instead of "@clip: 1" it could be like "@add: clip" maybe
-def clip(ent: Entity) -> list[Brush]:
-    output_brushes: list[Brush] = []
-    for brush in ent.brushes:
-        clone = copy.deepcopy(brush)
-        for l in clone.planes:
-            l.texture_name = "clip"
-        output_brushes.append(clone)
-    return output_brushes
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("map", type=Path, help="the full path of the target map file")
@@ -100,7 +86,7 @@ if __name__ == "__main__":
 
     map_string = q_map_path.read_text()
     entities: list[Entity]
-    new_ents: list[Entity] = []
+    final_ents: list[Entity] = []
     cfg: PPConfig
 
     if q_cfg_path and q_cfg_path.exists():
@@ -121,41 +107,17 @@ if __name__ == "__main__":
                 if spec.loader:
                     spec.loader.exec_module(module)
                 context = {"entities": entities, "var_prefix": cfg.char_general}
-                module.main(context)
+                output: list[Entity] = module.main(context)
+                final_ents = output
 
         # in-YAML exec
         for action in cfg.actions:
             if ex := action.get("exec"):
                 exec(ex)
     else:
-        cfg = PPConfig()
-        entities = parse_whole_map(map_string)
-
-    # in-MAP keys
-    for ent in entities:
-        for key, value in ent.kv.items():
-            if key.startswith(cfg.char_general) and value == "1":
-                # clip
-                if key == cfg.char_general + "clip":
-                    print(f"clipping {ent.classname}. brushes: ", end="")
-                    new_brushes = clip(ent)
-                    print(len(new_ents[0].brushes), end=" -> ")
-                    new_ents[0].brushes.extend(new_brushes)
-                    print(len(new_ents[0].brushes))
-                # delete
-                if (key == cfg.char_general + "delete") and value == "1":
-                    print(f"deleting {ent.classname}")
-                    break
-            elif value.startswith("eval"):
-                ent.kv[key] = eval(value.removeprefix("eval"))
-        else:
-            new_ents.append(ent)
-
-    # new_str = ""
-    # for ent in new_ents:
-    #     new_str += ent.dumps() + "\n"
+        final_ents = parse_whole_map(map_string)
 
     new_map_path.touch()
-    new_map_path.write_text("\n".join([ent.dumps() for ent in new_ents]))
+    new_map_path.write_text("\n".join([ent.dumps() for ent in final_ents]))
 
     print("==== ENDING pp.py ====")
