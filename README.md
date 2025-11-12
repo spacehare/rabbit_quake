@@ -1,6 +1,10 @@
-# tools
+personal quake scripts  
 
-- `jamgen.py`
+i make no guarantees that anything works
+
+<!-- # tools -->
+
+<!-- - `jamgen.py`
   - generate a starter folder for a quake mapping jam
 - `submit.py`
   - submit a quake mapping jam map as a `.zip` or `.7z`
@@ -16,7 +20,7 @@
   - convert image files to be quake-compatible
 - `wav.py` ⚠ requires [ffmpeg](https://ffmpeg.org/)
   - convert audio files to quake-compatible `.wav` files
-  - if you have [chocolatey](https://chocolatey.org/): `choco install ffmpeg`
+  - if you have [chocolatey](https://chocolatey.org/): `choco install ffmpeg` -->
 
 # similar tools
 
