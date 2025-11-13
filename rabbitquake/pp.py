@@ -43,7 +43,7 @@ class PPConfig:
     def loads(yaml_path: Path) -> "PPConfig":
         loaded: dict = yaml.safe_load(yaml_path.open())
         new_pp = PPConfig()
-        new_pp.version = loaded["version"]
+        new_pp.version = loaded["config_version"]
         new_pp.variables = loaded.get("variables")
         prefix: dict = loaded.get("prefix", CHAR_DICT_DEFAULT)
         new_pp.char_general = prefix.get("general", CHAR_GENERAL_DEFAULT)
