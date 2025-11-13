@@ -89,6 +89,9 @@ if __name__ == "__main__":
     final_ents: list[Entity] = []
     cfg: PPConfig
 
+    if not map_string:
+        raise ValueError("map string is empty")
+
     if q_cfg_path and q_cfg_path.exists():
         print('found cfg path at "%s"' % q_cfg_path.absolute())
         cfg: PPConfig = PPConfig.loads(q_cfg_path)
@@ -108,16 +111,20 @@ if __name__ == "__main__":
                     spec.loader.exec_module(module)
                 context = {"entities": entities, "var_prefix": cfg.char_general}
                 output: list[Entity] = module.main(context)
-                final_ents = output
+                entities = output
 
         # in-YAML exec
         for action in cfg.actions:
             if ex := action.get("exec"):
                 exec(ex)
+
     else:
-        final_ents = parse_whole_map(map_string)
+        entities = parse_whole_map(map_string)
+
+    if not entities:
+        raise ValueError("output entity list is empty")
 
     new_map_path.touch()
-    new_map_path.write_text("\n".join([ent.dumps() for ent in final_ents]))
+    new_map_path.write_text("\n".join([ent.dumps() for ent in entities]))
 
     print("==== ENDING pp.py ====")
