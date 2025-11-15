@@ -31,6 +31,7 @@
 "_wateralpha" "1"
 "_lavaalpha" "1"
 "_telealpha" "1"
+"_slimealpha" "1"
 "_surflight_radiosity" "1"
 "fog" "0.0 0.0 0.0 0.0"
 "fog_color" "255 255 255"
