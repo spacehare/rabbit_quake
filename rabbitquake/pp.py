@@ -102,6 +102,7 @@ if __name__ == "__main__":
         for script_path in cfg.scripts:
             # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
             actual_path = (q_cfg_path.parent / script_path).resolve()
+            print("running %s" % actual_path)
             if spec := importlib.util.spec_from_file_location(
                 actual_path.stem, actual_path
             ):
