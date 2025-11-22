@@ -11,9 +11,9 @@ def stem_direction(path: Path) -> str:
 
 
 rotations = {
-    1: Image.Transpose.ROTATE_90,
+    1: Image.Transpose.ROTATE_270,
     2: Image.Transpose.ROTATE_180,
-    3: Image.Transpose.ROTATE_270,
+    3: Image.Transpose.ROTATE_90,
 }
 
 
@@ -38,8 +38,8 @@ if __name__ == "__main__":
     # rotate yaw
     rotate_me = ["up", "dn"]
     dir_dict: dict[str, int] = {}
-    faces = ["lf", "rt", "ft", "bk"]
-    items = deque(["lf", "rt", "ft", "bk"])
+    faces = ["ft", "rt", "bk", "lf"]
+    items = deque(faces)
     items.rotate(turns)
 
     for path in parent_folder.glob("*"):
