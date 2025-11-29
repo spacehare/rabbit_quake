@@ -1,6 +1,7 @@
 """parse Valve220 quake .map files"""
 # https://quakewiki.org/wiki/Quake_Map_Format
 # https://developer.valvesoftware.com/wiki/MAP_(file_format)
+# https://www.gamers.org/dEngine/quake/spec/quake-spec34/qkspec_2.htm
 
 from dataclasses import dataclass, field
 from typing import NamedTuple
@@ -12,6 +13,7 @@ def to_number_string(f: float) -> str:
 
 class Point(NamedTuple):
     """X Y Z"""
+
     x: float
     y: float
     z: float
@@ -174,3 +176,10 @@ def parse_whole_map(text: str) -> list[Entity]:
                     current_brush.planes.append(Plane.deconstruct_line(line))
 
     return entities
+
+
+loads = parse_whole_map
+
+
+def dumps(entities: list[Entity]) -> str:
+    return "\n".join([ent.dumps() for ent in entities])

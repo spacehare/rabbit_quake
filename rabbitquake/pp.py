@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from rabbitquake.app.bcolors import bcolors, colorize
-from rabbitquake.app.parse import Brush, Entity, parse_whole_map
+from rabbitquake.app.parse import Brush, Entity, dumps, loads
 
 # inspired by...
 # MESS
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         cfg: PPConfig = PPConfig.loads(q_cfg_path)
         map_string = find_and_replace(map_string, cfg)
 
-        entities = parse_whole_map(map_string)
+        entities = loads(map_string)
         # YAML scripts
         for script_path in cfg.scripts:
             # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
@@ -120,12 +120,12 @@ if __name__ == "__main__":
                 exec(ex)
 
     else:
-        entities = parse_whole_map(map_string)
+        entities = loads(map_string)
 
     if not entities:
         raise ValueError("output entity list is empty")
 
     new_map_path.touch()
-    new_map_path.write_text("\n".join([ent.dumps() for ent in entities]))
+    new_map_path.write_text(dumps(entities))
 
     print("==== ENDING pp.py ====")
