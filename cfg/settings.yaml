@@ -90,6 +90,8 @@ jampack:
 submit:
   allowed:
     - mapsrc/*.map
+    - mapsrc/*.yaml
+    - mapsrc/*.py
     - sound/**/*.wav
     - music/*
     - track*.*
