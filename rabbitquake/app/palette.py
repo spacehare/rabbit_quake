@@ -276,6 +276,21 @@ def palette_image_from_tuples(p: list) -> Image.Image:
     return img
 
 
+def square_palette_image_from_tuples(rgb_tuples: list) -> Image.Image:
+    length: int = len(rgb_tuples)
+    size: int = int(length**0.5)
+    image = Image.new("P", (size, size))
+    y: int = 0
+
+    for index, color in enumerate(rgb_tuples):
+        mod = index % size
+        if (index != 0) and (mod == 0):
+            y += 1
+        x = mod
+        image.putpixel((x, y), color)
+    return image
+
+
 def image_to_palette_indexes(img: Image.Image, palette=QUAKE_RGB_TUPLES) -> list[int]:
     data = list(img.getdata())  # type: ignore
     indexes: list[int] = []
