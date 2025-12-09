@@ -4,8 +4,8 @@
 		"source.organizeImports.ruff": "always"
 	},
 	"editor.defaultFormatter": "charliermarsh.ruff",
-	"ruff.lineLength": 88,
+	"ruff.lineLength": 100,
 	"[python]": {
-		"editor.rulers": [88]
+		"editor.rulers": [100]
 	}
 }
