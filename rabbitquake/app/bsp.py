@@ -30,7 +30,6 @@ class BSP:
 
 ST_VERSION = Struct("l")
 ST_ENTRY = Struct("2l")
-ST_VERSION = Struct("l")
 
 
 def read_bsp(bsp_path: Path) -> BSP:
@@ -48,8 +47,8 @@ def read_bsp(bsp_path: Path) -> BSP:
             data = f.read(entry.size)
             if entry == entries[0]:
                 text: str = data.decode("utf-8", "backslashreplace")
-                qmap = parse_whole_map(text)
-                nbsp.entities = qmap
+                entities: list[Entity] = parse_whole_map(text)
+                nbsp.entities = entities
 
     return nbsp
 
