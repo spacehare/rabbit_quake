@@ -18,7 +18,7 @@ PLACEHOLDER_RGBA_255 = (0, 255, 0, 255)
 PLACEHOLDER_RGBA_0 = (0, 255, 0, 0)
 TRANS_RGB = (159, 91, 83)
 QUAKE_PALETTE_LIST = pal.QUAKE_RGB_TUPLES
-NO_BRIGHTS_LIST = QUAKE_PALETTE_LIST[:224]
+NO_BRIGHTS_LIST = QUAKE_PALETTE_LIST[:240]
 NO_BRIGHTS_WITH_TRANS_LIST = NO_BRIGHTS_LIST + [TRANS_RGB]
 
 QUAKE_PALETTE_IMG = palette_image_from_tuples(QUAKE_PALETTE_LIST)
@@ -124,9 +124,7 @@ def wadpack():
     pass
 
 
-def fix(
-    img_path: Path, out_img_folder: Path, prefix: str = "", *, zeroes=3, alpha_cutoff
-):
+def fix(img_path: Path, out_img_folder: Path, prefix: str = "", *, zeroes=3, alpha_cutoff):
     with Image.open(img_path) as img:
         out_path = out_img_folder / img_path.name
 
@@ -171,9 +169,7 @@ if __name__ == "__main__":
     parser.add_argument("--fix", "-f", action="store_true")
     parser.add_argument("--prefix", "-p", help="prefix to prepend to each image")
     parser.add_argument("--scale", type=int, help="scale image by this multiplier")
-    parser.add_argument(
-        "--zeroes", "-z", type=int, help="how many zeroes to prepend to numbers"
-    )
+    parser.add_argument("--zeroes", "-z", type=int, help="how many zeroes to prepend to numbers")
     parser.add_argument(
         "--alpha_cutoff", "-a", type=int, help="below this alpha value will turn pink"
     )
