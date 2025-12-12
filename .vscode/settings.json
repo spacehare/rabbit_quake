@@ -4,8 +4,11 @@
 		"source.organizeImports.ruff": "always"
 	},
 	"editor.defaultFormatter": "charliermarsh.ruff",
-	"ruff.lineLength": 100,
+	"ruff.lineLength": 120,
 	"[python]": {
-		"editor.rulers": [100]
+		"editor.rulers": [120]
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
