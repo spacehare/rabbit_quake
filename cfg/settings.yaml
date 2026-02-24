@@ -5,7 +5,6 @@ keybinds:
   iterate: "!v"
   pc_close_loop: "!+v"
 
-
 paths:
   trenchbroom: I:\Quake\TrenchBroom-Win64-v2024.1-Release
   trenchbroom_preferences: C:\Users\Rabbit\AppData\Roaming\TrenchBroom\Preferences.json
@@ -19,7 +18,6 @@ paths:
 cfg_whitelist:
   remobilize.cfg:
     - remobilize_test15
-
 
 # search through key-value pairs per entity
 # relevant variables:
@@ -48,7 +46,6 @@ dependencies:
       if entity.kv['classname'] in ['worldspawn, misc_changemusic']:
         output = "track" + entity.kv.get('sounds') + ".*"
 
-
 # if the path pattern contains "**" then full_match() will be used
 # otherwise, just match()
 jampack:
@@ -61,6 +58,9 @@ jampack:
     - patterns:
         - path: "*.map"
       destination: mapsrc
+    - patterns:
+        - path: textures/*
+      destination: textures
     - patterns:
         - path: descript.ion
         - path: "*.def"
@@ -85,7 +85,6 @@ jampack:
         - path: "*.tga"
       destination: gfx/env
 
-
 # whitelist for files
 submit:
   allowed:
@@ -101,7 +100,7 @@ submit:
     - gfx/env/**/*.tga
     - readme/*
     - progs/**/*.mdl
-
+    - textures/**/*.*
 
 template:
   touch: # folders to create
@@ -111,6 +110,7 @@ template:
     - gfx/env/{mapstem}
     - sound/{mapstem}
     - progs/{mapstem}
+    - textures/{mapstem}
     - readme
     - build
   copy: # files to copy
@@ -122,7 +122,6 @@ template:
       destination: todo.md
     - file: assets/readme.md
       destination: readme/{mapstem}.md
-
 
 ericw:
   bsp: maps
@@ -147,7 +146,6 @@ ericw:
       light:
         - -extra4
 
-
 symlink:
   - target: gfx/env/{mapstem}
     destination: gfx/env
@@ -159,3 +157,5 @@ symlink:
     destination: maps
   - target: music/track*.*
     destination: music
+  - target: textures/{mapstem}
+    destination: textures
