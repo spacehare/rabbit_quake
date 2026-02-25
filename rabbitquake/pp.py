@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from rabbitquake.app.bcolors import bcolors, colorize
-from rabbitquake.app.parse import Brush, Entity, dumps, loads
+from rabbitquake.app.parse import Entity, dumps, loads
 
 # inspired by...
 # MESS
@@ -19,8 +19,8 @@ from rabbitquake.app.parse import Brush, Entity, dumps, loads
 
 
 CHAR_GENERAL_DEFAULT = "@"
-CHAR_VAR_IN_DEFAULT = "${"
-CHAR_VAR_OUT_DEFAULT = "}"
+CHAR_VAR_IN_DEFAULT = "%"
+CHAR_VAR_OUT_DEFAULT = "%"
 CHAR_DICT_DEFAULT = {
     "general": CHAR_GENERAL_DEFAULT,
     "variable_in": CHAR_VAR_IN_DEFAULT,
@@ -54,78 +54,91 @@ class PPConfig:
         return new_pp
 
 
-def find_and_replace(map_string: str, pp_cfg: PPConfig) -> str:
-    # a regex pattern like r"%.+?%" could work, but this is simpler i think
-    new_str: str = map_string
-    print(colorize("FIND-AND-REPLACE VARIABLES", bcolors.UNDERLINE))
-    for key, value in pp_cfg.variables.items():
-        variable_sandwich = f"{pp_cfg.char_variable_in}{key}{pp_cfg.char_variable_out}"
-        new_str = new_str.replace(variable_sandwich, str(value))
-        print(f"  {variable_sandwich:<15} {colorize(value, bcolors.OKCYAN)}")
-    return new_str
+def run_script(path: Path, context: dict) -> list[Entity]:
+    # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+    print("running %s" % path.resolve())
+    if (spec := importlib.util.spec_from_file_location(path.stem, path)) and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[path.stem] = module
+        spec.loader.exec_module(module)
+        output: list[Entity] = module.main(context)
+        return output
+    else:
+        raise ValueError("spec failed to load!")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("map", type=Path, help="the full path of the target map file")
-    parser.add_argument(
-        "output", type=Path, help="the full path of the to-be-created file"
-    )
-    parser.add_argument(
-        "cfg_path", type=Path, nargs="?", help="the full path of the YAML config"
-    )
+    parser.add_argument("map", type=Path, help="path to input .map file")
+    parser.add_argument("output", type=Path, help="path to output .map file")
+    parser.add_argument("--cfg", type=Path, help="path to the config")
+    parser.add_argument("--script", type=Path, help="path to main script")
     args = parser.parse_args()
 
     q_map_path: Path = args.map
     q_output_path: Path = args.output
-    q_cfg_path: Path | None = args.cfg_path
-    new_map_path = q_output_path
+    q_cfg_path: Path = args.cfg
+    q_script_path: Path = args.script
 
     print("==== STARTING pp.py ====")
-    print(new_map_path)
 
     map_string = q_map_path.read_text()
     entities: list[Entity]
-    final_ents: list[Entity] = []
-    cfg: PPConfig
+    cfg: PPConfig | None = None
 
     if not map_string:
         raise ValueError("map string is empty")
 
-    if q_cfg_path and q_cfg_path.exists():
-        print('found cfg path at "%s"' % q_cfg_path.absolute())
-        cfg: PPConfig = PPConfig.loads(q_cfg_path)
-        map_string = find_and_replace(map_string, cfg)
+    # external YAML config
+    if q_cfg_path.exists():
+        print('found cfg path at "%s"' % q_cfg_path.resolve())
+        cfg = PPConfig.loads(q_cfg_path)
 
-        entities = loads(map_string)
-        # YAML scripts
-        for script_path in cfg.scripts:
-            # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
-            actual_path = (q_cfg_path.parent / script_path).resolve()
-            print("running %s" % actual_path)
-            if spec := importlib.util.spec_from_file_location(
-                actual_path.stem, actual_path
-            ):
-                module = importlib.util.module_from_spec(spec)
-                sys.modules[actual_path.stem] = module
-                if spec.loader:
-                    spec.loader.exec_module(module)
-                context = {"entities": entities, "var_prefix": cfg.char_general}
-                output: list[Entity] = module.main(context)
-                entities = output
+    entities = loads(map_string)
+    worldspawn = entities[0]
+    assert worldspawn.classname == "worldspawn"
+    sym_gen_prefix = cfg.char_general if cfg else worldspawn.kv.get("__general_prefix") or CHAR_GENERAL_DEFAULT
+    sym_var_prefix = cfg.char_variable_in if cfg else worldspawn.kv.get("__variable_prefix") or CHAR_VAR_IN_DEFAULT
+    sym_var_suffix = cfg.char_variable_out if cfg else worldspawn.kv.get("__variable_suffix") or CHAR_VAR_IN_DEFAULT
+    variables: dict = cfg.variables if cfg else {}
 
-        # in-YAML exec
-        for action in cfg.actions:
-            if ex := action.get("exec"):
-                exec(ex)
+    # replace variables
+    for key in worldspawn.kv:
+        if key.startswith(sym_var_prefix):
+            variables[key[1:-1]] = worldspawn.kv[key]
+            print(f"  {key[1:-1]} = {worldspawn.kv[key]}")
+    for ent in entities:
+        for key in ent.kv:
+            for var in variables:
+                ent.kv[key] = ent.kv[key].replace(sym_var_prefix + var + sym_var_suffix, variables[var])
 
-    else:
-        entities = loads(map_string)
+    ctx = {"entities": entities, "var_prefix": sym_gen_prefix}
+
+    # run script from args
+    if q_script_path.exists():
+        run_script(q_script_path, ctx)
+
+    # load script from path in worldspawn key
+    elif script := worldspawn.kv.get("__script"):
+        print("found script reference in worldspawn: %s" % script)
+        script_path = Path(script)
+        actual_path = (q_map_path.parent / script_path).resolve()
+        run_script(actual_path, ctx)
+
+    # assume filename based on stem
+    elif (assumed_script := q_map_path.with_suffix(".py")) and assumed_script.exists():
+        run_script(assumed_script, ctx)
+
+    # clean up: delete keys to get rid of `developer 1` warnings
+    for ent in entities:
+        trash_list = [key for key in ent.kv if key.startswith(sym_gen_prefix)]
+        for key in trash_list:
+            del ent.kv[key]
 
     if not entities:
         raise ValueError("output entity list is empty")
 
-    new_map_path.touch()
-    new_map_path.write_text(dumps(entities))
+    q_output_path.touch()
+    q_output_path.write_text(dumps(entities))
 
     print("==== ENDING pp.py ====")
