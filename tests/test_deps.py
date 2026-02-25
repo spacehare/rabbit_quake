@@ -2,7 +2,8 @@ import unittest
 from pathlib import Path
 
 import rabbitquake.autosave as autosave
-from rabbitquake import jampack
+from rabbitquake.app import deps
+from rabbitquake.app.settings import jampack
 
 # import tempfile
 
