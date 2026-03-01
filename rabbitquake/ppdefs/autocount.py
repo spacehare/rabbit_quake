@@ -1,11 +1,12 @@
+import copy
 from enum import Enum
 
-from rabbitquake.app.parse import Brush, Entity
+from rabbitquake.app.parse import Entity
 
 SYMBOL_COUNT = "#"
 
 
-class EntitySkillflags(Enum):
+class Skillsflags(Enum):
     NOT_ON_EASY = 256  # '0b00100000000'
     NOT_ON_NORMAL = 512  # '0b01000000000'
     NOT_ON_HARD = 1024  # '0b10000000000'
@@ -30,9 +31,9 @@ def autocount(trigger_counter: Entity, entities: list[Entity]) -> list[Entity] |
         if possible_spawnflags := entity.kv.get("spawnflags"):
             spawnflags: int = int(possible_spawnflags)
 
-            is_easy = not (EntitySkillflags.NOT_ON_EASY.value & spawnflags)
-            is_normal = not (EntitySkillflags.NOT_ON_NORMAL.value & spawnflags)
-            is_hard = not (EntitySkillflags.NOT_ON_HARD.value & spawnflags)
+            is_easy = not (Skillsflags.NOT_ON_EASY.value & spawnflags)
+            is_normal = not (Skillsflags.NOT_ON_NORMAL.value & spawnflags)
+            is_hard = not (Skillsflags.NOT_ON_HARD.value & spawnflags)
 
             monster_skill_bools = (is_easy, is_normal, is_hard)
         else:
@@ -44,3 +45,25 @@ def autocount(trigger_counter: Entity, entities: list[Entity]) -> list[Entity] |
                 for idx, skill_bool in enumerate(monster_skill_bools):
                     if skill_bool:
                         totals[idx] += monster_count
+
+    # create new trigger_counter copies, per-skill
+    clones = []
+    for idx, skill_flag in enumerate(Skillsflags):
+        if totals[idx] == 0:
+            continue
+
+        # set count
+        clone: Entity = copy.deepcopy(trigger_counter)
+        clone.kv["count"] = str(totals[idx])
+
+        # unset "NOT ON <SKILL>" for the one we want
+        clone_spawnflags = int(clone.kv.get("spawnflags", 0)) & ~skill_flag.value
+        # set "NOT ON <SKILL>" for the ones we don't
+        for skill in [flag for flag in Skillsflags if flag is not skill_flag]:
+            clone_spawnflags |= skill.value
+
+        clone.kv["spawnflags"] = str(clone_spawnflags)
+
+        clones.append(clone)
+
+    return clones
