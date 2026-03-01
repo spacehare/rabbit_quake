@@ -8,8 +8,9 @@ from pathlib import Path
 
 import yaml
 
+import rabbitquake.app.parse as parse
 from rabbitquake.app.bcolors import bcolors, colorize
-from rabbitquake.app.parse import Entity, dumps, loads
+from rabbitquake.app.parse import Entity
 
 # inspired by...
 # MESS
@@ -94,7 +95,7 @@ if __name__ == "__main__":
         print('found cfg path at "%s"' % q_cfg_path.resolve())
         cfg = PPConfig.loads(q_cfg_path)
 
-    entities = loads(map_string)
+    entities = parse.loads(map_string)
     worldspawn = entities[0]
     assert worldspawn.classname == "worldspawn"
     sym_gen_prefix = cfg.char_general if cfg else worldspawn.kv.get("__general_prefix") or CHAR_GENERAL_DEFAULT
@@ -139,6 +140,6 @@ if __name__ == "__main__":
         raise ValueError("output entity list is empty")
 
     q_output_path.touch()
-    q_output_path.write_text(dumps(entities))
+    q_output_path.write_text(parse.dumps(entities))
 
     print("==== ENDING pp.py ====")
