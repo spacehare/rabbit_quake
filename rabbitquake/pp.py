@@ -9,7 +9,6 @@ from pathlib import Path
 import yaml
 
 import rabbitquake.app.parse as parse
-from rabbitquake.app.bcolors import bcolors, colorize
 from rabbitquake.app.parse import Entity
 
 # inspired by...
@@ -55,15 +54,14 @@ class PPConfig:
         return new_pp
 
 
-def run_script(path: Path, context: dict) -> list[Entity]:
+def run_script(path: Path, ents: list[Entity], context: dict) -> None:
     # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
     print("running %s" % path.resolve())
     if (spec := importlib.util.spec_from_file_location(path.stem, path)) and spec.loader:
         module = importlib.util.module_from_spec(spec)
         sys.modules[path.stem] = module
         spec.loader.exec_module(module)
-        output: list[Entity] = module.main(context)
-        return output
+        module.main(ents, context)
     else:
         raise ValueError("spec failed to load!")
 
@@ -72,14 +70,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("map", type=Path, help="path to input .map file")
     parser.add_argument("output", type=Path, help="path to output .map file")
-    parser.add_argument("--cfg", type=Path, help="path to the config")
-    parser.add_argument("--script", type=Path, help="path to main script")
+    parser.add_argument("--cfg", type=Path, help="path to the .yaml config")
+    parser.add_argument("--script", type=Path, help="path to main .py script")
     args = parser.parse_args()
 
     q_map_path: Path = args.map
     q_output_path: Path = args.output
     q_cfg_path: Path = args.cfg
     q_script_path: Path = args.script
+
+    assert q_cfg_path.suffix == ".yaml"
+    assert q_script_path.suffix == ".py"
 
     print("==== STARTING pp.py ====")
 
@@ -117,27 +118,24 @@ if __name__ == "__main__":
 
     # run script from args
     if q_script_path.exists():
-        run_script(q_script_path, ctx)
+        run_script(q_script_path, entities, ctx)
 
     # load script from path in worldspawn key
     elif script := worldspawn.kv.get("__script"):
         print("found script reference in worldspawn: %s" % script)
         script_path = Path(script)
         actual_path = (q_map_path.parent / script_path).resolve()
-        run_script(actual_path, ctx)
+        run_script(actual_path, entities, ctx)
 
     # assume filename based on stem
     elif (assumed_script := q_map_path.with_suffix(".py")) and assumed_script.exists():
-        run_script(assumed_script, ctx)
+        run_script(assumed_script, entities, ctx)
 
     # clean up: delete keys to get rid of `developer 1` warnings
     for ent in entities:
         trash_list = [key for key in ent.kv if key.startswith(sym_gen_prefix)]
         for key in trash_list:
             del ent.kv[key]
-
-    if not entities:
-        raise ValueError("output entity list is empty")
 
     q_output_path.touch()
     q_output_path.write_text(parse.dumps(entities))
