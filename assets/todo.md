@@ -3,6 +3,7 @@
 - [ ] texture
 - [ ] seal
 - [ ] lighting
+- [ ] fog
 - [ ] secrets
 - playtest and balance
   - [ ] QuakeSpasm
