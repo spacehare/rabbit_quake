@@ -25,10 +25,7 @@ if __name__ == "__main__":
             print("\tlink =", colorize(new_path, bcolors.OKBLUE))
 
             if new_path.exists():
-                print(
-                    colorize(
-                        f'\t"{new_path}" already exists, skipping.', bcolors.WARNING
-                    )
-                )
+                print(colorize(f'\t"{new_path}" already exists, skipping.', bcolors.WARNING))
             else:
+                new_path.parent.mkdir(parents=True, exist_ok=True)
                 new_path.symlink_to(target=path, target_is_directory=path.is_dir())
