@@ -11,7 +11,8 @@ def to_number_string(f: float) -> str:
     return str(int(f) if f.is_integer() else f)
 
 
-class Point(NamedTuple):
+@dataclass
+class Point:
     """X Y Z"""
 
     x: float
@@ -23,6 +24,11 @@ class Point(NamedTuple):
 
     def dumps(self):
         return " ".join([to_number_string(p) for p in self])
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
 
 
 @dataclass
