@@ -38,18 +38,29 @@ class UvPoint:
     scale: float
 
 
-class UV(NamedTuple):
+@dataclass
+class UV:
     u: UvPoint
     v: UvPoint
 
+    def __iter__(self):
+        yield self.u
+        yield self.v
 
-class Points(NamedTuple):
+
+@dataclass
+class Points:
     a: Point
     b: Point
     c: Point
 
     def __repr__(self):
         return f"{self.a} {self.b} {self.c}"
+    
+    def __iter__(self):
+        yield self.a
+        yield self.b
+        yield self.c
 
 
 class Plane:
